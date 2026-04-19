@@ -1,0 +1,388 @@
+{
+  "pages": [
+    {
+      "pageName": "g2rain_raindrop",
+      "pageCode": "g2rain_raindrop",
+      "linkPath": "/g2rain_raindrop"
+    },
+    {
+      "pageName": "dictionary_usage",
+      "pageCode": "dictionary_usage",
+      "linkPath": "/dictionary_usage"
+    },
+    {
+      "pageName": "route_definition",
+      "pageCode": "route_definition",
+      "linkPath": "/route_definition"
+    },
+    {
+      "pageName": "locale_setting",
+      "pageCode": "locale_setting",
+      "linkPath": "/locale_setting"
+    },
+    {
+      "pageName": "i18n_message_usage",
+      "pageCode": "i18n_message_usage",
+      "linkPath": "/i18n_message_usage"
+    },
+    {
+      "pageName": "i18n_message",
+      "pageCode": "i18n_message",
+      "linkPath": "/i18n_message"
+    }
+  ],
+  "pageElements": [
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "dictionary_item:add",
+      "pageElementType": "button",
+      "pageCode": "dictionary_usage",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "dictionary_item:delete",
+      "pageElementType": "button",
+      "pageCode": "dictionary_usage",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "dictionary_item:edit",
+      "pageElementType": "button",
+      "pageCode": "dictionary_usage",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "dictionary_usage:add",
+      "pageElementType": "button",
+      "pageCode": "dictionary_usage",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "dictionary_usage:delete",
+      "pageElementType": "button",
+      "pageCode": "dictionary_usage",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "dictionary_usage:edit",
+      "pageElementType": "button",
+      "pageCode": "dictionary_usage",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "字典项",
+      "pageElementCode": "dictionary_usage:items",
+      "pageElementType": "button",
+      "pageCode": "dictionary_usage",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "g2rain_raindrop:add",
+      "pageElementType": "button",
+      "pageCode": "g2rain_raindrop",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "g2rain_raindrop:delete",
+      "pageElementType": "button",
+      "pageCode": "g2rain_raindrop",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "g2rain_raindrop:edit",
+      "pageElementType": "button",
+      "pageCode": "g2rain_raindrop",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "i18n_message_usage:add",
+      "pageElementType": "button",
+      "pageCode": "i18n_message_usage",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "i18n_message_usage:delete",
+      "pageElementType": "button",
+      "pageCode": "i18n_message_usage",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "i18n_message_usage:edit",
+      "pageElementType": "button",
+      "pageCode": "i18n_message_usage",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "i18n_message:add",
+      "pageElementType": "button",
+      "pageCode": "i18n_message",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "i18n_message:delete",
+      "pageElementType": "button",
+      "pageCode": "i18n_message",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "i18n_message:edit",
+      "pageElementType": "button",
+      "pageCode": "i18n_message",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "locale_setting:add",
+      "pageElementType": "button",
+      "pageCode": "locale_setting",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "locale_setting:delete",
+      "pageElementType": "button",
+      "pageCode": "locale_setting",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "locale_setting:edit",
+      "pageElementType": "button",
+      "pageCode": "locale_setting",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "route_definition:add",
+      "pageElementType": "button",
+      "pageCode": "route_definition",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "route_definition:delete",
+      "pageElementType": "button",
+      "pageCode": "route_definition",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "route_definition:edit",
+      "pageElementType": "button",
+      "pageCode": "route_definition",
+      "status": "ENABLED"
+    }
+  ],
+  "apiEndpoints": [
+    {
+      "apiName": "列表查询",
+      "apiUrl": "/infra/g2rain_raindrop/list",
+      "requestMethod": "GET",
+      "apiTag": "g2rain_raindrop"
+    },
+    {
+      "apiName": "详情查询",
+      "apiUrl": "/infra/g2rain_raindrop/:id",
+      "requestMethod": "GET",
+      "apiTag": "g2rain_raindrop"
+    },
+    {
+      "apiName": "保存",
+      "apiUrl": "/infra/g2rain_raindrop/save",
+      "requestMethod": "POST",
+      "apiTag": "g2rain_raindrop"
+    },
+    {
+      "apiName": "删除",
+      "apiUrl": "/infra/g2rain_raindrop/:id",
+      "requestMethod": "DELETE",
+      "apiTag": "g2rain_raindrop"
+    },
+    {
+      "apiName": "列表查询",
+      "apiUrl": "/infra/dictionary_usage/list",
+      "requestMethod": "GET",
+      "apiTag": "dictionary_usage"
+    },
+    {
+      "apiName": "详情查询",
+      "apiUrl": "/infra/dictionary_usage/:id",
+      "requestMethod": "GET",
+      "apiTag": "dictionary_usage"
+    },
+    {
+      "apiName": "保存",
+      "apiUrl": "/infra/dictionary_usage/save",
+      "requestMethod": "POST",
+      "apiTag": "dictionary_usage"
+    },
+    {
+      "apiName": "删除",
+      "apiUrl": "/infra/dictionary_usage/:id",
+      "requestMethod": "DELETE",
+      "apiTag": "dictionary_usage"
+    },
+    {
+      "apiName": "列表查询",
+      "apiUrl": "/infra/dictionary_item/list",
+      "requestMethod": "GET",
+      "apiTag": "dictionary_usage"
+    },
+    {
+      "apiName": "查询",
+      "apiUrl": "/infra/dictionary_item/tree",
+      "requestMethod": "GET",
+      "apiTag": "dictionary_usage"
+    },
+    {
+      "apiName": "详情查询",
+      "apiUrl": "/infra/dictionary_item/:id",
+      "requestMethod": "GET",
+      "apiTag": "dictionary_usage"
+    },
+    {
+      "apiName": "保存",
+      "apiUrl": "/infra/dictionary_item/save",
+      "requestMethod": "POST",
+      "apiTag": "dictionary_usage"
+    },
+    {
+      "apiName": "删除",
+      "apiUrl": "/infra/dictionary_item/:id",
+      "requestMethod": "DELETE",
+      "apiTag": "dictionary_usage"
+    },
+    {
+      "apiName": "列表查询",
+      "apiUrl": "/infra/route_definition/list",
+      "requestMethod": "GET",
+      "apiTag": "route_definition"
+    },
+    {
+      "apiName": "详情查询",
+      "apiUrl": "/infra/route_definition/:id",
+      "requestMethod": "GET",
+      "apiTag": "route_definition"
+    },
+    {
+      "apiName": "保存",
+      "apiUrl": "/infra/route_definition/save",
+      "requestMethod": "POST",
+      "apiTag": "route_definition"
+    },
+    {
+      "apiName": "删除",
+      "apiUrl": "/infra/route_definition/:id",
+      "requestMethod": "DELETE",
+      "apiTag": "route_definition"
+    },
+    {
+      "apiName": "列表查询",
+      "apiUrl": "/infra/locale_setting/list",
+      "requestMethod": "GET",
+      "apiTag": "locale_setting"
+    },
+    {
+      "apiName": "详情查询",
+      "apiUrl": "/infra/locale_setting/:id",
+      "requestMethod": "GET",
+      "apiTag": "locale_setting"
+    },
+    {
+      "apiName": "保存",
+      "apiUrl": "/infra/locale_setting/save",
+      "requestMethod": "POST",
+      "apiTag": "locale_setting"
+    },
+    {
+      "apiName": "删除",
+      "apiUrl": "/infra/locale_setting/:id",
+      "requestMethod": "DELETE",
+      "apiTag": "locale_setting"
+    },
+    {
+      "apiName": "列表查询",
+      "apiUrl": "/infra/i18n_message_usage/list",
+      "requestMethod": "GET",
+      "apiTag": "i18n_message_usage"
+    },
+    {
+      "apiName": "详情查询",
+      "apiUrl": "/infra/i18n_message_usage/:id",
+      "requestMethod": "GET",
+      "apiTag": "i18n_message_usage"
+    },
+    {
+      "apiName": "保存",
+      "apiUrl": "/infra/i18n_message_usage/save",
+      "requestMethod": "POST",
+      "apiTag": "i18n_message_usage"
+    },
+    {
+      "apiName": "删除",
+      "apiUrl": "/infra/i18n_message_usage/:id",
+      "requestMethod": "DELETE",
+      "apiTag": "i18n_message_usage"
+    },
+    {
+      "apiName": "列表查询",
+      "apiUrl": "/infra/i18n_message/list",
+      "requestMethod": "GET",
+      "apiTag": "i18n_message"
+    },
+    {
+      "apiName": "详情查询",
+      "apiUrl": "/infra/i18n_message/:id",
+      "requestMethod": "GET",
+      "apiTag": "i18n_message"
+    },
+    {
+      "apiName": "保存",
+      "apiUrl": "/infra/i18n_message/save",
+      "requestMethod": "POST",
+      "apiTag": "i18n_message"
+    },
+    {
+      "apiName": "删除",
+      "apiUrl": "/infra/i18n_message/:id",
+      "requestMethod": "DELETE",
+      "apiTag": "i18n_message"
+    }
+  ]
+}

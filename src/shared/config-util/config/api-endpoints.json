@@ -1,0 +1,176 @@
+[
+  {
+    "apiName": "列表查询",
+    "apiUrl": "/infra/g2rain_raindrop/list",
+    "requestMethod": "GET",
+    "apiTag": "g2rain_raindrop"
+  },
+  {
+    "apiName": "详情查询",
+    "apiUrl": "/infra/g2rain_raindrop/:id",
+    "requestMethod": "GET",
+    "apiTag": "g2rain_raindrop"
+  },
+  {
+    "apiName": "保存",
+    "apiUrl": "/infra/g2rain_raindrop/save",
+    "requestMethod": "POST",
+    "apiTag": "g2rain_raindrop"
+  },
+  {
+    "apiName": "删除",
+    "apiUrl": "/infra/g2rain_raindrop/:id",
+    "requestMethod": "DELETE",
+    "apiTag": "g2rain_raindrop"
+  },
+  {
+    "apiName": "列表查询",
+    "apiUrl": "/infra/dictionary_usage/list",
+    "requestMethod": "GET",
+    "apiTag": "dictionary_usage"
+  },
+  {
+    "apiName": "详情查询",
+    "apiUrl": "/infra/dictionary_usage/:id",
+    "requestMethod": "GET",
+    "apiTag": "dictionary_usage"
+  },
+  {
+    "apiName": "保存",
+    "apiUrl": "/infra/dictionary_usage/save",
+    "requestMethod": "POST",
+    "apiTag": "dictionary_usage"
+  },
+  {
+    "apiName": "删除",
+    "apiUrl": "/infra/dictionary_usage/:id",
+    "requestMethod": "DELETE",
+    "apiTag": "dictionary_usage"
+  },
+  {
+    "apiName": "列表查询",
+    "apiUrl": "/infra/dictionary_item/list",
+    "requestMethod": "GET",
+    "apiTag": "dictionary_usage"
+  },
+  {
+    "apiName": "查询",
+    "apiUrl": "/infra/dictionary_item/tree",
+    "requestMethod": "GET",
+    "apiTag": "dictionary_usage"
+  },
+  {
+    "apiName": "详情查询",
+    "apiUrl": "/infra/dictionary_item/:id",
+    "requestMethod": "GET",
+    "apiTag": "dictionary_usage"
+  },
+  {
+    "apiName": "保存",
+    "apiUrl": "/infra/dictionary_item/save",
+    "requestMethod": "POST",
+    "apiTag": "dictionary_usage"
+  },
+  {
+    "apiName": "删除",
+    "apiUrl": "/infra/dictionary_item/:id",
+    "requestMethod": "DELETE",
+    "apiTag": "dictionary_usage"
+  },
+  {
+    "apiName": "列表查询",
+    "apiUrl": "/infra/route_definition/list",
+    "requestMethod": "GET",
+    "apiTag": "route_definition"
+  },
+  {
+    "apiName": "详情查询",
+    "apiUrl": "/infra/route_definition/:id",
+    "requestMethod": "GET",
+    "apiTag": "route_definition"
+  },
+  {
+    "apiName": "保存",
+    "apiUrl": "/infra/route_definition/save",
+    "requestMethod": "POST",
+    "apiTag": "route_definition"
+  },
+  {
+    "apiName": "删除",
+    "apiUrl": "/infra/route_definition/:id",
+    "requestMethod": "DELETE",
+    "apiTag": "route_definition"
+  },
+  {
+    "apiName": "列表查询",
+    "apiUrl": "/infra/locale_setting/list",
+    "requestMethod": "GET",
+    "apiTag": "locale_setting"
+  },
+  {
+    "apiName": "详情查询",
+    "apiUrl": "/infra/locale_setting/:id",
+    "requestMethod": "GET",
+    "apiTag": "locale_setting"
+  },
+  {
+    "apiName": "保存",
+    "apiUrl": "/infra/locale_setting/save",
+    "requestMethod": "POST",
+    "apiTag": "locale_setting"
+  },
+  {
+    "apiName": "删除",
+    "apiUrl": "/infra/locale_setting/:id",
+    "requestMethod": "DELETE",
+    "apiTag": "locale_setting"
+  },
+  {
+    "apiName": "列表查询",
+    "apiUrl": "/infra/i18n_message_usage/list",
+    "requestMethod": "GET",
+    "apiTag": "i18n_message_usage"
+  },
+  {
+    "apiName": "详情查询",
+    "apiUrl": "/infra/i18n_message_usage/:id",
+    "requestMethod": "GET",
+    "apiTag": "i18n_message_usage"
+  },
+  {
+    "apiName": "保存",
+    "apiUrl": "/infra/i18n_message_usage/save",
+    "requestMethod": "POST",
+    "apiTag": "i18n_message_usage"
+  },
+  {
+    "apiName": "删除",
+    "apiUrl": "/infra/i18n_message_usage/:id",
+    "requestMethod": "DELETE",
+    "apiTag": "i18n_message_usage"
+  },
+  {
+    "apiName": "列表查询",
+    "apiUrl": "/infra/i18n_message/list",
+    "requestMethod": "GET",
+    "apiTag": "i18n_message"
+  },
+  {
+    "apiName": "详情查询",
+    "apiUrl": "/infra/i18n_message/:id",
+    "requestMethod": "GET",
+    "apiTag": "i18n_message"
+  },
+  {
+    "apiName": "保存",
+    "apiUrl": "/infra/i18n_message/save",
+    "requestMethod": "POST",
+    "apiTag": "i18n_message"
+  },
+  {
+    "apiName": "删除",
+    "apiUrl": "/infra/i18n_message/:id",
+    "requestMethod": "DELETE",
+    "apiTag": "i18n_message"
+  }
+]

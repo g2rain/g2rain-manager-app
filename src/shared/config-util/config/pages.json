@@ -1,0 +1,32 @@
+[
+  {
+    "pageName": "g2rain_raindrop",
+    "pageCode": "g2rain_raindrop",
+    "linkPath": "/g2rain_raindrop"
+  },
+  {
+    "pageName": "dictionary_usage",
+    "pageCode": "dictionary_usage",
+    "linkPath": "/dictionary_usage"
+  },
+  {
+    "pageName": "route_definition",
+    "pageCode": "route_definition",
+    "linkPath": "/route_definition"
+  },
+  {
+    "pageName": "locale_setting",
+    "pageCode": "locale_setting",
+    "linkPath": "/locale_setting"
+  },
+  {
+    "pageName": "i18n_message_usage",
+    "pageCode": "i18n_message_usage",
+    "linkPath": "/i18n_message_usage"
+  },
+  {
+    "pageName": "i18n_message",
+    "pageCode": "i18n_message",
+    "linkPath": "/i18n_message"
+  }
+]
