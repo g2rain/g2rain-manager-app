@@ -197,13 +197,13 @@ import { ref, reactive, computed, watch, onMounted } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { ControlDomainApi } from './api';
-import { ControlUnitApi } from '../control-unit/api'
+import { ControlUnitApi } from '../control_unit/api'
 import { ApplicationApi } from '../application/api';
 import { OrganApi } from '../organ/api';
-import { ApplicationAuthorizationApi } from '../application-authorization/api'
-import { ControlDomainControlUnitRelationApi } from '../control-domain-control-unit-relation/api'
+import { ApplicationAuthorizationApi } from '../application_authorization/api'
+import { ControlDomainControlUnitRelationApi } from '../control_domain_control_unit_relation/api'
 import type { ControlDomain, ControlDomainPayload, ControlDomainQuery } from './type';
-import type { ControlUnit } from '../control-unit/type'
+import type { ControlUnit } from '../control_unit/type'
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect } from '@/components';
 

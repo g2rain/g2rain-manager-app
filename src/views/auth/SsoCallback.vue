@@ -25,7 +25,7 @@ import { useRouter } from 'vue-router';
 import { sso } from '@runtime/auth';
 import { getRouterInstance } from '@runtime/router';
 import { useAccessTokenStore } from '@platform/stores';
-import { isIntegrateMode } from '@platform/apps';
+import { isIntegrateMode } from '@shared/utils/mode.util';
 
 const isLoading = ref(true);
 const error = ref<string | null>(null);

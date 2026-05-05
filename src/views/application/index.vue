@@ -268,7 +268,7 @@ import type { FormInstance, FormRules, UploadFile } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { ApplicationApi } from './api';
 import { OrganApi } from '../organ/api';
-import { ApplicationSuiteApi } from '../application-suite/api'
+import { ApplicationSuiteApi } from '../application_suite/api'
 import type { Application, ApplicationPayload, ApplicationQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';

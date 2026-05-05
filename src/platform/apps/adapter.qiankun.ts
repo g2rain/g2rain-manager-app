@@ -8,7 +8,6 @@ import { WindowEventSubAppEventAdapter } from '@/components/micro-app/event-wind
 import { renderWithQiankun } from 'vite-plugin-qiankun/dist/helper';
 import { env } from '@shared/env';
 import { initTokenFromProps } from './init';
-import { initRouterFromResources } from '@/main';
 import { type App as VueApp } from 'vue';
 import { updateHttpBaseURLFromProps } from '@/components/http';
 import { initMicroAppMessageHandlers } from './message-handlers';
@@ -88,6 +87,7 @@ export function registerQiankunLifecycle(ctx: QiankunLifecycleContext): void {
 
       // Token 初始化完成后，再初始化路由（从资源接口加载，需要 token）
       try {
+        const { initRouterFromResources } = await import('@/main');
         await initRouterFromResources();
 
         // 获取更新后的路由实例

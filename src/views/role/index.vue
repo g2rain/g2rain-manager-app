@@ -169,9 +169,9 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { RoleApi } from './api';
 import { UserApi } from '../user/api'
-import { UserRoleRelationApi } from '../user-role-relation/api'
+import { UserRoleRelationApi } from '../user_role_relation/api'
 import { OrganApi } from '../organ/api';
-import { RoleControlUnitRelationApi } from '../role-control-unit-relation/api'
+import { RoleControlUnitRelationApi } from '../role_control_unit_relation/api'
 import type { Role, RolePayload, RoleQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';

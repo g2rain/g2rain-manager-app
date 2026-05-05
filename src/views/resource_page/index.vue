@@ -108,7 +108,7 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { ResourcePageApi } from './api';
 import { ApplicationApi } from '../application/api';
-import ResourcePageElementPage from '../resource-page-element/index.vue'
+import ResourcePageElementPage from '../resource_page_element/index.vue'
 import type { ResourcePage, ResourcePagePayload, ResourcePageQuery } from './type';
 import type { PageSelectListDto } from '@platform/types/api.type';
 

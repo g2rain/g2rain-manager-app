@@ -3,8 +3,7 @@ import type { Token, ApplicationScope } from '@platform/types/http.types';
 import type { Client } from '@/components/http';
 import { jwtVerify } from 'jose';
 import { publicKeyStringToJwk } from '@shared/utils/jwt.util';
-import { isIntegrateMode } from '@platform/apps';
-import { isQianKunMode } from '@shared/utils/mode.util'
+import { isIntegrateMode, isQianKunMode } from '@shared/utils/mode.util';
 
 const STORAGE_KEY = 'g2rain_token';
 

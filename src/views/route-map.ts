@@ -66,8 +66,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
       showInHome: true,
     },
   },
-  '/resource-menu': {
-    component: () => import('@/views/resource-menu/index.vue'),
+  '/resource_menu': {
+    component: () => import('@/views/resource_menu/index.vue'),
     name: 'ResourceMenu',
     meta: {
       title: 'resource_menu',
@@ -75,8 +75,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
       showInHome: true,
     },
   },
-  '/resource-page': {
-    component: () => import('@/views/resource-page/index.vue'),
+  '/resource_page': {
+    component: () => import('@/views/resource_page/index.vue'),
     name: 'ResourcePage',
     meta: {
       title: 'resource_page',
@@ -84,8 +84,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
       showInHome: true,
     },
   },
-  '/control-unit': {
-    component: () => import('@/views/control-unit/index.vue'),
+  '/control_unit': {
+    component: () => import('@/views/control_unit/index.vue'),
     name: 'ControlUnit',
     meta: {
       title: 'control_unit',
@@ -102,8 +102,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
       showInHome: true,
     },
   },
-  '/control-domain': {
-    component: () => import('@/views/control-domain/index.vue'),
+  '/control_domain': {
+    component: () => import('@/views/control_domain/index.vue'),
     name: 'ControlDomain',
     meta: {
       title: 'control_domain',
@@ -120,8 +120,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
       showInHome: true,
     },
   },
-  '/application-authorization': {
-    component: () => import('@/views/application-authorization/index.vue'),
+  '/application_authorization': {
+    component: () => import('@/views/application_authorization/index.vue'),
     name: 'ApplicationAuthorization',
     meta: {
       title: 'application_authorization',
@@ -129,8 +129,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
       showInHome: true,
     },
   },
-  '/resource-settings': {
-    component: () => import('@/views/resource-settings/index.vue'),
+  '/resource_settings': {
+    component: () => import('@/views/resource_settings/index.vue'),
     name: 'ResourceSettings',
     meta: {
       title: 'resource_settings',
