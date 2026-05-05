@@ -84,24 +84,6 @@ export const routeMap: Record<string, ViewRouteConfig> = {
       showInHome: true,
     },
   },
-  '/api-endpoint': {
-    component: () => import('@/views/api-endpoint/index.vue'),
-    name: 'ApiEndpoint',
-    meta: {
-      title: 'api_endpoint',
-      requiresAuth: true,
-      showInHome: true,
-    },
-  },
-  '/resource-api-endpoint': {
-    component: () => import('@/views/resource-api-endpoint/index.vue'),
-    name: 'ResourceApiEndpoint',
-    meta: {
-      title: 'resource_api_endpoint',
-      requiresAuth: true,
-      showInHome: true,
-    },
-  },
   '/control-unit': {
     component: () => import('@/views/control-unit/index.vue'),
     name: 'ControlUnit',
@@ -156,6 +138,25 @@ export const routeMap: Record<string, ViewRouteConfig> = {
       showInHome: true,
     },
   },
+  '/service_registry': {
+    component: () => import('@/views/service_registry/index.vue'),
+    name: 'ServiceRegistry',
+    meta: {
+      title: 'service_registry',
+      requiresAuth: true,
+      showInHome: true
+
+    },
+  },
+  '/resource_api': {
+    component: () => import('@/views/resource_api/index.vue'),
+    name: 'ResourceApi',
+    meta: {
+      title: 'resource_api',
+      requiresAuth: true,
+      showInHome: true
+    },
+  }
 };
 
 /**
