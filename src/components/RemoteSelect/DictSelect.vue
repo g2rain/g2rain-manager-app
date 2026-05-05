@@ -91,11 +91,13 @@ const fetchData: FetchDataFunction<RemoteSelectOption> = async (
   const keyword = params.key?.trim() || (params.value !== undefined && params.value !== null ? String(params.value) : '');
   const usageCode = props.usageCode?.trim();
 
+  // 没有用途编码时，仍要求有关键字（避免无范围的全量字典拉取）
   if (!usageCode && !keyword) {
     return [];
   }
 
   try {
+    // 不再传 value（避免按 ID 查询）
     return await props.apiMethod({
       ...(keyword ? { key: keyword } : {}),
       ...(usageCode ? { usageCode } : {}),

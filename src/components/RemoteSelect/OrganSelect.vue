@@ -2,6 +2,7 @@
   <RemoteSelect
     v-model="innerValue"
     :fetch-data="fetchData"
+    :prefetch-on-open="props.prefetchOnOpen"
     :value-key="valueKey"
     :label-key="labelKey"
     :placeholder="placeholder"
@@ -37,6 +38,11 @@ interface Props {
   width?: string;
   /** 远程搜索防抖延迟（毫秒），与 RemoteSelect 一致 */
   debounceDelay?: number;
+  /**
+   * 是否在打开下拉时预取一次默认数据
+   * 默认为 true，便于直接看到一部分机构列表
+   */
+  prefetchOnOpen?: boolean;
 }
 
 interface Emits {
@@ -53,6 +59,7 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   width: '200px',
   debounceDelay: 300,
+  prefetchOnOpen: true,
 });
 
 const emit = defineEmits<Emits>();
@@ -81,12 +88,9 @@ const handleChange = (value: number | string | null | undefined) => {
 const fetchData: FetchDataFunction<RemoteSelectOption> = async (
   params: { key?: string; value?: number }
 ): Promise<RemoteSelectOption[]> => {
-  if ((!params.key || params.key === '') && (params.value === undefined || params.value === null)) {
-    return [];
-  }
-
   try {
-    return await props.apiMethod(params);
+    const data = await props.apiMethod(params);
+    return data;
   } catch (error) {
     console.error('OrganSelect fetchData error:', error);
     return [];

@@ -27,7 +27,7 @@
 
 基于 `RemoteSelect` 封装的机构选择组件，已配置好机构相关的 API 和字段映射。
 
-默认使用 `@/views/organ/api` 的 `OrganApi.searchOrgans`；若子应用目录结构一致可直接使用，否则请通过 `apiMethod` 注入自定义请求。
+默认使用 `@/views/organ/api` 的 `OrganApi.id2name`；若子应用目录结构一致可直接使用，否则请通过 `apiMethod` 注入自定义请求。
 
 ## 导入方式
 
@@ -106,7 +106,7 @@ function onOrganClear() {
 
 ### 自定义请求（apiMethod）
 
-当默认 `OrganApi.searchOrgans` 不满足需求时，传入与 `FetchDataFunction` 相同签名的方法即可：
+当默认 `OrganApi.id2name` 不满足需求时，传入与 `FetchDataFunction` 相同签名的方法即可：
 
 ```vue
 <template>
@@ -199,7 +199,7 @@ const form = reactive({
 
 #### 2）需要“打开就有默认列表”的场景（谨慎开启）
 
-仅当你的 `apiMethod` 支持**空关键字分页/默认列表**时再开启（本仓库若未接入 `DictItemApi`，请将 `:api-method` 换成你项目里对应的接口）：
+仅当你的 `apiMethod` 支持**空关键字分页/默认列表**时再开启：
 
 ```vue
 <ApiSelect
@@ -220,8 +220,6 @@ const form = reactive({
   <StatusSwitch
     v-model="row.status"
     permission="application-authorization:status-update"
-    :active-value="'ACTIVATED'"
-    :inactive-value="'DEACTIVATED'"
     :options="statusOptions"
     :api-method="({ nextValue }) => ApplicationAuthorizationApi.updateStatus(row.id, String(nextValue))"
   />
