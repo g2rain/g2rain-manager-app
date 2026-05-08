@@ -39,8 +39,8 @@
         <h2>管理资源接口数据</h2>
       </div>
       <div style="display:flex; gap:8px;">
-        <el-button type="primary"  @click="handleImport">导入资源接口</el-button> 
-        <el-button type="primary"  @click="handleCreate">新增资源接口</el-button> <!--v-permission="'resource_api:add'"-->
+        <el-button type="primary" v-permission="'resource_api:import'" @click="handleImport">导入资源接口</el-button> 
+        <el-button type="primary" v-permission="'resource_api:add'" @click="handleCreate">新增资源接口</el-button>
       </div>
     </div>
 
@@ -56,8 +56,8 @@
       <el-table-column label="操作" fixed="right" width="280">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
-          <el-button type="primary"  link size="small" @click="handleEdit(row)">编辑</el-button> <!--v-permission="'resource_api:edit'"-->
-          <el-button type="danger"  link size="small" @click="handleDelete(row)">删除</el-button> <!--v-permission="'resource_api:delete'"-->
+          <el-button type="primary" v-permission="'resource_api:edit'" link size="small" @click="handleEdit(row)">编辑</el-button>
+          <el-button type="danger" v-permission="'resource_api:delete'" link size="small" @click="handleDelete(row)">删除</el-button>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 8px;">

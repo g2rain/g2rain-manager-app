@@ -156,6 +156,24 @@ export const routeMap: Record<string, ViewRouteConfig> = {
       requiresAuth: true,
       showInHome: true
     },
+  },
+  '/login_token': {
+    component: () => import('@/views/login_token/index.vue'),
+    name: 'LoginToken',
+    meta: {
+      title: 'login_token',
+      requiresAuth: true,
+      showInHome: true
+    },
+  },
+  '/audit_event': {
+    component: () => import('@/views/audit_event/index.vue'),
+    name: 'AuditEvent',
+    meta: {
+      title: 'audit_event',
+      requiresAuth: true,
+      showInHome: true
+    },
   }
 };
 
