@@ -41,6 +41,7 @@
           {{applicationOptions.find(item => item.value === row?.applicationId)?.label || ''}}
         </template>
       </el-table-column>
+      <el-table-column prop="id" label="页面序号" width="160" />
       <el-table-column prop="pageName" label="页面名称" width="160" />
       <el-table-column prop="pageCode" label="页面编码" width="180" />
       <el-table-column prop="linkPath" label="链接路径" width="240" />
