@@ -35,7 +35,7 @@
 
         <!-- 操作按钮 -->
         <el-form-item>
-          <el-button type="primary" v-permission="'resource-settings:upload'" @click="submitEdit">保存并上传</el-button>
+          <el-button type="primary" v-permission="'resource_settings:upload'" @click="submitEdit">保存并上传</el-button>
           <el-button @click="resetForm">重置</el-button>
         </el-form-item>
       </el-form>

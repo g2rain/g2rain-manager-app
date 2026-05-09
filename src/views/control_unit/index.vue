@@ -36,7 +36,7 @@
       <div class="control-unit-page__title-group">
         <h2>管理功能权限数据</h2>
       </div>
-      <el-button type="primary" v-permission="'control-unit:add'" @click="handleCreate">新增功能权限</el-button>
+      <el-button type="primary" v-permission="'control_unit:add'" @click="handleCreate">新增功能权限</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
@@ -58,7 +58,7 @@
       <el-table-column prop="status" label="功能权限状态" width="180">
         <template #default="{ row }">
           <el-switch 
-            v-permission="'control-unit:status-update'" 
+            v-permission="'control_unit:status_update'" 
             v-model="row.status"
             inline-prompt :active-value="'PUBLISHED'" 
             :inactive-value="'UNPUBLISHED'"
@@ -72,11 +72,11 @@
       <el-table-column label="操作" fixed="right" width="280">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
-          <el-button type="primary" v-permission="'control-unit:edit'" link size="small"
+          <el-button type="primary" v-permission="'control_unit:edit'" link size="small"
             @click="handleEdit(row)">编辑</el-button>
-          <el-button type="success" v-permission="'control-unit:resources-config'" link size="small"
+          <el-button type="success" v-permission="'control_unit:resources_config'" link size="small"
             @click="handleConfigureResources(row)">配置资源</el-button>
-          <el-button type="danger" v-permission="'control-unit:delete'" v-if="!row.landing" link size="small"
+          <el-button type="danger" v-permission="'control_unit:delete'" v-if="!row.landing" link size="small"
             @click="handleDelete(row)">删除</el-button>
         </template>
         <template #header>

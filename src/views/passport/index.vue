@@ -56,7 +56,7 @@
       <el-table-column prop="status" label="账号状态" width="180">
         <template #default="{ row }">
           <el-switch 
-            v-permission="'passport:status-update'"
+            v-permission="'passport:status_update'"
             v-model="row.status" 
             inline-prompt :active-value="'NORMAL'" 
             :inactive-value="'FROZEN'"

@@ -56,7 +56,7 @@
       <el-table-column prop="status" label="机构状态" width="180">
         <template #default="{ row }">
           <el-switch 
-            v-permission="'organ:status-update'"
+            v-permission="'organ:status_update'"
             v-model="row.status" 
             inline-prompt :active-value="'ACTIVE'" :inactive-value="'INACTIVE'"
             :active-text="statusOptions.find(item => item.value === 'ACTIVE')?.label"

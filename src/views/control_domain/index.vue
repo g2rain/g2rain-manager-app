@@ -42,7 +42,7 @@
       <div class="control-domain-page__title-group">
         <h2>管理业务能力数据</h2>
       </div>
-      <el-button type="primary" v-permission="'control-domain:add'" @click="handleCreate">新增业务能力</el-button>
+      <el-button type="primary" v-permission="'control_domain:add'" @click="handleCreate">新增业务能力</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
@@ -69,13 +69,13 @@
       <el-table-column label="操作" fixed="right" width="300">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
-          <el-button type="primary" v-permission="'control-domain:edit'" link size="small"
+          <el-button type="primary" v-permission="'control_domain:edit'" link size="small"
             @click="handleEdit(row)">编辑</el-button>
-          <el-button type="success" v-permission="'control-domain:control-utils-associate'" link size="small"
+          <el-button type="success" v-permission="'control_domain:control_utils_associate'" link size="small"
             @click="handleAssociateControlUtils(row)">关联功能权限</el-button>
-          <el-button type="warning" v-permission="'control-domain:features-activate'" link size="small"
+          <el-button type="warning" v-permission="'control_domain:features_activate'" link size="small"
             @click="handleActivateFeatures(row)">开通功能</el-button>
-          <el-button type="danger" v-permission="'control-domain:delete'" link size="small"
+          <el-button type="danger" v-permission="'control_domain:delete'" link size="small"
             @click="handleDelete(row)">删除</el-button>
         </template>
         <template #header>

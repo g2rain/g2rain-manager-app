@@ -31,7 +31,7 @@
       <div class="resource-menu-page__title-group">
         <h2>管理菜单数据</h2>
       </div>
-      <el-button type="primary" v-permission="'resource-menu:add'" @click="handleCreate(undefined)">新增顶级菜单</el-button>
+      <el-button type="primary" v-permission="'resource_menu:add'" @click="handleCreate(undefined)">新增顶级菜单</el-button>
     </div>
 
     <!-- 树形 Table -->
@@ -53,9 +53,9 @@
       <!-- 操作列 -->
       <el-table-column label="操作" fixed="right" width="220">
         <template #default="{ row }">
-          <el-button link type="primary" v-permission="'resource-menu:edit'" @click="handleEdit(row)">编辑</el-button>
-          <el-button link type="success" v-permission="'resource-menu:add'" @click="handleCreate(row)">新增子菜单</el-button>
-          <el-button link type="danger" v-permission="'resource-menu:delete'" @click="handleDelete(row)">删除</el-button>
+          <el-button link type="primary" v-permission="'resource_menu:edit'" @click="handleEdit(row)">编辑</el-button>
+          <el-button link type="success" v-permission="'resource_menu:add'" @click="handleCreate(row)">新增子菜单</el-button>
+          <el-button link type="danger" v-permission="'resource_menu:delete'" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

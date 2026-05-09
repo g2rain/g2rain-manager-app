@@ -32,7 +32,7 @@
       <div class="resource-page-page__title-group">
         <h2>管理页面数据</h2>
       </div>
-      <el-button type="primary" v-permission="'resource-page:add'" @click="handleCreate">新增页面</el-button>
+      <el-button type="primary" v-permission="'resource_page:add'" @click="handleCreate">新增页面</el-button>
     </div>
 
     <el-table :data="tableData" border stripe style="width: 100%">
@@ -49,11 +49,11 @@
       <el-table-column prop="updateTime" label="更新时间" width="180" />
       <el-table-column label="操作" fixed="right" width="280">
         <template #default="{ row }">
-          <el-button type="primary" v-permission="'resource-page:edit'" link size="small"
+          <el-button type="primary" v-permission="'resource_page:edit'" link size="small"
             @click="handleEdit(row)">编辑</el-button>
-          <el-button type="primary" v-permission="'resource-page:page-element-mgmt'" link size="small"
+          <el-button type="primary" v-permission="'resource_page:page_element_mgmt'" link size="small"
             @click="handlePageElement(row)">管理页面元素</el-button>
-          <el-button type="danger" v-permission="'resource-page:delete'" link size="small"
+          <el-button type="danger" v-permission="'resource_page:delete'" link size="small"
             @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
