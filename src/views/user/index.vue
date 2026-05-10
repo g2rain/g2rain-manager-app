@@ -41,12 +41,14 @@
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true" @sort-change="handleSortChange">
-      <el-table-column prop="id" label="用户序号" width="120" />
-
+      <el-table-column prop="passportId" label="账号序号" width="120">
+        <template #default="{ row }">
+          <el-button type="primary" link @click="openPassportListDialog(row)">{{ row.passportId }}</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column prop="id" label="用户序号" width="140" />
       <el-table-column prop="organId" label="所属机构" width="140" />
-      
       <el-table-column prop="realName" label="姓名" width="180" />
-
       <el-table-column prop="admin" label="管理员" width="140">
         <template #default="{ row }">
           <el-tag :type="row.admin ? 'success' : 'info'" effect="light">
@@ -54,15 +56,10 @@
           </el-tag>
         </template>
       </el-table-column>
-
       <el-table-column prop="email" label="邮箱地址" width="180" />
-
       <el-table-column prop="mobile" label="手机号码" width="180" />
-      
       <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
-      
       <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
-      
       <el-table-column label="操作" fixed="right" width="280">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
@@ -147,6 +144,26 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 关联账号列表 -->
+    <el-dialog v-model="passportListDialogVisible" title="账号列表" width="960px" destroy-on-close @closed="passportListRows = []">
+      <el-table :data="passportListRows" border stripe max-height="420">
+        <el-table-column prop="id" label="账号标识" width="120" />
+        <el-table-column prop="username" label="用户名" min-width="120" />
+        <el-table-column prop="realName" label="姓名" width="120" />
+        <el-table-column prop="status" label="账号状态" width="100">
+          <template #default="{ row: p }">
+            {{ statusOptions.find((s) => s.value === p.status)?.label ?? p.status }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="mobile" label="手机号码" width="140" />
+        <el-table-column prop="email" label="邮箱地址" min-width="160" />
+        <el-table-column prop="createTime" label="创建时间" width="170" />
+      </el-table>
+      <template #footer>
+        <el-button type="primary" @click="passportListDialogVisible = false">关 闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -155,14 +172,21 @@
   import type { FormInstance, FormRules } from 'element-plus';
   import { ElMessageBox, ElMessage } from 'element-plus';
   import { UserApi } from './api';
+  import { PassportApi } from '../passport/api';
   import { OrganApi } from '../organ/api';
   import type { User, UserPayload, UserQuery } from './type';
+  import type { Passport } from '../passport/type';
   import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
   import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';
 
   // 定义字典引用
   const adminOptions = ref<Array<{ label: string; value: boolean }>>([]);
   const organOptions = ref<Array<{ label: string; value: number }>>([]);
+  /** 弹窗内展示 passport 状态文案 */
+  const statusOptions = ref<Array<{ label: string; value: string }>>([
+    { label: '正常', value: 'NORMAL' },
+    { label: '冻结', value: 'FROZEN' },
+  ]);
 
   // 获取字典信息
   const loadDicts = async () => {
@@ -389,6 +413,21 @@
       editDialogVisible.value = false;
     } catch (error: any) {
       ElMessage.error(error.message || '保存失败');
+    }
+  };
+
+  // 查看账号列表
+  const passportListDialogVisible = ref(false);
+  const passportListRows = ref<Passport[]>([]);
+  const openPassportListDialog = async (row: User) => {
+    passportListDialogVisible.value = true;
+    passportListRows.value = [];
+    try {
+      if (row.passportId != null) {
+        passportListRows.value = await PassportApi.list({ id: row.passportId });
+      }
+    } catch (error: any) {
+      ElMessage.error(error.message || '加载账号列表失败');
     }
   };
 

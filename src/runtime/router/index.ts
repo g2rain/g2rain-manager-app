@@ -1,7 +1,7 @@
 import { createRouter, createMemoryHistory, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import type { App } from 'vue';
 import { env } from '@shared/env';
-import { isIntegrateMode } from '@platform/apps';
+import { isIntegrateMode } from '@shared/utils/mode.util';
 import { authRoutes } from './auth.router';
 import { homeRoutes } from './home.router';
 

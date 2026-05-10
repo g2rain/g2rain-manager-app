@@ -45,16 +45,18 @@
       <el-button type="primary" v-permission="'passport:add'" @click="handleCreate">新增账号</el-button>
     </div>
 
-    <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
-      @sort-change="handleSortChange">
+    <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true" @sort-change="handleSortChange">
+      <el-table-column prop="id" label="账号标识" width="180">
+        <template #default="{ row }">
+          <el-button type="primary" link @click="openUserListDialog(row)">{{ row.id }}</el-button>
+        </template>
+      </el-table-column>
       <el-table-column prop="username" label="用户名" width="180" />
-
       <el-table-column prop="realName" label="姓名" width="180" />
-
       <el-table-column prop="status" label="账号状态" width="180">
         <template #default="{ row }">
           <el-switch 
-            v-permission="'passport:status-update'"
+            v-permission="'passport:status_update'"
             v-model="row.status" 
             inline-prompt :active-value="'NORMAL'" 
             :inactive-value="'FROZEN'"
@@ -64,11 +66,8 @@
           />
         </template>
       </el-table-column>
-
       <el-table-column prop="mobile" label="手机号码" width="180" />
-
       <el-table-column prop="email" label="邮箱地址" width="180" />
-
       <el-table-column prop="sex" label="性别" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
@@ -76,14 +75,10 @@
           </el-tag>
         </template>
       </el-table-column>
-
       <el-table-column prop="birthday" label="出身日期" width="180" />
-
       <el-table-column prop="idNo" label="身份证号" width="180" />
-
       <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
       <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
-
       <el-table-column label="操作" fixed="right" width="280">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
@@ -158,6 +153,7 @@
     <!-- 明细弹窗 -->
     <el-dialog v-model="detailDialogVisible" title="账号明细" width="520px">
       <el-descriptions :column="1" border>
+        <el-descriptions-item label="账号标识">{{ currentRow?.id }}</el-descriptions-item>
         <el-descriptions-item label="用户名">{{ currentRow?.username }}</el-descriptions-item>
         <el-descriptions-item label="姓名">{{ currentRow?.realName }}</el-descriptions-item>
         <el-descriptions-item label="性别">
@@ -183,6 +179,29 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 用户列表） -->
+    <el-dialog v-model="userListDialogVisible" title="用户列表" width="960px" destroy-on-close @closed="userListRows = []">
+      <el-table :data="userListRows" border stripe max-height="420">
+        <el-table-column prop="id" label="用户序号" width="100" />
+        <el-table-column prop="passportId" label="账号序号" width="100" />
+        <el-table-column prop="organId" label="所属机构" width="100" />
+        <el-table-column prop="realName" label="姓名" width="120" />
+        <el-table-column prop="admin" label="管理员" width="90">
+          <template #default="{ row: u }">
+            <el-tag :type="u.admin ? 'success' : 'info'" effect="light" size="small">
+              {{ u.admin ? '是' : '否' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="email" label="邮箱地址" min-width="160" />
+        <el-table-column prop="mobile" label="手机号码" width="130" />
+        <el-table-column prop="createTime" label="创建时间" width="170" />
+      </el-table>
+      <template #footer>
+        <el-button type="primary" @click="userListDialogVisible = false">关 闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -191,7 +210,9 @@ import { ref, reactive, onMounted } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { PassportApi } from './api';
+import { UserApi } from '../user/api';
 import type { Passport, PassportPayload, PassportQuery } from './type';
+import type { User } from '../user/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';
 
@@ -323,6 +344,19 @@ const detailDialogVisible = ref(false);
 const handleView = (row: Passport) => {
   currentRow.value = { ...row };
   detailDialogVisible.value = true;
+};
+
+// 查看用户列表
+const userListDialogVisible = ref(false);
+const userListRows = ref<User[]>([]);
+const openUserListDialog = async (row: Passport) => {
+  userListDialogVisible.value = true;
+  userListRows.value = [];
+  try {
+    userListRows.value = await UserApi.list({ passportId: row.id });
+  } catch (error: any) {
+    ElMessage.error(error.message || '加载用户列表失败');
+  }
 };
 
 // 删除数据记录
@@ -461,6 +495,12 @@ const updateStatus = async (row: any) => {
     row.canIntegrate = !row.canIntegrate; // 回退状态
   }
 };
+
+
+
+
+
+
 
 // 挂载回调
 onMounted(async () => {

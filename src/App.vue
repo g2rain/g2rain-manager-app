@@ -9,7 +9,8 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { sso } from '@runtime/auth';
-import { isIntegrateMode, emitRouteChange } from '@platform/apps';
+import { isIntegrateMode } from '@shared/utils/mode.util';
+import { emitRouteChange } from '@platform/apps';
 import type { MicroAppProps } from '@platform/apps';
 
 const router = useRouter();

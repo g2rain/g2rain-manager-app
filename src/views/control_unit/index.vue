@@ -36,7 +36,7 @@
       <div class="control-unit-page__title-group">
         <h2>管理功能权限数据</h2>
       </div>
-      <el-button type="primary" v-permission="'control-unit:add'" @click="handleCreate">新增功能权限</el-button>
+      <el-button type="primary" v-permission="'control_unit:add'" @click="handleCreate">新增功能权限</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
@@ -58,7 +58,7 @@
       <el-table-column prop="status" label="功能权限状态" width="180">
         <template #default="{ row }">
           <el-switch 
-            v-permission="'control-unit:status-update'" 
+            v-permission="'control_unit:status_update'" 
             v-model="row.status"
             inline-prompt :active-value="'PUBLISHED'" 
             :inactive-value="'UNPUBLISHED'"
@@ -72,11 +72,11 @@
       <el-table-column label="操作" fixed="right" width="280">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
-          <el-button type="primary" v-permission="'control-unit:edit'" link size="small"
+          <el-button type="primary" v-permission="'control_unit:edit'" link size="small"
             @click="handleEdit(row)">编辑</el-button>
-          <el-button type="success" v-permission="'control-unit:resources-config'" link size="small"
+          <el-button type="success" v-permission="'control_unit:resources_config'" link size="small"
             @click="handleConfigureResources(row)">配置资源</el-button>
-          <el-button type="danger" v-permission="'control-unit:delete'" v-if="!row.landing" link size="small"
+          <el-button type="danger" v-permission="'control_unit:delete'" v-if="!row.landing" link size="small"
             @click="handleDelete(row)">删除</el-button>
         </template>
         <template #header>
@@ -212,18 +212,64 @@
 
         <!-- 接口 -->
         <el-tab-pane label="接口资源" name="apis">
+          <div class="api-toolbar">
+            <el-select
+              v-model="apiServiceCode"
+              clearable
+              filterable
+              placeholder="请选择服务后加载接口"
+              style="width: 260px"
+              @change="handleApiServiceChange"
+            >
+              <el-option
+                v-for="item in srvRegistryOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+            <div class="api-toolbar__actions">
+              <el-button
+                type="primary"
+                link
+                :disabled="!apiGroups.length"
+                @click="handleSelectAllApis"
+              >
+                全部选中
+              </el-button>
+              <el-button
+                type="primary"
+                link
+                :disabled="!apiGroups.length"
+                @click="handleUnselectAllApis"
+              >
+                全部取消
+              </el-button>
+            </div>
+          </div>
           <el-scrollbar max-height="58vh">
             <!-- 根据接口数据渲染复选框即可 -->
             <div class="api-groups-container">
               <fieldset class="api-fieldset" v-for="group in apiGroups" :key="group.tag">
                 <legend class="api-legend">{{ group.tag }}</legend>
                 <div class="api-items">
-                  <el-checkbox v-for="api in group.items" :key="api.id" v-model="api.checked" class="api-item">
+                  <el-checkbox
+                    v-for="api in group.items"
+                    :key="api.id"
+                    v-model="api.checked"
+                    class="api-item"
+                    @change="toggleApi(api)"
+                  >
                     <span class="api-label">
                       <span class="api-name">{{ api.name }}</span>
                       <span class="api-meta">{{ api.method }} {{ api.url }}</span>
                     </span>
                   </el-checkbox>
+                  <div
+                    v-if="group.items.length % 2 === 1"
+                    class="api-item api-item--placeholder"
+                    aria-hidden="true"
+                  />
                 </div>
               </fieldset>
             </div>
@@ -245,15 +291,16 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { ControlUnitApi } from './api';
 import { ApplicationApi } from '../application/api';
-import { ResourceMenuApi } from '../resource-menu/api';
-import { ResourcePageApi } from '../resource-page/api';
-import { ResourcePageElementApi } from '../resource-page-element/api';
-import { ResourceApiEndpointApi } from '../resource-api-endpoint/api';
-import { ControlUnitResourceRelationApi } from '../control-unit-resource-relation/api';
+import { ResourceMenuApi } from '../resource_menu/api';
+import { ResourcePageApi } from '../resource_page/api';
+import { ResourcePageElementApi } from '../resource_page_element/api';
+import { ResourceApiApi } from '../resource_api/api';
+import { ServiceRegistryApi } from '../service_registry/api';
+import { ControlUnitResourceRelationApi } from '../control_unit_resource_relation/api';
 import type { ControlUnit, ControlUnitPayload, ControlUnitQuery } from './type';
-import type { ControlUnitResourceRelationPayload } from '../control-unit-resource-relation/type';
-import type { ResourcePage } from '../resource-page/type';
-import type { ResourcePageElement } from '../resource-page-element/type';
+import type { ControlUnitResourceRelationPayload } from '../control_unit_resource_relation/type';
+import type { ResourcePage } from '../resource_page/type';
+import type { ResourcePageElement } from '../resource_page_element/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';
 
@@ -262,12 +309,17 @@ const statusOptions = ref<Array<{ label: string; value: string }>>([]);
 const scopeOptions = ref<Array<{ label: string; value: string }>>([]);
 const elementStatusOptions = ref<Array<{ label: string; value: string }>>([]);
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
+const srvRegistryOptions = ref<Array<{ label: string; value: string }>>([]);
 
 // 获取字典信息
 const loadDicts = async () => {
   applicationOptions.value = (await ApplicationApi.id2name()).map(u => ({
     value: u.id,
     label: u.applicationName || `${u.id}`
+  }));
+  srvRegistryOptions.value = (await ServiceRegistryApi.list()).map(u => ({
+    value: u.serviceCode,
+    label: u.name,
   }));
 
   scopeOptions.value = [{
@@ -706,37 +758,76 @@ const getConfiguredCount = (page: Page) =>
 const apiGroups = reactive<ApiGroup[]>([])
 // 原始关联页面 ID
 let originalApiIds: number[] = []
+const selectedApiIds = ref<Set<number>>(new Set())
+const apiRelationLoaded = ref(false)
+const apiServiceCode = ref('')
+const currentConfigureRow = ref<ControlUnit | null>(null)
 // 加载接口地址
-const loadApiEndpoints = async (row: ControlUnit) => {
-  // 回显已选元素（如果你要根据 controlUnitId 拉已选关系）
-  const apiRelations = await ControlUnitResourceRelationApi.list({
-    controlUnitId: row.id,
-    resourceType: 'API_ENDPOINT'
-  })
+const loadApiEndpoints = async (row: ControlUnit, serviceCode?: string) => {
+  // 首次加载时初始化接口关联关系
+  if (!apiRelationLoaded.value) {
+    const apiRelations = await ControlUnitResourceRelationApi.list({
+      controlUnitId: row.id,
+      resourceType: 'API_ENDPOINT'
+    })
+    originalApiIds = apiRelations.map(r => r.resourceId)
+    selectedApiIds.value = new Set(originalApiIds)
+    apiRelationLoaded.value = true
+  }
 
-  originalApiIds = apiRelations.map(r => r.resourceId)
+  // 清空
+  apiGroups.splice(0)
+  if (!serviceCode) return;
 
   const groupMap = new Map<string, ApiItem[]>();
-  (await ResourceApiEndpointApi.list({ applicationId: row.applicationId })).forEach(api => {
-    const tag = api.apiTag || '未分类'
+  (await ResourceApiApi.list({ serviceCode })).forEach(api => {
+    const tag = api.apiTags || '未分类'
     if (!groupMap.has(tag)) {
       groupMap.set(tag, [])
     }
 
     groupMap.get(tag)!.push({
-      id: api.apiEndpointId,
-      name: api.apiName,
-      method: api.requestMethod,
-      url: api.apiUrl,
-      checked: originalApiIds.includes(api.apiEndpointId)
+      id: api.id,
+      name: api.name,
+      method: api.method,
+      url: api.path,
+      checked: selectedApiIds.value.has(api.id)
     })
   })
 
-  // 清空
-  apiGroups.splice(0)
-
   // 赋值
   groupMap.forEach((items, tag) => apiGroups.push({ tag, items }))
+}
+
+const handleApiServiceChange = async (serviceCode?: string) => {
+  if (!currentConfigureRow.value) return;
+  await loadApiEndpoints(currentConfigureRow.value, serviceCode || '');
+}
+
+const toggleApi = (api: ApiItem) => {
+  if (api.checked) {
+    selectedApiIds.value.add(api.id)
+    return
+  }
+  selectedApiIds.value.delete(api.id)
+}
+
+const handleSelectAllApis = () => {
+  apiGroups.forEach(group => {
+    group.items.forEach(api => {
+      api.checked = true
+      selectedApiIds.value.add(api.id)
+    })
+  })
+}
+
+const handleUnselectAllApis = () => {
+  apiGroups.forEach(group => {
+    group.items.forEach(api => {
+      api.checked = false
+      selectedApiIds.value.delete(api.id)
+    })
+  })
 }
 
 // 4. 配置资源弹窗引用
@@ -755,6 +846,11 @@ const resetConfigureResourcesDialog = () => {
   originalPageIds = [];
   originalElementMap.clear();
   originalApiIds = [];
+  selectedApiIds.value = new Set();
+  apiRelationLoaded.value = false;
+  apiServiceCode.value = '';
+  currentConfigureRow.value = null;
+  apiGroups.splice(0);
 }
 
 // 6. 默认选中菜单资源
@@ -765,6 +861,8 @@ const handleConfigureResources = async (row: ControlUnit) => {
   // 先打开弹窗
   configureResourcesDialog.visible = true;
   configureResourcesDialog.controlUnitId = row.id
+  currentConfigureRow.value = row;
+  apiServiceCode.value = srvRegistryOptions.value[0]?.value || '';
 
   // 设置默认选中菜单 Tab
   activeName.value = 'menu';
@@ -776,7 +874,7 @@ const handleConfigureResources = async (row: ControlUnit) => {
   await loadPagesWithElements(row);
 
   // ---------- `接口地址` 资源初始化 ----------
-  await loadApiEndpoints(row);
+  await loadApiEndpoints(row, apiServiceCode.value);
 }
 
 // 提交配置资源数据
@@ -853,7 +951,7 @@ const configureResources = async () => {
     })
 
     // ------------------ 接口 ------------------
-    const checkedApiIds = apiGroups.flatMap(group => group.items).filter(api => api.checked).map(api => api.id)
+    const checkedApiIds = Array.from(selectedApiIds.value)
     // 计算新增和删除接口
     checkedApiIds.filter(id => !originalApiIds.includes(id)).forEach(m => {
       apisToCreate.push({ resourceId: m, resourceType: 'API_ENDPOINT' })
@@ -977,6 +1075,19 @@ onMounted(async () => {
   gap: 16px;
 }
 
+.api-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.api-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .api-fieldset {
   border: 1px solid #e0e3eb;
   border-radius: 12px;
@@ -993,55 +1104,76 @@ onMounted(async () => {
 }
 
 .api-items {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 0;
+  row-gap: 6px;
   margin-top: 8px;
 }
 
 .api-item {
-  width: 220px;
+  width: 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
   cursor: pointer;
-  position: relative;
-  padding-bottom: 12px;
+  padding: 6px 0 6px 10px;
   font-size: 14px;
 }
 
-.api-item::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 40%;
-  height: 1px;
-  background: linear-gradient(to right, transparent, #d0d0d0, transparent);
-  transform-origin: center;
-  transition: width 0.3s ease;
+.api-item:nth-child(4n + 1),
+.api-item:nth-child(4n + 2) {
+  background-color: #eef3ff;
 }
 
-.api-item:hover::after {
+.api-item:nth-child(4n + 3),
+.api-item:nth-child(4n + 4) {
+  background-color: #ffffff;
+}
+
+.api-item--placeholder {
+  pointer-events: none;
+}
+
+.api-item :deep(.el-checkbox) {
+  margin: 0;
   width: 100%;
-  left: 0;
+  display: flex;
+  align-items: center;
+}
+
+.api-item :deep(.el-checkbox__label) {
+  width: 100%;
+  line-height: 1.4;
 }
 
 .api-name {
   font-weight: 500;
   color: #2c2c2c;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .api-label {
   display: flex;
   flex-direction: column;
   margin-left: 8px;
-  row-gap: 4px;
+  row-gap: 2px;
+  min-width: 0;
+  flex: 1;
+  justify-content: center;
 }
 
 .api-meta {
   font-size: 12px;
   color: #6e6e6e;
-  margin-left: 16px;
+  margin-left: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .control-unit-page {

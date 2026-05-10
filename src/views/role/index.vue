@@ -63,9 +63,9 @@
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
           <el-button type="primary" v-permission="'role:edit'" link size="small" @click="handleEdit(row)">编辑</el-button>
-          <el-button type="success" v-permission="'role:users-assign'" link size="small"
+          <el-button type="success" v-permission="'role:users_assign'" link size="small"
             @click="handleAssignUsers(row)">分配用户</el-button>
-          <el-button type="warning" v-permission="'role:control-utils-assign'" link size="small"
+          <el-button type="warning" v-permission="'role:control_utils_assign'" link size="small"
             @click="handleAssignControlUtils(row)">分配功能权限</el-button>
           <el-button type="danger" v-permission="'role:delete'" v-if="row.roleType !== 'ADMIN'" link size="small"
             @click="handleDelete(row)">删除</el-button>
@@ -169,9 +169,9 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { RoleApi } from './api';
 import { UserApi } from '../user/api'
-import { UserRoleRelationApi } from '../user-role-relation/api'
+import { UserRoleRelationApi } from '../user_role_relation/api'
 import { OrganApi } from '../organ/api';
-import { RoleControlUnitRelationApi } from '../role-control-unit-relation/api'
+import { RoleControlUnitRelationApi } from '../role_control_unit_relation/api'
 import type { Role, RolePayload, RoleQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';

@@ -62,7 +62,7 @@
       <el-table-column prop="status" label="应用状态" width="180">
         <template #default="{ row }">
           <el-switch 
-            v-permission="'application:status-update'"   
+            v-permission="'application:status_update'"   
             v-model="row.status" 
             inline-prompt :active-value="'PUBLISHED'" :inactive-value="'UNPUBLISHED'"
             :active-text="statusOptions.find(item => item.value === 'PUBLISHED')?.label"
@@ -91,7 +91,7 @@
             @click="handleEdit(row)">编辑</el-button>
           <el-button type="success" v-permission="'application:integrate'" link size="small"
             v-if="canShowIntegrateBtn(row)" @click="handleIntegrate(row)">关联应用</el-button>
-          <el-button type="success" link size="small" v-permission="'application:public-key-config'"
+          <el-button type="success" link size="small" v-permission="'application:public_key_config'"
             @click="handlePubKeyConfig(row)">公钥配置</el-button>
           <el-button type="danger" v-permission="'application:delete'" v-if="!row.landing" link size="small"
             @click="handleDelete(row)">删除</el-button>
@@ -268,7 +268,7 @@ import type { FormInstance, FormRules, UploadFile } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { ApplicationApi } from './api';
 import { OrganApi } from '../organ/api';
-import { ApplicationSuiteApi } from '../application-suite/api'
+import { ApplicationSuiteApi } from '../application_suite/api'
 import type { Application, ApplicationPayload, ApplicationQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';

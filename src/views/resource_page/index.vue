@@ -1,7 +1,7 @@
 <template>
-  <div class="resource-api-endpoint-page">
+  <div class="resource-page-page">
     <!-- 查询表单 -->
-    <el-card class="resource-api-endpoint-page__search" shadow="never">
+    <el-card class="resource-page-page__search" shadow="never">
       <!-- 基础查询表单（BaseSelectListDto） -->
       <el-form :model="queryForm" :inline="true" class="query-form">
         <!-- 业务特定查询字段 -->
@@ -11,14 +11,12 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="后端接口标签">
-          <el-select v-model="queryForm.apiTag" placeholder="请选择后端接口标签" clearable style="width: 200px">
-            <el-option v-for="item in apiTagOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+        <el-form-item label="页面名称">
+          <el-input v-model="queryForm.pageName" placeholder="请输入页面名称" clearable style="width: 200px" />
         </el-form-item>
 
-        <el-form-item label="接口名称">
-          <el-input v-model="queryForm.apiName" placeholder="请输入接口名称" clearable style="width: 200px" />
+        <el-form-item label="页面编码">
+          <el-input v-model="queryForm.pageCode" placeholder="请输入页面编码" clearable style="width: 200px" />
         </el-form-item>
 
         <!-- 操作按钮 -->
@@ -30,59 +28,65 @@
     </el-card>
 
     <!-- 标题和操作按钮 -->
-    <div class="resource-api-endpoint-page__header">
-      <div class="resource-api-endpoint-page__title-group">
-        <h2>管理资源接口数据</h2>
+    <div class="resource-page-page__header">
+      <div class="resource-page-page__title-group">
+        <h2>管理页面数据</h2>
       </div>
-      <el-button type="primary" v-permission="'resource-api-endpoint:add'" @click="handleCreate">新增资源接口</el-button>
+      <el-button type="primary" v-permission="'resource_page:add'" @click="handleCreate">新增页面</el-button>
     </div>
 
     <el-table :data="tableData" border stripe style="width: 100%">
-      <el-table-column prop="id" label="资源接口序号" width="120" />
       <el-table-column prop="applicationId" label="所属应用" width="130">
         <template #default="{ row }">
           {{applicationOptions.find(item => item.value === row?.applicationId)?.label || ''}}
         </template>
       </el-table-column>
-      <el-table-column prop="apiTag" label="后端接口标签" width="180" />
-      <el-table-column prop="apiName" label="后端接口名称" width="180" />
-      <el-table-column prop="apiUrl" label="后端接口路径" width="180" />
-      <el-table-column prop="requestMethod" label="请求方法" width="180" />
+      <el-table-column prop="id" label="页面序号" width="160" />
+      <el-table-column prop="pageName" label="页面名称" width="160" />
+      <el-table-column prop="pageCode" label="页面编码" width="180" />
+      <el-table-column prop="linkPath" label="链接路径" width="240" />
       <el-table-column prop="createTime" label="创建时间" width="180" />
       <el-table-column prop="updateTime" label="更新时间" width="180" />
       <el-table-column label="操作" fixed="right" width="280">
         <template #default="{ row }">
-          <el-button type="primary" v-permission="'resource-api-endpoint:edit'" link size="small"
+          <el-button type="primary" v-permission="'resource_page:edit'" link size="small"
             @click="handleEdit(row)">编辑</el-button>
-          <el-button type="danger" v-permission="'resource-api-endpoint:delete'" link size="small"
+          <el-button type="primary" v-permission="'resource_page:page_element_mgmt'" link size="small"
+            @click="handlePageElement(row)">管理页面元素</el-button>
+          <el-button type="danger" v-permission="'resource_page:delete'" link size="small"
             @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 分页组件 -->
-    <div class="resource-api-endpoint-page__pagination">
+    <div class="resource-page-page__pagination">
       <el-pagination v-model:current-page="pagination.pageNum" v-model:page-size="pagination.pageSize"
         :page-sizes="[10, 20, 50, 100]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
         @size-change="handleSizeChange" @current-change="handlePageChange" />
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑资源接口' : '新增资源接口'" width="520px">
+    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑页面' : '新增页面'" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="120px">
         <!-- 所属应用 -->
         <el-form-item label="所属应用" prop="applicationId" v-if="!isEdit">
-          <el-select v-model="editForm.applicationId" placeholder="请选择所属应用" style="width: 280px">
+          <el-select v-model="editForm.applicationId" placeholder="请选择所属应用" style="width: 200px">
             <el-option v-for="item in applicationOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="后端接口" prop="apiEndpointId">
-          <el-select v-model="editForm.apiEndpointId" placeholder="请选择后端接口" style="width: 280px">
-            <el-option v-for="item in apiEndpointOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+        <el-form-item label="页面名称" prop="pageName">
+          <el-input v-model="editForm.pageName" placeholder="请输入页面名称" />
         </el-form-item>
 
+        <el-form-item label="页面编码" prop="pageCode">
+          <el-input v-model="editForm.pageCode" placeholder="请输入页面编码" />
+        </el-form-item>
+
+        <el-form-item label="页面路径" prop="linkPath">
+          <el-input v-model="editForm.linkPath" placeholder="请输入链接路径" />
+        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -91,6 +95,11 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 管理页面元素弹窗 -->
+    <el-dialog v-model="pageElementDialogVisible" title="管理页面元素" width="1010px">
+      <ResourcePageElementPage :pageCode="selectedPageCode" :applicationId="selectedApplicationId" />
+    </el-dialog>
   </div>
 </template>
 
@@ -98,17 +107,17 @@
 import { ref, reactive, onMounted } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
-import { ResourceApiEndpointApi } from './api';
-import { ApiEndpointApi } from '../api-endpoint/api';
+import { ResourcePageApi } from './api';
 import { ApplicationApi } from '../application/api';
-import type { ResourceApiEndpoint, ResourceApiEndpointPayload, ResourceApiEndpointQuery } from './type';
+import ResourcePageElementPage from '../resource_page_element/index.vue'
+import type { ResourcePage, ResourcePagePayload, ResourcePageQuery } from './type';
 import type { PageSelectListDto } from '@platform/types/api.type';
 
 // 业务查询状态
 const queryForm = reactive({
   applicationId: undefined as number | undefined,
-  apiTag: '',
-  apiName: '',
+  pageName: '',
+  pageCode: '',
 });
 
 // 分页相关状态
@@ -120,30 +129,19 @@ const pagination = reactive({
 
 // 定义字典引用
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
-const apiTagOptions = ref<Array<{ label: string; value: string }>>([]);
-const apiEndpointOptions = ref<Array<{ label: string; value: number }>>([]);
 
 // 获取字典信息
 const loadDicts = async () => {
-  apiTagOptions.value = (await ApiEndpointApi.apiTags()).map(u => ({
-    value: u,
-    label: u,
-  }));
-
-  applicationOptions.value = (await ApplicationApi.id2name()).map(u => ({
+  applicationOptions.value = (await ApplicationApi.id2name({
+    includeApplicationTypes: ['SUPPORT', 'SYSTEM']
+  })).map(u => ({
     value: u.id,
     label: u.applicationName || `${u.id}`
   }));
-
-  apiEndpointOptions.value = (await ApiEndpointApi.list()).map(u => ({
-    value: u.id,
-    label: `${u.apiName}[${u.requestMethod}-${u.apiUrl}]`
-  }));
-
 };
 
 // 定义列表引用
-const tableData = ref<ResourceApiEndpoint[]>([]);
+const tableData = ref<ResourcePage[]>([]);
 
 // 加载列表数据
 const loadData = async () => {
@@ -152,14 +150,14 @@ const loadData = async () => {
     const query = Object.fromEntries(
       Object.entries({ ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
-    ) as ResourceApiEndpointQuery;
+    ) as ResourcePageQuery;
 
     // 请求分页数据
-    const pageData = await ResourceApiEndpointApi.page({
+    const pageData = await ResourcePageApi.page({
       pageNum: pagination.pageNum,
       pageSize: pagination.pageSize,
       ...query,
-    } as PageSelectListDto & ResourceApiEndpointQuery);
+    } as PageSelectListDto & ResourcePageQuery);
     
     // 设置响应结果
     tableData.value = pageData.records;
@@ -177,9 +175,10 @@ const handleSearch = () => {
 
 // 重置查询条件
 const handleReset = () => {
+  // 重置业务特定查询表单
   queryForm.applicationId = undefined;
-  queryForm.apiTag = '';
-  queryForm.apiName = '';
+  queryForm.pageName = '';
+  queryForm.pageCode = '';
   pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
@@ -198,13 +197,13 @@ const handlePageChange = (page: number) => {
 };
 
 // 删除数据记录
-const handleDelete = (row: ResourceApiEndpoint) => {
-  ElMessageBox.confirm(`确认删除资源接口「${row.id}」吗？`, '提示', {
+const handleDelete = (row: ResourcePage) => {
+  ElMessageBox.confirm(`确认删除页面「${row.id}」吗？`, '提示', {
     type: 'warning',
   })
     .then(async () => {
       try {
-        await ResourceApiEndpointApi.remove(row.id);
+        await ResourcePageApi.remove(row.id);
         // 如果当前页只有一条数据，删除后应该跳转到上一页
         if (tableData.value.length === 1 && pagination.pageNum > 1) {
           pagination.pageNum--;
@@ -220,21 +219,28 @@ const handleDelete = (row: ResourceApiEndpoint) => {
 
 // 保存弹窗引用
 const editDialogVisible = ref(false);
+
 // 修改标记状态
 const isEdit = ref(false);
+
 // 修改组件引用
 const editFormRef = ref<FormInstance | null>(null);
+
 // 保存表单状态
 const editForm = reactive({
   id: undefined as number | undefined,
   applicationId: undefined as number | undefined,
-  apiEndpointId: undefined as number | undefined,
+  pageName: '',
+  pageCode: '',
+  linkPath: '',
 });
 
 // 表单校验规则
 const editRules: FormRules = {
-  applicationId: [{ required: true, message: '请输入所属应用', trigger: 'blur' }],
-  apiEndpointId: [{ required: true, message: '请选择后端接口', trigger: 'blur' }],
+  applicationId: [{ required: true, message: '请选择归属应用', trigger: 'blur' }],
+  pageName: [{ required: true, message: '请输入页面名称', trigger: 'blur' }],
+  pageCode: [{ required: true, message: '请输入页面编码', trigger: 'blur' }],
+  linkPath: [{ required: true, message: '请输入链接路径', trigger: 'blur' }],
 };
 
 // 打开创建弹窗
@@ -244,18 +250,22 @@ const handleCreate = () => {
 
   editForm.id = undefined;
   editForm.applicationId = undefined;
-  editForm.apiEndpointId = undefined;
+  editForm.pageName = '';
+  editForm.pageCode = '';
+  editForm.linkPath = '';
   editDialogVisible.value = true;
 };
 
 // 打开修改弹窗
-const handleEdit = (row: ResourceApiEndpoint) => {
+const handleEdit = (row: ResourcePage) => {
   isEdit.value = true;
   editFormRef.value?.clearValidate();
   
   editForm.id = row.id;
   editForm.applicationId = row.applicationId;
-  editForm.apiEndpointId = row.apiEndpointId;
+  editForm.pageName = row.pageName;
+  editForm.pageCode = row.pageCode;
+  editForm.linkPath = row.linkPath;
   editDialogVisible.value = true;
 };
 
@@ -265,9 +275,11 @@ const submitEdit = async () => {
   const valid = await editFormRef.value.validate();
   if (!valid) return;
 
-  const payload: ResourceApiEndpointPayload = {
+  const payload: ResourcePagePayload = {
     applicationId: editForm.applicationId,
-    apiEndpointId: editForm.apiEndpointId,
+    pageName: editForm.pageName,
+    pageCode: editForm.pageCode,
+    linkPath: editForm.linkPath,
   };
 
   try {
@@ -275,13 +287,25 @@ const submitEdit = async () => {
     if (isEdit.value) {
       payload.id = editForm.id;
     }
-    await ResourceApiEndpointApi.save(payload);
+    await ResourcePageApi.save(payload);
     ElMessage.success(isEdit.value ? '更新成功' : '新增成功');
     await loadData();
     editDialogVisible.value = false;
   } catch (error: any) {
     ElMessage.error(error.message || '保存失败');
   }
+};
+
+// 弹窗状态
+const pageElementDialogVisible = ref(false);
+const selectedPageCode = ref('');
+const selectedApplicationId = ref<number | undefined>(undefined);
+
+// 打开页面元素弹窗
+const handlePageElement = (row: ResourcePage) => {
+  selectedPageCode.value = row.pageCode;
+  selectedApplicationId.value = row.applicationId!;
+  pageElementDialogVisible.value = true;
 };
 
 // 挂载回调
@@ -294,7 +318,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.resource-api-endpoint-page {
+.resource-page-page {
   padding: 20px;
   background-color: #f5f7fa;
   min-height: 100%;
@@ -302,7 +326,7 @@ onMounted(async () => {
   box-sizing: border-box;
 }
 
-.resource-api-endpoint-page__header {
+.resource-page-page__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -313,13 +337,13 @@ onMounted(async () => {
   border-radius: 4px;
 }
 
-.resource-api-endpoint-page__title-group {
+.resource-page-page__title-group {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.resource-api-endpoint-page__header h2 {
+.resource-page-page__header h2 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
@@ -332,12 +356,12 @@ onMounted(async () => {
   gap: 8px;
 }
 
-.resource-api-endpoint-page__search {
+.resource-page-page__search {
   margin-bottom: 12px;
   background-color: #fff;
 }
 
-.resource-api-endpoint-page__pagination {
+.resource-page-page__pagination {
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;

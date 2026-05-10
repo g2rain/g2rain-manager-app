@@ -9,7 +9,7 @@ import { initRoutesFromResources } from './router';
 import type { ApplicationResources } from './types';
 import { useAccessTokenStore } from '@platform/stores';
 import { env } from '@shared/env';
-import { isIntegrateMode } from '@platform/apps';
+import { isIntegrateMode } from '@shared/utils/mode.util';
 import { emitTokenInvalid } from '@platform/apps';
 import { sso } from '@runtime/auth';
 import { initHttp } from '@runtime/http';

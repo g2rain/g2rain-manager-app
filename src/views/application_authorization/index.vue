@@ -60,7 +60,7 @@
       <el-table-column prop="status" label="状态" width="180">
         <template #default="{ row }">
           <el-switch
-            v-permission="'application-authorization:status-update'"
+            v-permission="'application_authorization:status_update'"
             v-model="row.status"
             inline-prompt
             :active-value="'ACTIVATED'"
@@ -76,7 +76,7 @@
       <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
       <el-table-column label="操作" fixed="right" width="100">
         <template #default="{ row }">
-          <el-button type="warning" v-permission="'application-authorization:control-utils-sync'" link size="small"
+          <el-button type="warning" v-permission="'application_authorization:control_utils_sync'" link size="small"
             @click="updateSyncControlUtils(row)">同步能力</el-button>
         </template>
         <template #header>
