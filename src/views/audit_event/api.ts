@@ -18,7 +18,7 @@ export class AuditEventApi {
    */
   static async list(params?: AuditEventQuery): Promise<AuditEvent[]> {
     const http = getHttpClient('default');
-    const res = await http.get<AuditEvent[]>('/audit_event/list', params);
+    const res = await http.get<AuditEvent[]>('/basis/audit_event/list', params);
     return res.data || [];
   }
 
@@ -29,7 +29,7 @@ export class AuditEventApi {
    */
   static async page(params: AuditEventQuery & PageSelectListDto): Promise<PageData<AuditEvent>> {
     const http = getHttpClient('default');
-    const res = await http.get<PageData<AuditEvent>>('/audit_event/page', params);
+    const res = await http.get<PageData<AuditEvent>>('/basis/audit_event/page', params);
     return res.data;
   }
 }
