@@ -5,6 +5,7 @@ export function parseTable(sql: string, tableName: string): TableInfo {
 
     const columns: TableColumn[] = [];
     let inColumns = false;
+    let tableComment = '';
 
     for (const line of lines) {
         if (line.startsWith('CREATE TABLE') && line.includes(`\`${tableName}\``)) {
@@ -13,17 +14,19 @@ export function parseTable(sql: string, tableName: string): TableInfo {
         }
 
         if (inColumns) {
-            if (line.startsWith('PRIMARY KEY') || line.startsWith(') ENGINE')) {
+            if (/^\)\s*ENGINE\b/i.test(line)) {
+                const tc = line.match(/COMMENT\s*=\s*(['"])(.*?)\1/i);
+                tableComment = (tc && tc[2]) || '';
                 break;
             }
 
             const match = line.match(
-                /`(\w+)`\s+(\w+(?:\([^)]+\))?)\s*(.*?)(?:COMMENT\s+['"](.*?)['"])?/i,
+                /^`(\w+)`\s+(\w+(?:\([^)]+\))?)\s+((?:(?!\s+COMMENT\b).)*?)(?:\s+COMMENT\s+(["'])(.*?)\4)?\s*,?\s*$/i,
             );
 
             if (!match) continue;
 
-            const [, name, sqlType, rest, comment] = match;
+            const [, name, sqlType, rest, , comment] = match;
             const camelName = snakeToCamel(name);
             const nullable = rest.includes('NULL') || rest.includes('DEFAULT');
 
@@ -65,8 +68,9 @@ export function parseTable(sql: string, tableName: string): TableInfo {
         camelName,
         routePath: `/${normalizedTableName}`,
         routeName: camelName,
+        tableComment,
         title: getTitleFromComment(
-            columns.find(c => c.name === 'name')?.comment || normalizedTableName,
+            tableComment || columns.find(c => c.name === 'name')?.comment || normalizedTableName,
         ),
         columns,
         baseColumns,
