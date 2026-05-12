@@ -55,7 +55,6 @@ onMounted(() => {
         activeRule: activeRule,
         routePath: routePath,
         fullPath: fullPath,
-        timestamp: Date.now(),
       });
 
       console.log('[App] 路由变化，已通知主应用:', {

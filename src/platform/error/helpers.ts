@@ -34,7 +34,7 @@ export function normalizeAxiosError(error: any): AppError {
   // 没有响应 -> 认为是网络错误
   if (!response) {
     return new FrontendError('网络异常，请稍后重试', {
-      code: FrontendErrorCode.NETWORK_ERROR,
+      errorCode: FrontendErrorCode.NETWORK_ERROR,
       detail: error,
       cause: error,
     });
