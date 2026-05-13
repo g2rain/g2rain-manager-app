@@ -1,3 +1,17 @@
+<%
+  function uiLabel(col) {
+    let s = String(col?.comment || col?.camelName || '').trim();
+    // 去掉枚举/说明括号，避免 label 过长
+    s = s.replace(/\[.*?\]/g, '');
+    s = s.replace(/（.*?）/g, '');
+    s = s.replace(/\(.*?\)/g, '');
+    s = s.trim();
+
+    // 常见后缀简化
+    if (s.endsWith('标识')) s = s.slice(0, -2) + 'ID';
+    return s || String(col?.camelName || '');
+  }
+%>
 <template>
   <div class="<%= table.name %>-page">
     <!-- 查询表单 -->
@@ -6,8 +20,8 @@
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <!-- 业务特定查询字段 -->
 <% table.businessColumns.filter(col => !col.isDeleteFlag).forEach(col => { -%>
-        <el-form-item label="<%= col.comment || col.camelName %>">
-          <el-input v-model="queryForm.<%= col.camelName %>" placeholder="请输入<%= col.comment || col.camelName %>" clearable style="width: 200px" />
+        <el-form-item label="<%= uiLabel(col) %>">
+          <el-input v-model="queryForm.<%= col.camelName %>" placeholder="请输入<%= uiLabel(col) %>" clearable style="width: 200px" />
         </el-form-item>
 <% }); -%>
 
@@ -32,7 +46,7 @@
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true" @sort-change="handleSortChange">
       <el-table-column prop="id" label="ID" width="120" />
 <% table.businessColumns.filter(col => !col.isDeleteFlag).forEach(col => { -%>
-      <el-table-column prop="<%= col.camelName %>" label="<%= col.comment || col.camelName %>" width="<%= col.type === 'string' ? '180' : '140' %>" />
+      <el-table-column prop="<%= col.camelName %>" label="<%= uiLabel(col) %>" width="<%= col.type === 'string' ? '180' : '140' %>" />
 <% }); -%>
       <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
       <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
@@ -68,8 +82,8 @@
     <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑<%= table.title %>' : '新增<%= table.title %>'" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
 <% table.businessColumns.filter(col => !col.isDeleteFlag).forEach(col => { -%>
-        <el-form-item label="<%= col.comment || col.camelName %>" prop="<%= col.camelName %>">
-          <el-input v-model="editForm.<%= col.camelName %>" placeholder="请输入<%= col.comment || col.camelName %>" />
+        <el-form-item label="<%= uiLabel(col) %>" prop="<%= col.camelName %>">
+          <el-input v-model="editForm.<%= col.camelName %>" placeholder="请输入<%= uiLabel(col) %>" />
         </el-form-item>
 <% }); -%>
       </el-form>
@@ -86,7 +100,7 @@
       <el-descriptions :column="1" border>
         <el-descriptions-item label="ID">{{ currentRow?.id }}</el-descriptions-item>
 <% table.businessColumns.filter(col => !col.isDeleteFlag).forEach(col => { -%>
-        <el-descriptions-item label="<%= col.comment || col.camelName %>">{{ currentRow?.<%= col.camelName %> }}</el-descriptions-item>
+        <el-descriptions-item label="<%= uiLabel(col) %>">{{ currentRow?.<%= col.camelName %> }}</el-descriptions-item>
 <% }); -%>
         <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
         <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
@@ -114,7 +128,7 @@ import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMess
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
 // 基础查询表单（BaseSelectListDto）
-const baseQueryForm = ref<BaseSelectListDto>({
+const baseQueryForm = reactive<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -143,7 +157,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm.value, ...queryForm })
+      Object.entries({ ...baseQueryForm, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as <%= table.camelName %>Query;
   
@@ -177,10 +191,10 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.value.id = undefined;
-  baseQueryForm.value.createTime = undefined;
-  baseQueryForm.value.updateTime = undefined;
-  baseQueryForm.value.sorts = undefined;
+  baseQueryForm.id = undefined;
+  baseQueryForm.createTime = undefined;
+  baseQueryForm.updateTime = undefined;
+  baseQueryForm.sorts = undefined;
   // 重置业务特定查询表单
 <% table.businessColumns.filter(col => !col.isDeleteFlag).forEach(col => { -%>
   queryForm.<%= col.camelName %> = <% if (col.type === 'string') { %>''<% } else { %>undefined<% } %>;

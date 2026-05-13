@@ -208,7 +208,7 @@
   const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
   // 基础查询状态（使用 ref，便于 v-model 替换整个对象时保持响应式）
-  const baseQueryForm = ref<BaseSelectListDto>({
+  const baseQueryForm = reactive<BaseSelectListDto>({
     id: undefined,
     createTime: undefined,
     updateTime: undefined,
@@ -239,7 +239,7 @@
     try {
       // 合并基础查询 + 业务查询，并过滤空值
       const query = Object.fromEntries(
-        Object.entries({ ...baseQueryForm.value, ...queryForm })
+        Object.entries({ ...baseQueryForm, ...queryForm })
           .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
       ) as UserQuery;
 
@@ -273,10 +273,10 @@
   // 重置查询条件
   const handleReset = () => {
     // 重置基础查询表单
-    baseQueryForm.value.id = undefined;
-    baseQueryForm.value.createTime = undefined;
-    baseQueryForm.value.updateTime = undefined;
-    baseQueryForm.value.sorts = undefined;
+    baseQueryForm.id = undefined;
+    baseQueryForm.createTime = undefined;
+    baseQueryForm.updateTime = undefined;
+    baseQueryForm.sorts = undefined;
     // 重置业务特定查询表单
     queryForm.passportId = undefined;
     queryForm.organId = undefined;
