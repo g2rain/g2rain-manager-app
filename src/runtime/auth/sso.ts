@@ -7,7 +7,7 @@ import { env, getPathWithContextPath, isMockEnabled } from '@shared/env';
 import { useAccessTokenStore } from '@platform/stores';
 import { fetchIamKeyId, fetchIamPublicKey, dpopSign } from '@/components/http';
 import { getHttpClient, HttpClient, type Result } from '@/components/http';
-import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 import { watch } from 'vue';
 import { Generator } from '@shared/utils/random.util';
 import { generateClient } from '@shared/utils/jwt.util';
@@ -40,7 +40,7 @@ class SSOService {
     // 使用 getPathWithContextPath 函数处理路径拼接，避免双斜杠
     const fullRedirectPath = getPathWithContextPath(redirectUriPath);
     // 直接拼接 origin 和路径，确保路径以 / 开头
-    const redirectUri = currentOrigin + (fullRedirectPath.startsWith('/') ? fullRedirectPath : '/' + fullRedirectPath);
+    const redirectUri = currentOrigin + fullRedirectPath;
     // 构建SSO认证URL
     const ssoUrl = new URL(ssoBaseUrl + authEndpoint);
     const params = new URLSearchParams({

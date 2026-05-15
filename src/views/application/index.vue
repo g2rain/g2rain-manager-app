@@ -328,7 +328,7 @@ const canShowIntegrateBtn = (row: Application) =>
   !row.canIntegrate && (row.applicationType === 'SUPPORT' || row.applicationType === 'SYSTEM')
 
 // 基础查询状态（使用 reactive 以确保 v-model 的双向绑定完全生效）
-const baseQueryForm = reactive<BaseSelectListDto>({
+let baseQueryForm = reactive<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,

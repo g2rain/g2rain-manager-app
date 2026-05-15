@@ -3,7 +3,7 @@ import type { Token, ApplicationScope } from '@platform/types/http.types';
 import type { Client } from '@/components/http';
 import { jwtVerify } from 'jose';
 import { publicKeyStringToJwk } from '@shared/utils/jwt.util';
-import { isIntegrateMode, isQianKunMode } from '@shared/utils/mode.util';
+import { isIntegrateMode } from '@shared/utils/mode.util';
 
 const STORAGE_KEY = 'g2rain_token';
 
@@ -23,7 +23,7 @@ export const useAccessTokenStore = defineStore('token', {
         return (this.logged = false);
       }
       // mock 模式下，now 设置为 0，token 永不过期
-      const now =  new Date();
+      const now = new Date();
 
       // 2. 检查 token 的过期时间
       try {
@@ -46,7 +46,7 @@ export const useAccessTokenStore = defineStore('token', {
       try {
         const expireAt = new Date(this.token.expireAt * 1000);
         // mock 模式下，now 设置为 0，token 永不过期
-        const now =  new Date();
+        const now = new Date();
         return expireAt > now;
       } catch (error) {
         console.log(error);
@@ -100,9 +100,9 @@ export const useAccessTokenStore = defineStore('token', {
   persist: isIntegrateMode()
     ? false
     : {
-        key: STORAGE_KEY,
-        storage: localStorage,
-        pick: ['client', 'token', 'tokenString', 'logged', 'tokenExpired'],
-      },
+      key: STORAGE_KEY,
+      storage: localStorage,
+      pick: ['client', 'token', 'tokenString', 'logged', 'tokenExpired'],
+    },
 });
 

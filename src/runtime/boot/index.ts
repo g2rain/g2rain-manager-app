@@ -6,7 +6,6 @@
 import { watch, type WatchStopHandle } from 'vue';
 import { resourceManager } from './resource';
 import { initRoutesFromResources } from './router';
-import type { ApplicationResources } from './types';
 import { useAccessTokenStore } from '@platform/stores';
 import { env } from '@shared/env';
 import { isIntegrateMode } from '@shared/utils/mode.util';
@@ -18,16 +17,33 @@ export * from './types';
 export * from './resource';
 export * from './router';
 
+/** 同一份子应用 JS 内 HTTP 引导只做一次 */
+let httpBootstrapDone = false;
+/** tokenExpired 监听全局只挂一条；多 Tab 用引用计数配对 mount/unmount */
+let tokenExpiredWatchStop: WatchStopHandle | null = null;
+let tokenExpiredWatcherRefCount = 0;
+
 /**
  * 监听 tokenExpired 状态变化
  * - 集成模式：当 token 标记为过期（tokenExpired: false -> true）时，通过事件通知主应用
  * - 独立运行模式：当 token 过期时，触发刷新 token
+ *
+ * qiankun 多实例：每次 render/mount 调用一次；watch 与 initHttp 仅首次生效，避免重复监听。
+ * 与 {@link teardownTokenExpiredWatcher} 成对（在 qiankun unmount 中调用）。
  */
 export function setupTokenExpiredWatcher(): void {
-  const accessTokenStore = useAccessTokenStore();
+  if (!httpBootstrapDone) {
+    initHttp();
+    httpBootstrapDone = true;
+  }
 
-  // 初始化 HTTP 组件（认证会话 + 认证异常处理），需在所有 HTTP 请求之前
-  initHttp();
+  tokenExpiredWatcherRefCount++;
+
+  if (tokenExpiredWatchStop != null) {
+    return;
+  }
+
+  const accessTokenStore = useAccessTokenStore();
 
   // 启动时如果已经是 tokenExpired = true，则立即按当前模式处理一次
   if (accessTokenStore.tokenExpired) {
@@ -46,7 +62,7 @@ export function setupTokenExpiredWatcher(): void {
     }
   }
 
-  watch(
+  tokenExpiredWatchStop = watch(
     () => accessTokenStore.tokenExpired,
     async (tokenExpired, prevTokenExpired) => {
       // 仅在状态发生变化时处理
@@ -76,6 +92,22 @@ export function setupTokenExpiredWatcher(): void {
     },
     { immediate: false },
   );
+}
+
+/**
+ * 与 setupTokenExpiredWatcher 成对：最后一个 qiankun 实例卸载时停止 watch。
+ * 独立运行模式无需调用（页面级生命周期）。
+ */
+export function teardownTokenExpiredWatcher(): void {
+  tokenExpiredWatcherRefCount = Math.max(0, tokenExpiredWatcherRefCount - 1);
+  if (tokenExpiredWatcherRefCount > 0) {
+    return;
+  }
+
+  console.log('[boot] 最后一个实例卸载，停止 tokenExpired 监听');
+
+  tokenExpiredWatchStop?.();
+  tokenExpiredWatchStop = null;
 }
 
 /**
@@ -120,13 +152,13 @@ export async function initApplicationResources(): Promise<void> {
           await resourceManager.init();
 
           // 获取路由实例并更新路由
-          const { getRouterInstance } = await import('@runtime/router');
-          const router = getRouterInstance();
+          const { getShell, STANDALONE_SHELL_KEY } = await import('@/runtime/micro-shells');
+          const { updateRouter } = await import('@runtime/router');
+          const router = getShell(STANDALONE_SHELL_KEY).router;
 
           if (router) {
             const resourceRoutes = await initRoutesFromResources();
-            const { updateRouter } = await import('@runtime/router');
-            updateRouter(resourceRoutes);
+            updateRouter(router, resourceRoutes);
 
             if ((import.meta.env as any).DEV) {
               console.log('[initApplicationResources] 资源初始化完成，路由已更新');

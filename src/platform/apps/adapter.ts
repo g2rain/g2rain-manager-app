@@ -5,7 +5,6 @@
 
 import type { EventAdapter } from '@/components/micro-app';
 import { QiankunSubAppEventAdapter } from './adapter.qiankun';
-import { isIntegrateMode } from '@shared/utils/mode.util';
 
 /**
  * 当前使用的适配器实例

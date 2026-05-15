@@ -196,7 +196,7 @@ const loadDicts = async () => {
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
 // 基础查询表单（BaseSelectListDto）
-const baseQueryForm = reactive<BaseSelectListDto>({
+let baseQueryForm = reactive<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
