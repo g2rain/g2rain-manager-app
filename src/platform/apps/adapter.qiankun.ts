@@ -27,6 +27,13 @@ export class QiankunSubAppEventAdapter extends WindowEventSubAppEventAdapter { }
 const qiankunEventAdapter = new QiankunSubAppEventAdapter();
 
 /**
+ * 获取 qiankun 子应用事件适配器单例（与 registerQiankunLifecycle 内为同一实例）
+ */
+export function getQiankunSubAppEventAdapter(): QiankunSubAppEventAdapter {
+  return qiankunEventAdapter;
+}
+
+/**
  * qiankun 生命周期上下文
  * 由应用入口（main.ts）传入具体实现，避免适配器直接依赖 Vue 细节
  */
