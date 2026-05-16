@@ -1114,37 +1114,45 @@ onMounted(async () => {
 .api-item {
   width: 100%;
   min-width: 0;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 6px 0 6px 10px;
+  height: auto;
+  margin: 0;
+  padding: 10px 0;
   font-size: 14px;
+}
+
+.api-item:nth-child(odd) {
+  border-radius: 8px 0 0 8px;
+  padding-left: 10px;
+}
+
+.api-item:nth-child(even) {
+  border-radius: 0 8px 8px 0;
+  padding-right: 10px;
 }
 
 .api-item:nth-child(4n + 1),
 .api-item:nth-child(4n + 2) {
-  background-color: #eef3ff;
+  background-color: var(--el-fill-color-light);
 }
 
 .api-item:nth-child(4n + 3),
 .api-item:nth-child(4n + 4) {
-  background-color: #ffffff;
+  background-color: transparent;
 }
 
 .api-item--placeholder {
   pointer-events: none;
 }
 
-.api-item :deep(.el-checkbox) {
-  margin: 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
-}
-
 .api-item :deep(.el-checkbox__label) {
   width: 100%;
   line-height: 1.4;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .api-name {
