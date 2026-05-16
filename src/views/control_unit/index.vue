@@ -1118,10 +1118,15 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   cursor: pointer;
-  height: auto;
   margin: 0;
-  padding: 10px 0;
   font-size: 14px;
+}
+
+/* 主应用全局 .el-checkbox 固定高度会压掉上下 padding，需提高优先级 */
+.api-items label.api-item.el-checkbox {
+  height: auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .api-item:nth-child(odd) {
@@ -1146,6 +1151,8 @@ onMounted(async () => {
 
 .api-item--placeholder {
   pointer-events: none;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .api-item :deep(.el-checkbox__label) {
