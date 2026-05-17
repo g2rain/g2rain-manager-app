@@ -208,7 +208,7 @@
   const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
   // 基础查询状态（使用 ref，便于 v-model 替换整个对象时保持响应式）
-  const baseQueryForm = reactive<BaseSelectListDto>({
+  let baseQueryForm = reactive<BaseSelectListDto>({
     id: undefined,
     createTime: undefined,
     updateTime: undefined,

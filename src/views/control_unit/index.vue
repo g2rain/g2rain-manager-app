@@ -351,7 +351,7 @@ const loadDicts = async () => {
 };
 
 // 基础查询状态（使用 reactive v-model 替换整个对象时保持响应式）
-const baseQueryForm = reactive<BaseSelectListDto>({
+let baseQueryForm = reactive<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -1114,37 +1114,52 @@ onMounted(async () => {
 .api-item {
   width: 100%;
   min-width: 0;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 6px 0 6px 10px;
+  margin: 0;
   font-size: 14px;
+}
+
+/* 主应用全局 .el-checkbox 固定高度会压掉上下 padding，需提高优先级 */
+.api-items label.api-item.el-checkbox {
+  height: auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.api-item:nth-child(odd) {
+  border-radius: 8px 0 0 8px;
+  padding-left: 10px;
+}
+
+.api-item:nth-child(even) {
+  border-radius: 0 8px 8px 0;
+  padding-right: 10px;
 }
 
 .api-item:nth-child(4n + 1),
 .api-item:nth-child(4n + 2) {
-  background-color: #eef3ff;
+  background-color: var(--el-fill-color-light);
 }
 
 .api-item:nth-child(4n + 3),
 .api-item:nth-child(4n + 4) {
-  background-color: #ffffff;
+  background-color: transparent;
 }
 
 .api-item--placeholder {
   pointer-events: none;
-}
-
-.api-item :deep(.el-checkbox) {
-  margin: 0;
-  width: 100%;
-  display: flex;
-  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .api-item :deep(.el-checkbox__label) {
   width: 100%;
   line-height: 1.4;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .api-name {
