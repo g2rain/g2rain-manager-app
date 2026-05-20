@@ -177,7 +177,11 @@
         </el-table-column>
         <!-- 业务展示列 -->
         <el-table-column prop="controlUnitName" label="功能权限名称" />
-        <el-table-column prop="controlUnitScope" label="功能权限范围" />
+        <el-table-column prop="controlUnitScope" label="功能权限范围">
+          <template #default="{ row }">
+            <DictText :value="row?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
+          </template>
+        </el-table-column>
       </el-table>
 
       <template #footer>

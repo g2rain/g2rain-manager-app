@@ -156,14 +156,27 @@
     </el-dialog>
 
     <!-- 配置资源 -->
-    <el-dialog v-model="configureResourcesDialog.visible" class="resources-dialog" title="配置资源" width="900px">
+    <el-dialog
+      v-model="configureResourcesDialog.visible"
+      class="resources-dialog"
+      title="配置资源"
+      width="900px"
+      @closed="resetConfigureResourcesDialog"
+    >
       <el-tabs type="border-card" v-model="activeName">
         <!-- 菜单 -->
         <el-tab-pane label="菜单资源" name="menu">
           <el-scrollbar max-height="58vh">
-            <el-tree v-if="menuTreeData.length > 0" ref="menuTreeRef" :data="menuTreeData" show-checkbox node-key="id"
-              default-expand-all :props="{ label: 'name', children: 'children' }"
-              :default-checked-keys="checkedMenuIds" />
+            <el-tree
+              v-if="menuTreeData.length > 0"
+              ref="menuTreeRef"
+              :key="configureResourcesDialog.controlUnitId ?? 'menu-tree'"
+              :data="menuTreeData"
+              show-checkbox
+              node-key="id"
+              default-expand-all
+              :props="{ label: 'name', children: 'children' }"
+            />
           </el-scrollbar>
         </el-tab-pane>
 
@@ -190,7 +203,7 @@
                     <div class="elements-row">
                       <div v-for="el in row.elements" :key="el.id" class="element-item">
                         <el-checkbox v-model="el.checked" @change="toggleElement(row, el)" />
-                        <DictSelect v-model="el.status" usage-code="RESOURCE_ELEMENT_STATUS" :disabled="!el.checked" :api-method="DictItemApi.select" width="90px" placeholder="状态" />
+                        <DictSelect v-model="el.status" usage-code="RESOURCE_STATUS" :disabled="!el.checked" :clearable="false" :api-method="DictItemApi.select" width="90px" placeholder="状态" />
                         <span @click.stop="el.checked = !el.checked; toggleElement(row, el)">
                           {{ el.name }}
                         </span>
@@ -279,7 +292,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, nextTick } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { ControlUnitApi } from './api';
@@ -574,8 +587,46 @@ const menuTreeRef = ref<any>(null);
 const menuTreeData = ref<MenuTreeItem[]>([]);
 // 默认选中节点
 const checkedMenuIds = ref<number[]>([]);
-// 首次加载的菜单选中状态
+// 首次加载的菜单选中状态（与后端关联表 resourceId 一致，用于保存 diff）
 let originalMenuIds: number[] = [];
+
+const collectDescendantMenuIds = (node: MenuTreeItem): number[] => {
+  const ids: number[] = [];
+  node.children?.forEach((child) => {
+    ids.push(child.id, ...collectDescendantMenuIds(child));
+  });
+  return ids;
+};
+
+/**
+ * 初始化回显：严格对齐关联表，同时保留后续操作的父子联动
+ * - 叶子在关联表中 → 勾选
+ * - 父节点在关联表中 → 仅当「所有后代也都在关联表中」才勾选父节点，避免只关联部分子菜单时整组被勾满
+ */
+const resolveMenuCheckedKeysForInit = (tree: MenuTreeItem[], relationIds: number[]): number[] => {
+  const relationSet = new Set(relationIds);
+  const keys: number[] = [];
+
+  const walk = (node: MenuTreeItem) => {
+    const hasChildren = !!node.children?.length;
+    if (hasChildren) {
+      node.children!.forEach(walk);
+      if (relationSet.has(node.id)) {
+        const descendants = collectDescendantMenuIds(node);
+        if (descendants.length === 0 || descendants.every((id) => relationSet.has(id))) {
+          keys.push(node.id);
+        }
+      }
+      return;
+    }
+    if (relationSet.has(node.id)) {
+      keys.push(node.id);
+    }
+  };
+
+  tree.forEach(walk);
+  return keys;
+};
 
 // 加载菜单树
 const loadMenuTree = async (row: ControlUnit) => {
@@ -623,8 +674,12 @@ const loadMenuTree = async (row: ControlUnit) => {
     controlUnitId: row.id, resourceType: 'MENU'
   })
 
-  checkedMenuIds.value = relations.map(u => u.resourceId)
-  originalMenuIds = [...checkedMenuIds.value]
+  const relationIds = relations.map((u) => u.resourceId);
+  originalMenuIds = [...relationIds];
+  checkedMenuIds.value = resolveMenuCheckedKeysForInit(menuTreeData.value, relationIds);
+
+  await nextTick();
+  menuTreeRef.value?.setCheckedKeys(checkedMenuIds.value, false);
 };
 
 // 2. 页面&页面元素加载
@@ -725,23 +780,27 @@ const apiGroups = reactive<ApiGroup[]>([])
 // 原始关联页面 ID
 let originalApiIds: number[] = []
 const selectedApiIds = ref<Set<number>>(new Set())
-const apiRelationLoaded = ref(false)
+/** 已加载接口关联的功能权限 ID，换行记录时必须重新拉取 */
+let apiRelationsControlUnitId: number | null = null
 const apiServiceCode = ref('')
 const currentConfigureRow = ref<ControlUnit | null>(null)
+
+const loadApiEndpointRelations = async (row: ControlUnit) => {
+  const apiRelations = await ControlUnitResourceRelationApi.list({
+    controlUnitId: row.id,
+    resourceType: 'API_ENDPOINT',
+  })
+  originalApiIds = apiRelations.map((r) => r.resourceId)
+  selectedApiIds.value = new Set(originalApiIds)
+  apiRelationsControlUnitId = row.id!
+}
+
 // 加载接口地址
 const loadApiEndpoints = async (row: ControlUnit, serviceCode?: string) => {
-  // 首次加载时初始化接口关联关系
-  if (!apiRelationLoaded.value) {
-    const apiRelations = await ControlUnitResourceRelationApi.list({
-      controlUnitId: row.id,
-      resourceType: 'API_ENDPOINT'
-    })
-    originalApiIds = apiRelations.map(r => r.resourceId)
-    selectedApiIds.value = new Set(originalApiIds)
-    apiRelationLoaded.value = true
+  if (apiRelationsControlUnitId !== row.id) {
+    await loadApiEndpointRelations(row)
   }
 
-  // 清空
   apiGroups.splice(0)
   if (!serviceCode) return;
 
@@ -809,11 +868,12 @@ const resetConfigureResourcesDialog = () => {
   configureResourcesDialog.controlUnitId = null;
   checkedMenuIds.value = [];
   originalMenuIds = [];
+  menuTreeData.value = [];
   originalPageIds = [];
   originalElementMap.clear();
   originalApiIds = [];
   selectedApiIds.value = new Set();
-  apiRelationLoaded.value = false;
+  apiRelationsControlUnitId = null;
   apiServiceCode.value = '';
   currentConfigureRow.value = null;
   apiGroups.splice(0);

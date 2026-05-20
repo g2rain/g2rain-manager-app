@@ -9,7 +9,7 @@
           <el-input v-model="queryForm.name" placeholder="请输入名称" clearable style="width: 200px" />
         </el-form-item>
         <el-form-item label="状态">
-          <el-input v-model="queryForm.status" placeholder="请输入状态" clearable style="width: 200px" />
+          <DictSelect v-model="queryForm.status" usage-code="STATIC_TOKEN_STATUS" :api-method="DictItemApi.select" placeholder="请选择状态" clearable style="width: 200px" />
         </el-form-item>
         <!-- 操作按钮 -->
         <el-form-item>
@@ -24,7 +24,7 @@
       <div class="personal_static_access_token-page__title-group">
         <h2>模型秘钥管理</h2>
       </div>
-      <el-button type="primary" v-permission="'personal_static_access_token:add'" @click="handleCreate">新增</el-button>
+      <el-button type="primary" v-permission="'personal_static_access_token:add'" @click="handleCreate">新增 Api Key</el-button>
     </div>
 
     <el-table :data="tableData" border stripe style="width: 100%">
@@ -33,8 +33,14 @@
       <el-table-column prop="organName" label="机构名称" width="140" />
       <el-table-column prop="userName" label="用户名称" width="140" />
       <el-table-column prop="name" label="访问令牌名称" width="180" />
-      <el-table-column prop="maskedToken" label="脱敏令牌" width="180" />
-      <el-table-column prop="status" label="状态" width="180" />
+      <el-table-column prop="maskedToken" label="脱敏令牌" width="300" />
+      <el-table-column prop="status" label="状态" width="180">
+        <template #default="{ row }">
+          <el-tag effect="light">
+            <DictText :value="row?.status" usage-code="STATIC_TOKEN_STATUS" :api-method="DictItemApi.select" />
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column prop="createTime" label="创建时间" width="180" />
       <el-table-column prop="updateTime" label="更新时间" width="180" />
       <el-table-column label="操作" fixed="right" width="280">
@@ -60,7 +66,7 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑' : '创建'" width="520px">
+    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑' : '创建 Api Key'" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
         <el-form-item label="名称" prop="name">
           <el-input v-model="editForm.name" placeholder="test" />
@@ -75,7 +81,7 @@
     </el-dialog>
 
     <!-- API key 创建结果弹窗 -->
-    <el-dialog v-model="apiKeyDialogVisible" title="创建" width="560px" :close-on-click-modal="false" :close-on-press-escape="false">
+    <el-dialog v-model="apiKeyDialogVisible" title="创建 Api Key" width="560px" :close-on-click-modal="false" :close-on-press-escape="false">
       <p class="api-key-dialog__tips">
         请将此APIkey保存在安全且易于访问的地方。出于安全原因，你将无法通过 API keys管理界面再次查看它。如果你丢失了这个key，将需要重新创建。
       </p>
@@ -97,7 +103,11 @@
         <el-descriptions-item label="用户名称">{{ currentRow?.userName }}</el-descriptions-item>
         <el-descriptions-item label="访问令牌名称">{{ currentRow?.name }}</el-descriptions-item>
         <el-descriptions-item label="脱敏令牌">{{ currentRow?.maskedToken }}</el-descriptions-item>
-        <el-descriptions-item label="状态">{{ currentRow?.status }}</el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag effect="light">
+            <DictText :value="currentRow?.status" usage-code="STATIC_TOKEN_STATUS" :api-method="DictItemApi.select" />
+          </el-tag>
+        </el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
         <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
@@ -120,7 +130,8 @@ import type { PersonalStaticAccessToken, PersonalStaticAccessTokenPayload, Perso
 import type { ApplicationAuthorization } from '../application_authorization/type';
 import type { PageSelectListDto } from '@platform/types/api.type';
 
-import { SortableTable, TableColumn, SortManagerButton, showErrorMessage } from '@/components';
+import { DictItemApi } from '../dict/api';
+import { DictSelect, DictText, showErrorMessage } from '@/components';
 
 const props = withDefaults(defineProps<{
   embedded?: boolean;

@@ -273,7 +273,7 @@ import type { FormInstance, FormRules, UploadFile } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { ApplicationApi } from './api';
 import { OrganApi } from '../organ/api';
-import { DictItemApi } from '../dict/api';
+import { DictItemApi, parseDictCodeAsBoolean } from '../dict/api';
 import { ApplicationSuiteApi } from '../application_suite/api'
 import type { Application, ApplicationPayload, ApplicationQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
@@ -282,14 +282,6 @@ import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, 
 // 定义字典引用
 const statusOptions = ref<Array<{ label: string; value: string }>>([]);
 const boolOptions = ref<Array<{ label: string; value: boolean }>>([]);
-
-/** 将 BOOLEAN_FLAG 字典 code 转为 boolean（与后端 / DictText 回显一致） */
-function parseDictCodeAsBoolean(code: string): boolean | undefined {
-  const normalized = String(code).trim().toLowerCase();
-  if (['true', '1', 'yes', 'y'].includes(normalized)) return true;
-  if (['false', '0', 'no', 'n'].includes(normalized)) return false;
-  return undefined;
-}
 
 // 获取字典信息
 const loadDicts = async () => {

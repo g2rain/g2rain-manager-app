@@ -143,6 +143,7 @@
           <el-tree-select
             v-model="reassignDialog.sourceParentId"
             :data="treeData"
+            placeholder="请选择原始上级机构"
             node-key="organId"
             value-key="organId"
             :props="{ label: 'organName', children: 'subOrgans' }"
@@ -155,6 +156,7 @@
           <el-tree-select
             v-model="reassignDialog.targetParentId"
             :data="treeData"
+            placeholder="请选择目标上级机构"  
             node-key="organId"
             value-key="organId"
             :props="{ label: 'organName', children: 'subOrgans' }"
