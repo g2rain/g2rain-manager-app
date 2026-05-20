@@ -8,6 +8,7 @@ import type { BaseSelectListDto, BaseVo } from '@platform/types/api.type';
  */
 export interface Role extends BaseVo {
   organId: number;
+  organName: string;
   roleType: string;
   roleName: string;
 }

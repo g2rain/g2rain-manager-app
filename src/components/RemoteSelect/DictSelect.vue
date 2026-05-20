@@ -26,7 +26,11 @@ interface Props {
   /** 用途编码，用于获取对应字典列表 */
   usageCode?: string;
   /** API 方法（必填），内部由 DictSelect 负责将查询关键字映射为后端参数 */
-  apiMethod: (params: { key?: string; value?: number; usageCode?: string }) => Promise<RemoteSelectOption[]>;
+  apiMethod: (params: {
+    key?: string;
+    value?: number;
+    usageCode?: string;
+  }) => Promise<RemoteSelectOption[]>;
   /** 值字段名，默认为 'code' */
   valueKey?: string;
   /** 标签字段名，默认为 'name' */
@@ -82,9 +86,7 @@ const handleChange = (value: number | string | null | undefined) => {
  * 根据属性初始化 fetchData 函数
  * 实现接口：FetchDataFunction<RemoteSelectOption>
  */
-const fetchData: FetchDataFunction<RemoteSelectOption> = async (
-  params: { key?: string; value?: number },
-): Promise<RemoteSelectOption[]> => {
+const fetchData: FetchDataFunction<RemoteSelectOption> = async (params: { key?: string; value?: number }): Promise<RemoteSelectOption[]> => {
   // 仅根据 name 查询关键字：
   // - RemoteSelect 的远程搜索输入为非数字 => params.key
   // - 若输入为数字 => RemoteSelect 会把它放到 params.value，我们也当作“name 关键字”转换成 string

@@ -22,9 +22,7 @@
         </el-form-item>
 
         <el-form-item label="账号状态">
-          <el-select v-model="queryForm.status" placeholder="请选择状态" clearable style="width: 200px">
-            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="queryForm.status" usage-code="PASSPORT_STATUS" :api-method="DictItemApi.select" placeholder="请选择状态" />
         </el-form-item>
 
         <!-- 操作按钮 -->
@@ -55,14 +53,14 @@
       <el-table-column prop="realName" label="姓名" width="180" />
       <el-table-column prop="status" label="账号状态" width="180">
         <template #default="{ row }">
-          <el-switch 
-            v-permission="'passport:status_update'"
-            v-model="row.status" 
-            inline-prompt :active-value="'NORMAL'" 
-            :inactive-value="'FROZEN'"
-            :active-text="statusOptions.find(item => item.value === 'NORMAL')?.label"
-            :inactive-text="statusOptions.find(item => item.value === 'FROZEN')?.label" 
-            @change="updateStatus(row)" 
+          <StatusSwitch
+            v-model="row.status"
+            permission="passport:status_update"
+            active-value="NORMAL"
+            inactive-value="FROZEN"
+            :options="statusOptions"
+            :api-method="({ nextValue }) => PassportApi.updateStatus(row.id, String(nextValue))"
+            @success="loadData"
           />
         </template>
       </el-table-column>
@@ -71,7 +69,7 @@
       <el-table-column prop="sex" label="性别" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
-            {{sexOptions.find(item => item.value === row?.sex)?.label || ''}}
+            <DictText :value="row?.sex" usage-code="SEX" :api-method="DictItemApi.select" />
           </el-tag>
         </template>
       </el-table-column>
@@ -119,11 +117,7 @@
         </el-form-item>
 
         <el-form-item label="性别" prop="sex">
-          <el-radio-group v-model="editForm.sex">
-            <el-radio v-for="option in sexOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </el-radio>
-          </el-radio-group>
+          <DictSelect v-model="editForm.sex" usage-code="SEX" :api-method="DictItemApi.select" placeholder="请选择性别" />
         </el-form-item>
 
         <el-form-item label="出生日期" prop="birthday">
@@ -158,7 +152,7 @@
         <el-descriptions-item label="姓名">{{ currentRow?.realName }}</el-descriptions-item>
         <el-descriptions-item label="性别">
           <el-tag>
-            {{sexOptions.find(item => item.value === currentRow?.sex)?.label || ''}}
+            <DictText :value="currentRow?.sex" usage-code="SEX" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="出生日期">{{ currentRow?.birthday }}</el-descriptions-item>
@@ -167,7 +161,7 @@
         <el-descriptions-item label="邮箱地址">{{ currentRow?.email }}</el-descriptions-item>
         <el-descriptions-item label="账号状态">
           <el-tag :type="currentRow?.status === 'NORMAL' ? 'success' : 'info'">
-            {{statusOptions.find(item => item.value === currentRow?.status)?.label || ''}}
+            <DictText :value="currentRow?.status" usage-code="PASSPORT_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
@@ -211,32 +205,29 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { PassportApi } from './api';
 import { UserApi } from '../user/api';
+import { DictItemApi } from '../dict/api';
 import type { Passport, PassportPayload, PassportQuery } from './type';
 import type { User } from '../user/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
 
 // 定义字典引用
 const statusOptions = ref<Array<{ label: string; value: string }>>([]);
-const sexOptions = ref<Array<{ label: string; value: string }>>([]);
 
 // 获取字典信息
 const loadDicts = async () => {
-  statusOptions.value = [{
-    label: '正常',
-    value: 'NORMAL'
-  }, {
-    label: '冻结',
-    value: 'FROZEN'
-  }];
-
-  sexOptions.value = [{
-    label: '男性',
-    value: 'MALE'
-  }, {
-    label: '女性',
-    value: 'FEMALE'
-  }];
+  try {
+    const items = await DictItemApi.loadByUsageCode('PASSPORT_STATUS');
+    statusOptions.value = [...items]
+      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+      .map((item) => ({
+        label: item.name || String(item.code),
+        value: String(item.code),
+      }));
+  } catch (error) {
+    console.error('加载账号状态字典失败:', error);
+    statusOptions.value = [];
+  }
 };
 
 // 定义组件引用
@@ -483,19 +474,6 @@ const submitEdit = async () => {
     ElMessage.error(error.message || '保存失败');
   }
 };
-
-// 修改账号状态
-const updateStatus = async (row: any) => {
-  try {
-    await PassportApi.updateStatus(row.id, row.status);
-    await loadData();
-    ElMessage.success('更新成功');
-  } catch (err) {
-    ElMessage.error('更新失败');
-    row.canIntegrate = !row.canIntegrate; // 回退状态
-  }
-};
-
 
 
 

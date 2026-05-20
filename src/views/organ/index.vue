@@ -6,9 +6,7 @@
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <!-- 业务特定查询字段 -->
         <el-form-item label="机构类型">
-          <el-select v-model="queryForm.organType" placeholder="请选择机构类型" clearable style="width: 200px">
-            <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="queryForm.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" placeholder="请选择机构类型" />
         </el-form-item>
 
         <el-form-item label="机构名称">
@@ -16,9 +14,7 @@
         </el-form-item>
 
         <el-form-item label="机构状态">
-          <el-select v-model="queryForm.status" placeholder="请选择机构状态" clearable style="width: 200px">
-            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="queryForm.status" usage-code="ORGAN_STATUS" :api-method="DictItemApi.select" placeholder="请选择机构状态" />
         </el-form-item>
 
         <!-- 操作按钮 -->
@@ -46,7 +42,7 @@
       <el-table-column prop="organType" label="机构类型" width="180">
         <template #default="{ row }">
           <el-tag>
-            {{typeOptions.find(item => item.value === row?.organType)?.label || ''}}
+            <DictText :value="row?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </template>
       </el-table-column>
@@ -55,13 +51,14 @@
 
       <el-table-column prop="status" label="机构状态" width="180">
         <template #default="{ row }">
-          <el-switch 
-            v-permission="'organ:status_update'"
-            v-model="row.status" 
-            inline-prompt :active-value="'ACTIVE'" :inactive-value="'INACTIVE'"
-            :active-text="statusOptions.find(item => item.value === 'ACTIVE')?.label"
-            :inactive-text="statusOptions.find(item => item.value === 'INACTIVE')?.label" 
-            @change="updateStatus(row)" 
+          <StatusSwitch
+            v-model="row.status"
+            permission="organ:status_update"
+            active-value="ACTIVE"
+            inactive-value="INACTIVE"
+            :options="statusOptions"
+            :api-method="({ nextValue }) => OrganApi.updateStatus(row.id, String(nextValue))"
+            @success="loadData"
           />
         </template>
       </el-table-column>
@@ -99,9 +96,7 @@
     <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑机构' : '新增机构'" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
         <el-form-item label="机构类型" prop="organType">
-          <el-select v-model="editForm.organType" placeholder="请选择机构类型" :disabled="isEdit" style="width: 200px">
-            <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="editForm.organType" usage-code="ORGAN_TYPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" placeholder="请选择机构类型" />
         </el-form-item>
 
         <el-form-item label="机构名称" prop="organName">
@@ -122,13 +117,13 @@
         <el-descriptions-item label="机构序号">{{ currentRow?.id }}</el-descriptions-item>
         <el-descriptions-item label="机构类型">
           <el-tag>
-            {{typeOptions.find(item => item.value === currentRow?.organType)?.label || ''}}
+            <DictText :value="currentRow?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="机构名称">{{ currentRow?.organName }}</el-descriptions-item>
         <el-descriptions-item label="机构状态">
           <el-tag :type="currentRow?.status === 'ACTIVE' ? 'success' : 'info'">
-            {{statusOptions.find(item => item.value === currentRow?.status)?.label || ''}}
+            <DictText :value="currentRow?.status" usage-code="ORGAN_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
@@ -182,37 +177,28 @@ import { ref, reactive, onMounted } from 'vue';
 import type { FormInstance, FormRules, FormItemRule } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { OrganApi } from './api';
+import { DictItemApi } from '../dict/api';
 import type { Organ, OrganPayload, OrganQuery, OrganHierarchicalRelation } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
 
 // 定义字典引用
 const statusOptions = ref<Array<{ label: string; value: string }>>([]);
-const typeOptions = ref<Array<{ label: string; value: string }>>([]);
 
 // 获取字典信息
 const loadDicts = async () => {
-  statusOptions.value = [{
-    label: '有效',
-    value: 'ACTIVE'
-  }, {
-    label: '无效',
-    value: 'INACTIVE'
-  }];
-
-  typeOptions.value = [{
-    label: '租户',
-    value: 'TENANT'
-  }, {
-    label: '公司',
-    value: 'COMPANY'
-  }, {
-    label: '渠道商',
-    value: 'SALES_PARTNER'
-  }, {
-    label: '服务商',
-    value: 'SERVICE_PROVIDER'
-  }];
+  try {
+    const items = await DictItemApi.loadByUsageCode('ORGAN_STATUS');
+    statusOptions.value = [...items]
+      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+      .map((item) => ({
+        label: item.name || String(item.code),
+        value: String(item.code),
+      }));
+  } catch (error) {
+    console.error('加载机构状态字典失败:', error);
+    statusOptions.value = [];
+  }
 };
 
 // 组件引用
@@ -405,18 +391,6 @@ const submitEdit = async () => {
     editDialogVisible.value = false;
   } catch (error: any) {
     ElMessage.error(error.message || '保存失败');
-  }
-};
-
-// 修改账号状态
-const updateStatus = async (row: any) => {
-  try {
-    await OrganApi.updateStatus(row.id, row.status);
-    await loadData();
-    ElMessage.success('更新成功');
-  } catch (err) {
-    ElMessage.error('更新失败');
-    row.canIntegrate = !row.canIntegrate; // 回退状态
   }
 };
 

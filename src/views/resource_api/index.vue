@@ -161,12 +161,7 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { ResourceApiApi } from './api';
 import { ServiceRegistryApi } from '../service_registry/api';
-import type {
-  ResourceApi,
-  ResourceApiPayload,
-  ResourceApiQuery,
-  UploadApiDto,
-} from './type';
+import type { ResourceApi, ResourceApiPayload, ResourceApiQuery, UploadApiDto} from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMessage } from '@/components';

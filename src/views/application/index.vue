@@ -6,15 +6,11 @@
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <!-- 业务特定查询字段 -->
         <el-form-item label="所属机构">
-          <el-select v-model="queryForm.organId" placeholder="请选择所属机构" clearable style="width: 200px">
-            <el-option v-for="item in organOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
         </el-form-item>
 
         <el-form-item label="应用类型">
-          <el-select v-model="queryForm.applicationType" placeholder="请选择应用类型" clearable style="width: 200px">
-            <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="queryForm.applicationType" usage-code="APPLICATION_TYPE" :api-method="DictItemApi.select" placeholder="请选择应用类型" />
         </el-form-item>
 
         <el-form-item label="应用名称">
@@ -45,12 +41,13 @@
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
-      <el-table-column prop="organId" label="所属机构" width="140" />
+      <el-table-column prop="id" label="应用标识" width="140" />
+      <el-table-column prop="organName" label="所属机构" width="140" />
 
       <el-table-column prop="applicationType" label="应用类型" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
-            {{typeOptions.find(item => item.value === row?.applicationType)?.label || ''}}
+            <DictText :value="row?.applicationType" usage-code="APPLICATION_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </template>
       </el-table-column>
@@ -61,13 +58,14 @@
 
       <el-table-column prop="status" label="应用状态" width="180">
         <template #default="{ row }">
-          <el-switch 
-            v-permission="'application:status_update'"   
-            v-model="row.status" 
-            inline-prompt :active-value="'PUBLISHED'" :inactive-value="'UNPUBLISHED'"
-            :active-text="statusOptions.find(item => item.value === 'PUBLISHED')?.label"
-            :inactive-text="statusOptions.find(item => item.value === 'UNPUBLISHED')?.label"
-            @change="updateStatus(row)" 
+          <StatusSwitch
+            v-model="row.status"
+            permission="application:status_update"
+            active-value="PUBLISHED"
+            inactive-value="UNPUBLISHED"
+            :options="statusOptions"
+            :api-method="({ nextValue }) => ApplicationApi.updateStatus(row.id, String(nextValue))"
+            @success="loadData"
           />
         </template>
       </el-table-column>
@@ -75,7 +73,7 @@
       <el-table-column prop="canIntegrate" label="支持集成" width="140">
         <template #default="{ row }">
           <el-tag effect="light">
-            {{boolOptions.find(item => item.value === row?.canIntegrate)?.label || ''}}
+            <DictText :value="row?.canIntegrate" usage-code="BOOLEAN_FLAG" :api-method="DictItemApi.select" />
           </el-tag>
         </template>
       </el-table-column>
@@ -90,7 +88,7 @@
           <el-button type="primary" v-permission="'application:edit'" link size="small"
             @click="handleEdit(row)">编辑</el-button>
           <el-button type="success" v-permission="'application:integrate'" link size="small"
-            v-if="canShowIntegrateBtn(row)" @click="handleIntegrate(row)">关联应用</el-button>
+            v-if="row.canIntegrate" @click="handleIntegrate(row)">关联应用</el-button>
           <el-button type="success" link size="small" v-permission="'application:public_key_config'"
             @click="handlePubKeyConfig(row)">公钥配置</el-button>
           <el-button type="danger" v-permission="'application:delete'" v-if="!row.landing" link size="small"
@@ -116,19 +114,23 @@
     <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑应用' : '新增应用'" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="150px">
         <el-form-item label="所属机构" prop="organId">
-          <el-select v-model="editForm.organId" :disabled="isEdit" placeholder="请选择所属机构" style="width: 200px">
-            <el-option v-for="item in organOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :api-method="OrganApi.searchOrgans" :clearable="false" placeholder="请选择所属机构" width="200px" />
         </el-form-item>
 
         <el-form-item label="应用类型" prop="applicationType">
-          <el-select v-model="editForm.applicationType" placeholder="请选择应用类型" style="width: 200px">
-            <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="editForm.applicationType" usage-code="APPLICATION_TYPE" :api-method="DictItemApi.select" :clearable="false" placeholder="请选择应用类型" />
         </el-form-item>
 
         <el-form-item label="支持集成" prop="canIntegrate">
           <el-radio-group v-model="editForm.canIntegrate">
+            <el-radio v-for="option in boolOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <el-form-item label="支持API密钥" prop="apiKeySupported">
+          <el-radio-group v-model="editForm.apiKeySupported">
             <el-radio v-for="option in boolOptions" :key="option.value" :value="option.value">
               {{ option.label }}
             </el-radio>
@@ -176,20 +178,25 @@
     <!-- 明细弹窗 -->
     <el-dialog v-model="detailDialogVisible" title="应用明细" width="520px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="所属机构">{{ currentRow?.organId }}</el-descriptions-item>
+        <el-descriptions-item label="所属机构">{{ currentRow?.organName }}</el-descriptions-item>
         <el-descriptions-item label="应用类型">
-          {{typeOptions.find(item => item.value === currentRow?.applicationType)?.label || ''}}
+          <DictText :value="currentRow?.applicationType" usage-code="APPLICATION_TYPE" :api-method="DictItemApi.select" />
         </el-descriptions-item>
         <el-descriptions-item label="支持集成">
           <el-tag :type="currentRow?.canIntegrate ? 'success' : 'info'">
-            {{boolOptions.find(item => item.value === currentRow?.canIntegrate)?.label || ''}}
+            <DictText :value="currentRow?.canIntegrate" usage-code="BOOLEAN_FLAG" :api-method="DictItemApi.select" />
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="支持API密钥">
+          <el-tag :type="currentRow?.apiKeySupported ? 'success' : 'info'">
+            <DictText :value="currentRow?.apiKeySupported" usage-code="BOOLEAN_FLAG" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="应用名称">{{ currentRow?.applicationName }}</el-descriptions-item>
         <el-descriptions-item label="应用编码">{{ currentRow?.applicationCode }}</el-descriptions-item>
         <el-descriptions-item label="应用状态">
           <el-tag>
-            {{statusOptions.find(item => item.value === currentRow?.status)?.label || ''}}
+            <DictText :value="currentRow?.status" usage-code="APPLICATION_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="访问令牌有效期(秒)">{{ currentRow?.accessTokenExpiresIn }}</el-descriptions-item>
@@ -228,9 +235,7 @@
       <el-form :model="pubKeyForm" label-width="100px">
         <!-- 公钥算法（仅上传时需要） -->
         <el-form-item label="公钥算法">
-          <el-select v-model="pubKeyForm.algorithm" placeholder="请选择算法" style="width: 200px">
-            <el-option v-for="item in keyAlgorithmOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="pubKeyForm.algorithm" usage-code="KEY_ALGORITHM" :api-method="DictItemApi.select" :clearable="false" placeholder="请选择算法" />
         </el-form-item>
 
         <!-- 当前公钥状态 + 下载 -->
@@ -268,64 +273,57 @@ import type { FormInstance, FormRules, UploadFile } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { ApplicationApi } from './api';
 import { OrganApi } from '../organ/api';
+import { DictItemApi } from '../dict/api';
 import { ApplicationSuiteApi } from '../application_suite/api'
 import type { Application, ApplicationPayload, ApplicationQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText, StatusSwitch } from '@/components';
 
 // 定义字典引用
 const statusOptions = ref<Array<{ label: string; value: string }>>([]);
-const typeOptions = ref<Array<{ label: string; value: string }>>([]);
 const boolOptions = ref<Array<{ label: string; value: boolean }>>([]);
-const organOptions = ref<Array<{ label: string; value: number }>>([]);
-const keyAlgorithmOptions = ref<Array<{ label: string; value: string }>>([]);
+
+/** 将 BOOLEAN_FLAG 字典 code 转为 boolean（与后端 / DictText 回显一致） */
+function parseDictCodeAsBoolean(code: string): boolean | undefined {
+  const normalized = String(code).trim().toLowerCase();
+  if (['true', '1', 'yes', 'y'].includes(normalized)) return true;
+  if (['false', '0', 'no', 'n'].includes(normalized)) return false;
+  return undefined;
+}
 
 // 获取字典信息
 const loadDicts = async () => {
-  organOptions.value = (await OrganApi.searchOrgans()).map(u => ({
-    value: u.organId,
-    label: u.organName
-  }));
+  try {
+    const items = await DictItemApi.loadByUsageCode('APPLICATION_STATUS');
+    statusOptions.value = [...items]
+      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+      .map((item) => ({
+        label: item.name || String(item.code),
+        value: String(item.code),
+      }));
+  } catch (error) {
+    console.error('加载应用状态字典失败:', error);
+    statusOptions.value = [];
+  }
 
-  statusOptions.value = [{
-    label: '已发布',
-    value: 'PUBLISHED'
-  }, {
-    label: '未发布',
-    value: 'UNPUBLISHED'
-  }];
-
-  typeOptions.value = [{
-    label: '支撑应用',
-    value: 'SUPPORT'
-  }, {
-    label: '系统应用',
-    value: 'SYSTEM'
-  }, {
-    label: '公共应用',
-    value: 'PUBLIC'
-  }, {
-    label: '私有应用',
-    value: 'PRIVATE'
-  }];
-
-  boolOptions.value = [{
-    label: '是',
-    value: true
-  }, {
-    label: '否',
-    value: false
-  }];
-
-  keyAlgorithmOptions.value = [{
-    label: 'EC',
-    value: 'EC'
-  }];
+  try {
+    const items = await DictItemApi.loadByUsageCode('BOOLEAN_FLAG');
+    boolOptions.value = [...items]
+      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+      .map((item) => {
+        const value = parseDictCodeAsBoolean(String(item.code));
+        if (value === undefined) return null;
+        return {
+          label: item.name || String(item.code),
+          value,
+        };
+      })
+      .filter((item): item is { label: string; value: boolean } => item !== null);
+  } catch (error) {
+    console.error('加载布尔字典失败:', error);
+    boolOptions.value = [];
+  }
 };
-
-// 是否展示集成表单项状态
-const canShowIntegrateBtn = (row: Application) =>
-  !row.canIntegrate && (row.applicationType === 'SUPPORT' || row.applicationType === 'SYSTEM')
 
 // 基础查询状态（使用 reactive 以确保 v-model 的双向绑定完全生效）
 let baseQueryForm = reactive<BaseSelectListDto>({
@@ -469,7 +467,8 @@ const editForm = reactive({
   applicationType: 'SYSTEM',
   applicationName: '',
   applicationCode: '',
-  canIntegrate: false,
+  canIntegrate: true,
+  apiKeySupported: false,
   accessTokenExpiresIn: undefined as number | undefined,
   refreshTokenExpiresIn: undefined as number | undefined,
   endpointUrl: '',
@@ -484,6 +483,7 @@ const editRules: FormRules = {
   applicationName: [{ required: true, message: '请输入应用名称', trigger: 'blur' }],
   applicationCode: [{ required: false, message: '请输入应用编码', trigger: 'blur' }],
   canIntegrate: [{ required: true, message: '请选择支持集成', trigger: 'blur' }],
+  apiKeySupported: [{ required: true, message: '请选择是否支持API密钥', trigger: 'blur' }],
   accessTokenExpiresIn: [{ required: true, message: '请输入访问令牌有效期', trigger: 'blur' }],
   refreshTokenExpiresIn: [{ required: true, message: '请输入刷新令牌有效期', trigger: 'blur' }],
   endpointUrl: [{ required: true, message: '请输入应用地址', trigger: 'blur' }],
@@ -501,7 +501,8 @@ const handleCreate = () => {
   editForm.applicationType = 'SYSTEM';
   editForm.applicationName = '';
   editForm.applicationCode = '';
-  editForm.canIntegrate = false;
+  editForm.canIntegrate = true;
+  editForm.apiKeySupported = false;
   editForm.accessTokenExpiresIn = 3600;
   editForm.refreshTokenExpiresIn = 86400;
   editForm.endpointUrl = '';
@@ -521,6 +522,7 @@ const handleEdit = (row: Application) => {
   editForm.applicationName = row.applicationName;
   editForm.applicationCode = row.applicationCode;
   editForm.canIntegrate = row.canIntegrate;
+  editForm.apiKeySupported = row.apiKeySupported;
   editForm.accessTokenExpiresIn = row.accessTokenExpiresIn;
   editForm.refreshTokenExpiresIn = row.refreshTokenExpiresIn;
   editForm.endpointUrl = row.endpointUrl;
@@ -540,6 +542,7 @@ const submitEdit = async () => {
     applicationName: editForm.applicationName,
     applicationCode: editForm.applicationCode,
     canIntegrate: editForm.canIntegrate,
+    apiKeySupported: editForm.apiKeySupported,
     applicationType: editForm.applicationType,
     accessTokenExpiresIn: editForm.accessTokenExpiresIn,
     refreshTokenExpiresIn: editForm.refreshTokenExpiresIn,
@@ -559,18 +562,6 @@ const submitEdit = async () => {
     editDialogVisible.value = false;
   } catch (error: any) {
     ElMessage.error(error.message || '保存失败');
-  }
-};
-
-// 修改应用状态
-const updateStatus = async (row: any) => {
-  try {
-    await ApplicationApi.updateStatus(row.id, row.status);
-    await loadData();
-    ElMessage.success('更新成功');
-  } catch (err) {
-    ElMessage.error('更新失败');
-    row.canIntegrate = !row.canIntegrate; // 回退状态
   }
 };
 
@@ -600,7 +591,7 @@ const handleIntegrate = async (row: Application) => {
   integrateDialog.visible = true
 
   // 查询待选应用列表
-  mainApplications.value = (await ApplicationApi.id2name({ canIntegrate: true })).map(u => ({
+  mainApplications.value = (await ApplicationApi.id2name({ canIntegrate: false })).map(u => ({
     value: u.id,
     label: u.applicationName || `${u.id}`
   }));

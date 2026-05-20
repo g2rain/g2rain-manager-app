@@ -33,13 +33,13 @@
           <el-input v-model="queryForm.name" placeholder="请输入真实姓名" clearable style="width: 200px" />
         </el-form-item>
         <el-form-item label="机构标识">
-          <el-input v-model="queryForm.organId" placeholder="请输入机构标识" clearable style="width: 200px" />
+          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" placeholder="请选择机构" width="200px" />
         </el-form-item>
         <el-form-item label="机构名称">
           <el-input v-model="queryForm.organName" placeholder="请输入机构名称" clearable style="width: 200px" />
         </el-form-item>
         <el-form-item label="机构类型">
-          <el-input v-model="queryForm.organType" placeholder="请输入机构类型" clearable style="width: 200px" />
+          <DictSelect v-model="queryForm.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" clearable placeholder="请选择机构类型" />
         </el-form-item>
         <el-form-item label="应用标识">
           <el-input v-model="queryForm.applicationId" placeholder="请输入应用标识" clearable style="width: 200px" />
@@ -48,7 +48,7 @@
           <el-input v-model="queryForm.applicationCode" placeholder="请输入应用编码" clearable style="width: 200px" />
         </el-form-item>
         <el-form-item label="应用所属机构标识">
-          <el-input v-model="queryForm.applicationOrganId" placeholder="请输入应用所属机构标识" clearable style="width: 200px" />
+          <OrganSelect v-model="queryForm.applicationOrganId" :api-method="OrganApi.searchOrgans" placeholder="请选择应用所属机构" width="200px" />
         </el-form-item>
         <!-- 操作按钮 -->
         <template #actions>
@@ -80,7 +80,11 @@
       <el-table-column prop="name" label="真实姓名" width="180" />
       <el-table-column prop="organId" label="机构标识" width="140" />
       <el-table-column prop="organName" label="机构名称" width="180" />
-      <el-table-column prop="organType" label="机构类型" width="180" />
+      <el-table-column prop="organType" label="机构类型" width="180">
+        <template #default="{ row }">
+          <DictText :value="row?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
+        </template>
+      </el-table-column>
       <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
       <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
       <el-table-column label="操作" fixed="right" width="280">
@@ -132,7 +136,9 @@
         <el-descriptions-item label="超级管理员">{{ currentRow?.adminUser }}</el-descriptions-item>
         <el-descriptions-item label="机构标识">{{ currentRow?.organId }}</el-descriptions-item>
         <el-descriptions-item label="机构名称">{{ currentRow?.organName }}</el-descriptions-item>
-        <el-descriptions-item label="机构类型">{{ currentRow?.organType }}</el-descriptions-item>
+        <el-descriptions-item label="机构类型">
+          <DictText :value="currentRow?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
+        </el-descriptions-item>
         <el-descriptions-item label="运营公司">{{ currentRow?.adminCompany }}</el-descriptions-item>
         <el-descriptions-item label="目标机构标识">{{ currentRow?.targetOrganId }}</el-descriptions-item>
         <el-descriptions-item label="应用标识">{{ currentRow?.applicationId }}</el-descriptions-item>
@@ -154,9 +160,11 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { AuditEventApi } from './api';
+import { OrganApi } from '../organ/api';
+import { DictItemApi } from '../dict/api';
 import type { AuditEvent, AuditEventQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMessage } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMessage, OrganSelect, DictSelect, DictText } from '@/components';
 
 // 组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
@@ -343,4 +351,3 @@ onMounted(() => {
   margin-top: 16px;
 }
 </style>
-

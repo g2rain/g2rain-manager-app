@@ -9,6 +9,7 @@ import type { BaseSelectListDto, BaseVo } from '@platform/types/api.type';
 export interface User extends BaseVo {
   passportId: number;
   organId: number;
+  organName: string;
   realName: string;
   email: string;
   mobile: string;
