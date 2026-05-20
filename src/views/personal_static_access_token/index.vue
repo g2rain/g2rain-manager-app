@@ -293,7 +293,7 @@ const toBigintHex = (value?: number) => BigInt(value ?? 0).toString(16).toUpperC
 const hashApiKey = async (apiKey: string) => sha256(apiKey);
 
 // 列表中仅展示前 8 位和后 4 位，中间用星号保持长度一致。
-const maskApiKey = (apiKey: string) => `${apiKey.slice(0, 8)}${'*'.repeat(apiKey.length - 12)}${apiKey.slice(-4)}`;
+const maskApiKey = (apiKey: string) => `${apiKey.slice(0, 8)}${'*'.repeat(16)}${apiKey.slice(-4)}`;
 
 // 从 CSPRNG 生成随机字节，再编码为无填充 base64url，避免使用 Math.random 或手写随机字符表。
 const generateSecureRandomBase64Url = (length: number) => {
