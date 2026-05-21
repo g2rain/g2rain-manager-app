@@ -12,9 +12,7 @@
         </el-form-item>
 
         <el-form-item label="业务能力类型">
-          <el-select v-model="queryForm.controlDomainType" placeholder="请选择业务能力类型" clearable style="width: 200px">
-            <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="queryForm.controlDomainType" usage-code="CONTROL_DOMAIN_TYPE" :api-method="DictItemApi.select" placeholder="请选择业务能力类型"/>
         </el-form-item>
 
         <el-form-item label="业务能力名称">
@@ -22,9 +20,7 @@
         </el-form-item>
 
         <el-form-item label="业务能力范围">
-          <el-select v-model="queryForm.controlDomainScope" placeholder="请选择业务能力范围" clearable style="width: 200px">
-            <el-option v-for="item in scopeOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="queryForm.controlDomainScope" usage-code="CONTROL_DOMAIN_SCOPE" :api-method="DictItemApi.select" placeholder="请选择业务能力范围"/>
         </el-form-item>
 
         <!-- 操作按钮 -->
@@ -52,7 +48,7 @@
       <el-table-column prop="controlDomainType" label="业务能力类型" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
-            {{typeOptions.find(item => item.value === row?.controlDomainType)?.label || ''}}
+            <DictText :value="row?.controlDomainType" usage-code="CONTROL_DOMAIN_TYPE" :api-method="DictItemApi.select"/>
           </el-tag>
         </template>
       </el-table-column>
@@ -60,7 +56,7 @@
       <el-table-column prop="controlDomainScope" label="业务能力范围" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
-            {{scopeOptions.find(item => item.value === row?.controlDomainScope)?.label || ''}}
+            <DictText :value="row?.controlDomainScope" usage-code="CONTROL_DOMAIN_SCOPE" :api-method="DictItemApi.select"/>
           </el-tag>
         </template>
       </el-table-column>
@@ -96,7 +92,7 @@
 
     <!-- 新增 / 编辑弹窗 -->
     <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑业务能力' : '新增业务能力'" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="150px">
         <el-form-item label="所属应用" prop="applicationId">
           <el-select v-model="editForm.applicationId" :disabled="isEdit" placeholder="请选择所属应用" style="width: 200px">
             <el-option v-for="item in applicationOptions" :key="item.value" :label="item.label" :value="item.value" />
@@ -104,21 +100,30 @@
         </el-form-item>
 
         <el-form-item label="业务能力类型" prop="controlDomainType">
-          <el-select v-model="editForm.controlDomainType" :disabled="isEdit" placeholder="请选择业务能力类型"
-            style="width: 200px">
-            <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect 
+            v-model="editForm.controlDomainType" 
+            usage-code="CONTROL_DOMAIN_TYPE" 
+            :disabled="isEdit" 
+            :api-method="DictItemApi.select" 
+            :clearable="false"
+            placeholder="请选择业务能力类型"
+          />
         </el-form-item>
 
         <el-form-item label="业务能力名称" prop="controlDomainName">
-          <el-input v-model="editForm.controlDomainName" placeholder="请输入业务能力名称" />
+          <el-input v-model="editForm.controlDomainName" placeholder="请输入业务能力名称"  style="width: 200px"/>
         </el-form-item>
 
         <el-form-item label="业务能力范围" prop="controlDomainScope">
-          <el-select v-model="editForm.controlDomainScope" :disabled="isEdit" placeholder="请选择业务能力范围"
-            style="width: 200px">
-            <el-option v-for="item in filteredScopeOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect
+            :key="editForm.controlDomainType || '_empty'"
+            v-model="editForm.controlDomainScope"
+            usage-code="CONTROL_DOMAIN_SCOPE"
+            :disabled="isEdit"
+            :api-method="selectControlDomainScope"
+            :clearable="false"
+            placeholder="请选择业务能力范围"
+          />
         </el-form-item>
 
         <el-form-item label="描述" prop="description">
@@ -141,13 +146,13 @@
         <el-descriptions-item label="所属应用">{{ currentRow?.applicationId }}</el-descriptions-item>
         <el-descriptions-item label="业务能力类型">
           <el-tag>
-            {{typeOptions.find(item => item.value === currentRow?.controlDomainType)?.label || ''}}
+            <DictText :value="currentRow?.controlDomainType" usage-code="CONTROL_DOMAIN_TYPE" :api-method="DictItemApi.select"/>
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="业务能力名称">{{ currentRow?.controlDomainName }}</el-descriptions-item>
         <el-descriptions-item label="业务能力范围">
           <el-tag>
-            {{scopeOptions.find(item => item.value === currentRow?.controlDomainScope)?.label || ''}}
+            <DictText :value="currentRow?.controlDomainScope" usage-code="CONTROL_DOMAIN_SCOPE" :api-method="DictItemApi.select"/>
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="描述">{{ currentRow?.description }}</el-descriptions-item>
@@ -172,7 +177,11 @@
         </el-table-column>
         <!-- 业务展示列 -->
         <el-table-column prop="controlUnitName" label="功能权限名称" />
-        <el-table-column prop="controlUnitScope" label="功能权限范围" />
+        <el-table-column prop="controlUnitScope" label="功能权限范围">
+          <template #default="{ row }">
+            <DictText :value="row?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
+          </template>
+        </el-table-column>
       </el-table>
 
       <template #footer>
@@ -193,23 +202,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue';
+import { ref, reactive, watch, onMounted } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { ControlDomainApi } from './api';
 import { ControlUnitApi } from '../control_unit/api'
 import { ApplicationApi } from '../application/api';
 import { OrganApi } from '../organ/api';
+import { DictItemApi } from '../dict/api';
 import { ApplicationAuthorizationApi } from '../application_authorization/api'
 import { ControlDomainControlUnitRelationApi } from '../control_domain_control_unit_relation/api'
 import type { ControlDomain, ControlDomainPayload, ControlDomainQuery } from './type';
 import type { ControlUnit } from '../control_unit/type'
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText } from '@/components';
 
 // 定义字典引用
-const typeOptions = ref<Array<{ label: string; value: string }>>([]);
-const scopeOptions = ref<Array<{ label: string; value: string }>>([]);
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
 
 // 获取字典信息
@@ -218,22 +226,6 @@ const loadDicts = async () => {
     value: u.id,
     label: u.applicationName || `${u.id}`
   }));
-
-  typeOptions.value = [{
-    label: '交易开通',
-    value: 'TRADE'
-  }, {
-    label: '应用开通',
-    value: 'APPLICATION'
-  }];
-
-  scopeOptions.value = [{
-    label: '客户交付',
-    value: 'CUSTOMER'
-  }, {
-    label: '平台运营',
-    value: 'OPERATION'
-  }];
 };
 
 // 基础查询状态（使用 reactive v-model 替换整个对象时保持响应式）
@@ -390,20 +382,33 @@ const editRules: FormRules = {
   description: [{ required: false, message: '请输入描述', trigger: 'blur' }],
 };
 
-// 过滤后的范围选项
-const filteredScopeOptions = computed(() => {
-  if (editForm.controlDomainType === 'TRADE') {
-    return scopeOptions.value.filter(item => item.value === 'CUSTOMER')
-  }
-  return scopeOptions.value
-})
+/** 类型为 TRADE 时，范围仅允许 CUSTOMER */
+const TRADE_SCOPE_CODE = 'CUSTOMER';
 
-// 当类型为 TRADE 时自动清空不允许的选择
-watch(() => editForm.controlDomainType, (newVal) => {
-  if (newVal === 'TRADE' && editForm.controlDomainScope !== 'CUSTOMER') {
-    editForm.controlDomainScope = 'CUSTOMER'
+const selectControlDomainScope = async (params: Parameters<typeof DictItemApi.select>[0]) => {
+  const domainType = editForm.controlDomainType;
+
+  const options = await DictItemApi.select({
+    ...params,
+    usageCode: params.usageCode ?? 'CONTROL_DOMAIN_SCOPE',
+  });
+
+  if (domainType === 'TRADE') {
+    return options.filter((item) => String(item.code) === TRADE_SCOPE_CODE);
   }
-})
+  // 未选类型或 APPLICATION 等：展示全部，由 watch 在选定 TRADE 时扶正 scope
+  return options;
+};
+
+/** 类型变更时联动范围：TRADE 固定为 CUSTOMER；APPLICATION 等保留已选或重新选择 */
+watch(
+  () => editForm.controlDomainType,
+  (newType) => {
+    if (newType === 'TRADE' && editForm.controlDomainScope !== TRADE_SCOPE_CODE) {
+      editForm.controlDomainScope = TRADE_SCOPE_CODE;
+    }
+  },
+);
 
 // 打开创建弹窗
 const handleCreate = () => {

@@ -6,13 +6,13 @@
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <!-- 业务特定查询字段 -->
         <el-form-item label="会话类型">
-          <el-input v-model="queryForm.sessionType" placeholder="请输入会话类型" clearable style="width: 200px" />
+          <DictSelect v-model="queryForm.sessionType" usage-code="SESSION_TYPE" :api-method="DictItemApi.select" placeholder="请选择会话类型" />
         </el-form-item>
         <el-form-item label="机构标识">
-          <el-input v-model="queryForm.organId" placeholder="请输入机构标识" clearable style="width: 200px" />
+          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" placeholder="请选择机构" width="200px" />
         </el-form-item>
         <el-form-item label="机构类型">
-          <el-input v-model="queryForm.organType" placeholder="请输入机构类型" clearable style="width: 200px" />
+          <DictSelect v-model="queryForm.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select"  placeholder="请选择机构类型" />
         </el-form-item>
         <el-form-item label="账号标识">
           <el-input v-model="queryForm.passportId" placeholder="请输入账号标识" clearable style="width: 200px" />
@@ -27,7 +27,7 @@
           <el-input v-model="queryForm.applicationId" placeholder="请输入应用标识" clearable style="width: 200px" />
         </el-form-item>
         <el-form-item label="应用所属机构标识">
-          <el-input v-model="queryForm.applicationOrganId" placeholder="请输入应用所属机构标识" clearable style="width: 200px" />
+          <OrganSelect v-model="queryForm.applicationOrganId" :api-method="OrganApi.searchOrgans" placeholder="请选择应用所属机构" width="200px" />
         </el-form-item>
         <el-form-item label="客户端标识">
           <el-input v-model="queryForm.clientId" placeholder="请输入客户端标识" clearable style="width: 200px" />
@@ -54,12 +54,20 @@
       <el-table-column prop="clientId" label="客户端标识" width="180" />
       <el-table-column prop="applicationId" label="应用标识" width="140" />
       <el-table-column prop="applicationOrganId" label="应用所属机构标识" width="140" />
-      <el-table-column prop="sessionType" label="会话类型" width="180" />
+      <el-table-column prop="sessionType" label="会话类型" width="180">
+        <template #default="{ row }">
+          <DictText :value="row?.sessionType" usage-code="SESSION_TYPE" :api-method="DictItemApi.select" />
+        </template>
+      </el-table-column>
       <el-table-column prop="passportId" label="账号标识" width="140" />
       <el-table-column prop="userId" label="用户标识" width="140" />
       <el-table-column prop="realName" label="真实姓名" width="180" />
       <el-table-column prop="organId" label="机构标识" width="140" />
-      <el-table-column prop="organType" label="机构类型" width="180" />
+      <el-table-column prop="organType" label="机构类型" width="180">
+        <template #default="{ row }">
+          <DictText :value="row?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
+        </template>
+      </el-table-column>
       <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
       <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
       <el-table-column label="操作" fixed="right" width="280">
@@ -95,13 +103,17 @@
         <el-descriptions-item label="客户端标识">{{ currentRow?.clientId }}</el-descriptions-item>
         <el-descriptions-item label="应用标识">{{ currentRow?.applicationId }}</el-descriptions-item>
         <el-descriptions-item label="应用所属机构标识">{{ currentRow?.applicationOrganId }}</el-descriptions-item>
-        <el-descriptions-item label="会话类型">{{ currentRow?.sessionType }}</el-descriptions-item>
+        <el-descriptions-item label="会话类型">
+          <DictText :value="currentRow?.sessionType" usage-code="SESSION_TYPE" :api-method="DictItemApi.select" />
+        </el-descriptions-item>
         <el-descriptions-item label="账号标识">{{ currentRow?.passportId }}</el-descriptions-item>
         <el-descriptions-item label="用户标识">{{ currentRow?.userId }}</el-descriptions-item>
         <el-descriptions-item label="真实姓名">{{ currentRow?.realName }}</el-descriptions-item>
         <el-descriptions-item label="超级管理员">{{ currentRow?.adminUser }}</el-descriptions-item>
         <el-descriptions-item label="机构标识">{{ currentRow?.organId }}</el-descriptions-item>
-        <el-descriptions-item label="机构类型">{{ currentRow?.organType }}</el-descriptions-item>
+        <el-descriptions-item label="机构类型">
+          <DictText :value="currentRow?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
+        </el-descriptions-item>
         <el-descriptions-item label="运营公司">{{ currentRow?.adminCompany }}</el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
         <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
@@ -118,10 +130,12 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { LoginTokenApi } from './api';
+import { OrganApi } from '../organ/api';
+import { DictItemApi } from '../dict/api';
 import type { LoginToken, LoginTokenQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMessage } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMessage, OrganSelect, DictSelect, DictText } from '@/components';
 
 // 组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
@@ -296,4 +310,3 @@ onMounted(() => {
   margin-top: 16px;
 }
 </style>
-

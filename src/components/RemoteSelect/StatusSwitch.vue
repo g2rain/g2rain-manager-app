@@ -1,6 +1,5 @@
 <template>
   <el-switch
-    v-if="isVisible"
     v-model="innerValue"
     :disabled="isDisabled"
     :loading="loading"
@@ -9,13 +8,12 @@
     :inactive-value="inactiveValue"
     :active-text="activeLabel"
     :inactive-text="inactiveLabel"
-    @click="handleUserClick"
     @change="handleChange"
   />
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import { PageElementPermission } from '@/components/permission';
 
@@ -67,33 +65,19 @@ const emit = defineEmits<Emits>();
 const innerValue = ref<StatusValue>(props.modelValue);
 const loading = ref(false);
 
-/**
- * 用户触发标记（核心）
- */
-const isUserTrigger = ref(false);
+/** 外部同步 innerValue 时忽略 change，避免误调接口 */
+const ignoreChange = ref(false);
 
-/**
- * 回滚保护
- */
+/** 回滚保护 */
 const isRollingBack = ref(false);
 
 /**
- * ======================
- * 权限控制
- * ======================
+ * 权限：始终展示开关；仅 ENABLED 可操作，VISIBLE / 无权限则置灰
  */
-const isVisible = computed(() => {
-  if (!props.permission) return true;
-  return PageElementPermission.isVisible(props.permission);
-});
-
-const isEnabledByPermission = computed(() => {
-  if (!props.permission) return true;
-  return PageElementPermission.isEnabled(props.permission);
-});
-
 const isDisabled = computed(() => {
-  return props.disabled || loading.value || !isEnabledByPermission.value;
+  if (props.disabled || loading.value) return true;
+  if (!props.permission) return false;
+  return !PageElementPermission.isEnabled(props.permission);
 });
 
 /**
@@ -118,20 +102,13 @@ const inactiveLabel = computed(() => {
  */
 watch(
   () => props.modelValue,
-  (val) => {
+  async (val) => {
+    ignoreChange.value = true;
     innerValue.value = val;
+    await nextTick();
+    ignoreChange.value = false;
   }
 );
-
-/**
- * ======================
- * 用户点击标记
- * ======================
- */
-const handleUserClick = () => {
-  if (isDisabled.value) return;
-  isUserTrigger.value = true;
-};
 
 /**
  * ======================
@@ -139,16 +116,7 @@ const handleUserClick = () => {
  * ======================
  */
 const handleChange = async (val: StatusValue) => {
-  /**
-   * 只允许用户触发
-   */
-  if (!isUserTrigger.value) return;
-  isUserTrigger.value = false;
-
-  /**
-   * 防止回滚触发
-   */
-  if (isRollingBack.value) return;
+  if (ignoreChange.value || isRollingBack.value) return;
 
   const nextValue = val;
   const prevValue = props.modelValue;

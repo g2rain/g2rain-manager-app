@@ -16,9 +16,7 @@
         </el-form-item>
 
         <el-form-item label="功能权限范围">
-          <el-select v-model="queryForm.controlUnitScope" placeholder="请选择功能权限范围" clearable style="width: 200px">
-            <el-option v-for="item in scopeOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="queryForm.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" placeholder="请选择功能权限范围" />
         </el-form-item>
 
         <!-- 操作按钮 -->
@@ -51,20 +49,21 @@
       <el-table-column prop="controlUnitScope" label="功能权限范围" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
-            {{scopeOptions.find(item => item.value === row?.controlUnitScope)?.label || ''}}
+            <DictText :value="row?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
           </el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="status" label="功能权限状态" width="180">
         <template #default="{ row }">
-          <el-switch 
-            v-permission="'control_unit:status_update'" 
+          <StatusSwitch
             v-model="row.status"
-            inline-prompt :active-value="'PUBLISHED'" 
-            :inactive-value="'UNPUBLISHED'"
-            :active-text="statusOptions.find(item => item.value === 'PUBLISHED')?.label"
-            :inactive-text="statusOptions.find(item => item.value === 'UNPUBLISHED')?.label"
-            @change="updateStatus(row)" />
+            permission="control_unit:status_update"
+            active-value="PUBLISHED"
+            inactive-value="UNPUBLISHED"
+            :options="statusOptions"
+            :api-method="({ nextValue }) => ControlUnitApi.updateStatus(row.id, String(nextValue))"
+            @success="loadData"
+          />
         </template>
       </el-table-column>
       <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
@@ -110,10 +109,7 @@
         </el-form-item>
 
         <el-form-item label="功能权限范围" prop="controlUnitScope">
-          <el-select v-model="editForm.controlUnitScope" :disabled="isEdit" placeholder="请选择功能权限范围"
-            style="width: 200px">
-            <el-option v-for="item in scopeOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="editForm.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" placeholder="请选择功能权限范围" />
         </el-form-item>
 
         <el-form-item label="描述" prop="description">
@@ -140,12 +136,12 @@
         <el-descriptions-item label="功能权限名称">{{ currentRow?.controlUnitName }}</el-descriptions-item>
         <el-descriptions-item label="功能权限范围">
           <el-tag>
-            {{scopeOptions.find(item => item.value === currentRow?.controlUnitScope)?.label || ''}}
+            <DictText :value="currentRow?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="应用状态">
           <el-tag>
-            {{statusOptions.find(item => item.value === currentRow?.status)?.label || ''}}
+            <DictText :value="currentRow?.status" usage-code="CONTROL_UNIT_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="描述">{{ currentRow?.description }}</el-descriptions-item>
@@ -160,14 +156,27 @@
     </el-dialog>
 
     <!-- 配置资源 -->
-    <el-dialog v-model="configureResourcesDialog.visible" class="resources-dialog" title="配置资源" width="900px">
+    <el-dialog
+      v-model="configureResourcesDialog.visible"
+      class="resources-dialog"
+      title="配置资源"
+      width="900px"
+      @closed="resetConfigureResourcesDialog"
+    >
       <el-tabs type="border-card" v-model="activeName">
         <!-- 菜单 -->
         <el-tab-pane label="菜单资源" name="menu">
           <el-scrollbar max-height="58vh">
-            <el-tree v-if="menuTreeData.length > 0" ref="menuTreeRef" :data="menuTreeData" show-checkbox node-key="id"
-              default-expand-all :props="{ label: 'name', children: 'children' }"
-              :default-checked-keys="checkedMenuIds" />
+            <el-tree
+              v-if="menuTreeData.length > 0"
+              ref="menuTreeRef"
+              :key="configureResourcesDialog.controlUnitId ?? 'menu-tree'"
+              :data="menuTreeData"
+              show-checkbox
+              node-key="id"
+              default-expand-all
+              :props="{ label: 'name', children: 'children' }"
+            />
           </el-scrollbar>
         </el-tab-pane>
 
@@ -194,10 +203,7 @@
                     <div class="elements-row">
                       <div v-for="el in row.elements" :key="el.id" class="element-item">
                         <el-checkbox v-model="el.checked" @change="toggleElement(row, el)" />
-                        <el-select v-model="el.status" :disabled="!el.checked" size="small" style="width: 60px;">
-                          <el-option v-for="item in elementStatusOptions" :key="item.value" :label="item.label"
-                            :value="item.value" />
-                        </el-select>
+                        <DictSelect v-model="el.status" usage-code="RESOURCE_STATUS" :disabled="!el.checked" :clearable="false" :api-method="DictItemApi.select" width="90px" placeholder="状态" />
                         <span @click.stop="el.checked = !el.checked; toggleElement(row, el)">
                           {{ el.name }}
                         </span>
@@ -286,7 +292,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, nextTick } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { ControlUnitApi } from './api';
@@ -297,17 +303,16 @@ import { ResourcePageElementApi } from '../resource_page_element/api';
 import { ResourceApiApi } from '../resource_api/api';
 import { ServiceRegistryApi } from '../service_registry/api';
 import { ControlUnitResourceRelationApi } from '../control_unit_resource_relation/api';
+import { DictItemApi } from '../dict/api';
 import type { ControlUnit, ControlUnitPayload, ControlUnitQuery } from './type';
 import type { ControlUnitResourceRelationPayload } from '../control_unit_resource_relation/type';
 import type { ResourcePage } from '../resource_page/type';
 import type { ResourcePageElement } from '../resource_page_element/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
 
 // 定义字典引用
 const statusOptions = ref<Array<{ label: string; value: string }>>([]);
-const scopeOptions = ref<Array<{ label: string; value: string }>>([]);
-const elementStatusOptions = ref<Array<{ label: string; value: string }>>([]);
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
 const srvRegistryOptions = ref<Array<{ label: string; value: string }>>([]);
 
@@ -322,32 +327,18 @@ const loadDicts = async () => {
     label: u.name,
   }));
 
-  scopeOptions.value = [{
-    label: '客户交付',
-    value: 'CUSTOMER'
-  }, {
-    label: '平台运营',
-    value: 'OPERATION'
-  }, {
-    label: '永久有效',
-    value: 'PERPETUAL'
-  }];
-
-  elementStatusOptions.value = [{
-    label: '可用',
-    value: 'ENABLED'
-  }, {
-    label: '显示',
-    value: 'VISIBLE'
-  }];
-
-  statusOptions.value = [{
-    label: '已发布',
-    value: 'PUBLISHED'
-  }, {
-    label: '未发布',
-    value: 'UNPUBLISHED'
-  }];
+  try {
+    const items = await DictItemApi.loadByUsageCode('CONTROL_UNIT_STATUS');
+    statusOptions.value = [...items]
+      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+      .map((item) => ({
+        label: item.name || String(item.code),
+        value: String(item.code),
+      }));
+  } catch (error) {
+    console.error('加载功能权限状态字典失败:', error);
+    statusOptions.value = [];
+  }
 };
 
 // 基础查询状态（使用 reactive v-model 替换整个对象时保持响应式）
@@ -553,18 +544,6 @@ const submitEdit = async () => {
   }
 };
 
-// 修改应用状态
-const updateStatus = async (row: any) => {
-  try {
-    await ControlUnitApi.updateStatus(row.id, row.status);
-    await loadData();
-    ElMessage.success('更新成功');
-  } catch (err) {
-    ElMessage.error('更新失败');
-    row.canIntegrate = !row.canIntegrate; // 回退状态
-  }
-};
-
 // --------------------关联资源-----------------------------------
 
 // `菜单树` 接口
@@ -608,8 +587,46 @@ const menuTreeRef = ref<any>(null);
 const menuTreeData = ref<MenuTreeItem[]>([]);
 // 默认选中节点
 const checkedMenuIds = ref<number[]>([]);
-// 首次加载的菜单选中状态
+// 首次加载的菜单选中状态（与后端关联表 resourceId 一致，用于保存 diff）
 let originalMenuIds: number[] = [];
+
+const collectDescendantMenuIds = (node: MenuTreeItem): number[] => {
+  const ids: number[] = [];
+  node.children?.forEach((child) => {
+    ids.push(child.id, ...collectDescendantMenuIds(child));
+  });
+  return ids;
+};
+
+/**
+ * 初始化回显：严格对齐关联表，同时保留后续操作的父子联动
+ * - 叶子在关联表中 → 勾选
+ * - 父节点在关联表中 → 仅当「所有后代也都在关联表中」才勾选父节点，避免只关联部分子菜单时整组被勾满
+ */
+const resolveMenuCheckedKeysForInit = (tree: MenuTreeItem[], relationIds: number[]): number[] => {
+  const relationSet = new Set(relationIds);
+  const keys: number[] = [];
+
+  const walk = (node: MenuTreeItem) => {
+    const hasChildren = !!node.children?.length;
+    if (hasChildren) {
+      node.children!.forEach(walk);
+      if (relationSet.has(node.id)) {
+        const descendants = collectDescendantMenuIds(node);
+        if (descendants.length === 0 || descendants.every((id) => relationSet.has(id))) {
+          keys.push(node.id);
+        }
+      }
+      return;
+    }
+    if (relationSet.has(node.id)) {
+      keys.push(node.id);
+    }
+  };
+
+  tree.forEach(walk);
+  return keys;
+};
 
 // 加载菜单树
 const loadMenuTree = async (row: ControlUnit) => {
@@ -657,8 +674,12 @@ const loadMenuTree = async (row: ControlUnit) => {
     controlUnitId: row.id, resourceType: 'MENU'
   })
 
-  checkedMenuIds.value = relations.map(u => u.resourceId)
-  originalMenuIds = [...checkedMenuIds.value]
+  const relationIds = relations.map((u) => u.resourceId);
+  originalMenuIds = [...relationIds];
+  checkedMenuIds.value = resolveMenuCheckedKeysForInit(menuTreeData.value, relationIds);
+
+  await nextTick();
+  menuTreeRef.value?.setCheckedKeys(checkedMenuIds.value, false);
 };
 
 // 2. 页面&页面元素加载
@@ -759,23 +780,27 @@ const apiGroups = reactive<ApiGroup[]>([])
 // 原始关联页面 ID
 let originalApiIds: number[] = []
 const selectedApiIds = ref<Set<number>>(new Set())
-const apiRelationLoaded = ref(false)
+/** 已加载接口关联的功能权限 ID，换行记录时必须重新拉取 */
+let apiRelationsControlUnitId: number | null = null
 const apiServiceCode = ref('')
 const currentConfigureRow = ref<ControlUnit | null>(null)
+
+const loadApiEndpointRelations = async (row: ControlUnit) => {
+  const apiRelations = await ControlUnitResourceRelationApi.list({
+    controlUnitId: row.id,
+    resourceType: 'API_ENDPOINT',
+  })
+  originalApiIds = apiRelations.map((r) => r.resourceId)
+  selectedApiIds.value = new Set(originalApiIds)
+  apiRelationsControlUnitId = row.id!
+}
+
 // 加载接口地址
 const loadApiEndpoints = async (row: ControlUnit, serviceCode?: string) => {
-  // 首次加载时初始化接口关联关系
-  if (!apiRelationLoaded.value) {
-    const apiRelations = await ControlUnitResourceRelationApi.list({
-      controlUnitId: row.id,
-      resourceType: 'API_ENDPOINT'
-    })
-    originalApiIds = apiRelations.map(r => r.resourceId)
-    selectedApiIds.value = new Set(originalApiIds)
-    apiRelationLoaded.value = true
+  if (apiRelationsControlUnitId !== row.id) {
+    await loadApiEndpointRelations(row)
   }
 
-  // 清空
   apiGroups.splice(0)
   if (!serviceCode) return;
 
@@ -843,11 +868,12 @@ const resetConfigureResourcesDialog = () => {
   configureResourcesDialog.controlUnitId = null;
   checkedMenuIds.value = [];
   originalMenuIds = [];
+  menuTreeData.value = [];
   originalPageIds = [];
   originalElementMap.clear();
   originalApiIds = [];
   selectedApiIds.value = new Set();
-  apiRelationLoaded.value = false;
+  apiRelationsControlUnitId = null;
   apiServiceCode.value = '';
   currentConfigureRow.value = null;
   apiGroups.splice(0);
@@ -905,7 +931,10 @@ const configureResources = async () => {
     // 1. 赋值关联资源行为的数据结构
 
     // ------------------ 菜单 ------------------
-    const checkedMenuIds = menuTreeRef.value?.getCheckedKeys(false) as number[];
+    const checkedMenuIds = [
+      ...(menuTreeRef.value?.getCheckedKeys(false) || []),
+      ...(menuTreeRef.value?.getHalfCheckedKeys() || []),
+    ] as number[];
     // 计算新增和删除菜单
     checkedMenuIds.filter(id => !originalMenuIds.includes(id)).forEach(m => {
       menuToCreate.push({ resourceId: m, resourceType: 'MENU' })

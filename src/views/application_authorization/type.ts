@@ -8,7 +8,10 @@ import type { BaseSelectListDto, BaseVo } from '@platform/types/api.type';
  */
 export interface ApplicationAuthorization extends BaseVo {
   organId: number;
+  organName: string;
   applicationId: number;
+  applicationName: string;
+  apiKeySupported: boolean;
   controlDomainId: number;
   controlDomainName: string;
   controlDomainDesc: string;

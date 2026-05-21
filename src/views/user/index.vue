@@ -5,9 +5,7 @@
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <el-form-item label="所属机构">
-          <el-select v-model="queryForm.organId" placeholder="请选择所属机构" clearable style="width: 200px">
-            <el-option v-for="item in organOptions" :key="item.value" :label="item.label" :value="item.value"/>
-          </el-select>
+          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
         </el-form-item>
         
         <el-form-item label="姓名">
@@ -47,7 +45,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="id" label="用户序号" width="140" />
-      <el-table-column prop="organId" label="所属机构" width="140" />
+      <el-table-column prop="organName" label="所属机构" width="140" />
       <el-table-column prop="realName" label="姓名" width="180" />
       <el-table-column prop="admin" label="管理员" width="140">
         <template #default="{ row }">
@@ -90,17 +88,7 @@
 
     <!-- 新增 / 编辑弹窗 -->
     <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑用户' : '新增用户'" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
-        <el-form-item label="账号序号" prop="passportId">         
-          <el-input v-model="editForm.passportId" placeholder="请输入账号序号" />        
-        </el-form-item>
-        
-        <el-form-item label="所属机构" prop="organId">      
-          <el-select v-model="editForm.organId" :disabled="isEdit" placeholder="请选择所属机构" style="width: 200px">
-            <el-option v-for="item in organOptions" :key="item.value" :label="item.label" :value="item.value"/>
-          </el-select>
-        </el-form-item>
-
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">        
         <el-form-item label="姓名" prop="realName">
           <el-input v-model="editForm.realName" placeholder="请输入姓名" />          
         </el-form-item>
@@ -112,7 +100,6 @@
         <el-form-item label="手机号码" prop="mobile">       
           <el-input v-model="editForm.mobile" placeholder="请输入手机号码" />      
         </el-form-item>
-
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -126,7 +113,7 @@
     <el-dialog v-model="detailDialogVisible" title="用户明细" width="520px">
       <el-descriptions :column="1" border>
         <el-descriptions-item label="用户序号">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item label="所属机构">{{ currentRow?.organId }}</el-descriptions-item>
+        <el-descriptions-item label="所属机构">{{ currentRow?.organName }}</el-descriptions-item>
         <el-descriptions-item label="姓名">{{ currentRow?.realName }}</el-descriptions-item>
         <el-descriptions-item label="邮箱地址">{{ currentRow?.email }}</el-descriptions-item>
         <el-descriptions-item label="手机号码">{{ currentRow?.mobile }}</el-descriptions-item>
@@ -153,7 +140,7 @@
         <el-table-column prop="realName" label="姓名" width="120" />
         <el-table-column prop="status" label="账号状态" width="100">
           <template #default="{ row: p }">
-            {{ statusOptions.find((s) => s.value === p.status)?.label ?? p.status }}
+            <DictText :value="p.status" usage-code="PASSPORT_STATUS" :api-method="DictItemApi.select" />
           </template>
         </el-table-column>
         <el-table-column prop="mobile" label="手机号码" width="140" />
@@ -174,27 +161,17 @@
   import { UserApi } from './api';
   import { PassportApi } from '../passport/api';
   import { OrganApi } from '../organ/api';
+  import { DictItemApi } from '../dict/api';
   import type { User, UserPayload, UserQuery } from './type';
   import type { Passport } from '../passport/type';
   import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-  import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';
+  import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictText } from '@/components';
 
   // 定义字典引用
   const adminOptions = ref<Array<{ label: string; value: boolean }>>([]);
-  const organOptions = ref<Array<{ label: string; value: number }>>([]);
-  /** 弹窗内展示 passport 状态文案 */
-  const statusOptions = ref<Array<{ label: string; value: string }>>([
-    { label: '正常', value: 'NORMAL' },
-    { label: '冻结', value: 'FROZEN' },
-  ]);
 
   // 获取字典信息
   const loadDicts = async () => {
-    organOptions.value = (await OrganApi.searchOrgans()).map(u => ({
-      value: u.organId,
-      label: u.organName 
-    }));
-
     adminOptions.value = [{
       label: '是',
       value: true
@@ -353,8 +330,6 @@
 
   // 表单校验规则
   const editRules: FormRules = {
-    passportId: [{ required: true, message: '请输入账号序号', trigger: 'blur' }],
-    organId: [{ required: true, message: '请选择所属机构', trigger: 'blur' }],
     realName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
     email: [{ required: false, message: '请输入邮箱地址', trigger: 'blur' }],
     mobile: [{ required: false, message: '请输入手机号码', trigger: 'blur' }],
@@ -490,4 +465,3 @@
     margin-top: 16px;
   }
 </style>
-

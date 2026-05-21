@@ -174,7 +174,12 @@ export const routeMap: Record<string, ViewRouteConfig> = {
       requiresAuth: true,
       showInHome: true
     },
-  }
+  },
+    '/personal_static_access_token': {
+            component: () => import('@/views/personal_static_access_token/index.vue'),
+            name: 'PersonalStaticAccessToken',
+            meta: { title: '个人静态访问令牌', requiresAuth: true, showInHome: true },
+        }
 };
 
 /**

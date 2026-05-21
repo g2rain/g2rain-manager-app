@@ -6,9 +6,7 @@
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <!-- 业务特定查询字段 -->
         <el-form-item label="所属机构">
-          <el-select v-model="queryForm.organId" placeholder="请选择所属机构" clearable style="width: 200px">
-            <el-option v-for="item in organOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
         </el-form-item>
 
         <el-form-item label="所属应用">
@@ -22,9 +20,7 @@
         </el-form-item>
 
         <el-form-item label="状态">
-          <el-select v-model="queryForm.status" placeholder="请选择状态" clearable style="width: 200px">
-            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="queryForm.status" usage-code="AUTHORIZATION_STATUS" :api-method="DictItemApi.select" placeholder="请选择状态" />
         </el-form-item>
         <!-- 操作按钮 -->
         <template #actions>
@@ -46,8 +42,8 @@
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
       <el-table-column prop="id" label="应用授权序号" width="120" />
-      <el-table-column prop="organId" label="所属机构" width="140" />
-      <el-table-column prop="applicationId" label="所属应用" width="140" />
+      <el-table-column prop="organName" label="所属机构" width="140" />
+      <el-table-column prop="applicationName" label="所属应用" width="140" />
       <el-table-column prop="controlDomainName" label="业务能力名称" width="160">
         <template #default="{ row }">
           <!-- placement="top" 让提示框出现在上方 -->
@@ -59,25 +55,24 @@
       </el-table-column>
       <el-table-column prop="status" label="状态" width="180">
         <template #default="{ row }">
-          <el-switch
-            v-permission="'application_authorization:status_update'"
+          <StatusSwitch
             v-model="row.status"
-            inline-prompt
-            :active-value="'ACTIVATED'"
-            :inactive-value="'DEACTIVATED'"
-            :active-text="statusOptions.find(item => item.value === 'ACTIVATED')?.label"
-            :inactive-text="statusOptions.find(item => item.value === 'DEACTIVATED')?.label"
-            @change="updateStatus(row)"
+            permission="application_authorization:status_update"
+            active-value="ACTIVATED"
+            inactive-value="DEACTIVATED"
+            :options="statusOptions"
+            :api-method="({ nextValue }) => ApplicationAuthorizationApi.updateStatus(row.id, String(nextValue))"
+            @success="loadData"
           />
         </template>
       </el-table-column>
       <el-table-column prop="subscriptionId" label="订阅序号" width="140" />
       <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
       <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
-      <el-table-column label="操作" fixed="right" width="100">
+      <el-table-column label="操作" fixed="right" width="200">
         <template #default="{ row }">
-          <el-button type="warning" v-permission="'application_authorization:control_utils_sync'" link size="small"
-            @click="updateSyncControlUtils(row)">同步能力</el-button>
+          <el-button type="warning" v-permission="'application_authorization:control_utils_sync'" link size="small" @click="updateSyncControlUtils(row)">同步能力</el-button>
+          <el-button v-if="row.apiKeySupported" type="primary"  v-permission="'application_authorization:manager_api_keys'" link size="small" @click="openApiKeyManager(row)">模型秘钥管理</el-button>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -94,6 +89,10 @@
         :page-sizes="[10, 20, 50, 100]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
         @size-change="handleSizeChange" @current-change="handlePageChange" />
     </div>
+
+    <el-dialog v-model="apiKeyManagerVisible" title="模型秘钥管理" width="1120px">
+      <PersonalStaticAccessToken :application-authorization="currentAuthorization" embedded />
+    </el-dialog>
   </div>
 </template>
 
@@ -103,13 +102,14 @@ import { ElMessage } from 'element-plus';
 import { ApplicationAuthorizationApi } from './api';
 import { OrganApi } from '../organ/api';
 import { ApplicationApi } from '../application/api';
+import { DictItemApi } from '../dict/api';
 import type { ApplicationAuthorization, ApplicationAuthorizationQuery } from './type';
 import type { PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, type QueryFormData } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, StatusSwitch, type QueryFormData } from '@/components';
+import PersonalStaticAccessToken from '../personal_static_access_token/index.vue';
 
 // 定义字典引用
 const statusOptions = ref<Array<{ label: string; value: string }>>([]);
-const organOptions = ref<Array<{ label: string; value: number }>>([]);
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
 
 // 获取字典信息
@@ -118,18 +118,19 @@ const loadDicts = async () => {
     value: u.id,
     label: u.applicationName || `${u.id}`
   }));
-  organOptions.value = (await OrganApi.searchOrgans()).map(u => ({
-    value: u.organId,
-    label: u.organName
-  }));
-
-  statusOptions.value = [{
-    label: '激活',
-    value: 'ACTIVATED'
-  }, {
-    label: '关停',
-    value: 'DEACTIVATED'
-  }];
+  
+  try {
+    const items = await DictItemApi.loadByUsageCode('AUTHORIZATION_STATUS');
+    statusOptions.value = [...items]
+      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+      .map((item) => ({
+        label: item.name || String(item.code),
+        value: String(item.code),
+      }));
+  } catch (error) {
+    console.error('加载授权状态字典失败:', error);
+    statusOptions.value = [];
+  }
 };
 
 // 组件引用
@@ -160,6 +161,8 @@ const pagination = reactive({
 
 // 定义列表引用
 const tableData = ref<ApplicationAuthorization[]>([]);
+const currentAuthorization = ref<ApplicationAuthorization | null>(null);
+const apiKeyManagerVisible = ref(false);
 
 // 加载列表数据
 const loadData = async () => {
@@ -225,18 +228,6 @@ const handlePageChange = (page: number) => {
   loadData();
 };
 
-// 修改应用状态
-const updateStatus = async (row: ApplicationAuthorization) => {
-  const prevStatus = row.status === 'ACTIVATED' ? 'DEACTIVATED' : 'ACTIVATED';
-  try {
-    await ApplicationAuthorizationApi.updateStatus(row.id, row.status);
-    ElMessage.success('更新成功');
-  } catch (err) {
-    row.status = prevStatus;
-    ElMessage.error('更新失败');
-  }
-};
-
 // 同步能力
 const updateSyncControlUtils = async (row: ApplicationAuthorization) => {
   await ApplicationAuthorizationApi.save({
@@ -246,6 +237,11 @@ const updateSyncControlUtils = async (row: ApplicationAuthorization) => {
   })
 
   ElMessage.success('同步成功')
+};
+
+const openApiKeyManager = (row: ApplicationAuthorization) => {
+  currentAuthorization.value = { ...row };
+  apiKeyManagerVisible.value = true;
 };
 
 // 挂载回调

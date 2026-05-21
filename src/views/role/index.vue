@@ -6,15 +6,11 @@
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <!-- 业务特定查询字段 -->
         <el-form-item label="所属机构">
-          <el-select v-model="queryForm.organId" placeholder="请选择所属机构" clearable style="width: 200px">
-            <el-option v-for="item in organOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
         </el-form-item>
 
         <el-form-item label="角色类型">
-          <el-select v-model="queryForm.roleType" placeholder="请选择角色类型" clearable style="width: 200px">
-            <el-option v-for="item in typeOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <DictSelect v-model="queryForm.roleType" usage-code="ROLE_TYPE" :api-method="DictItemApi.select" placeholder="请选择角色类型" />
         </el-form-item>
 
         <el-form-item label="角色名称">
@@ -43,12 +39,12 @@
       @sort-change="handleSortChange">
       <el-table-column prop="id" label="角色序号" width="120" />
 
-      <el-table-column prop="organId" label="所属机构" width="140" />
+      <el-table-column prop="organName" label="所属机构" width="140" />
 
       <el-table-column prop="roleType" label="角色类型" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
-            {{typeOptions.find(item => item.value === row?.roleType)?.label || ''}}
+            <DictText :value="row?.roleType" usage-code="ROLE_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </template>
       </el-table-column>
@@ -90,9 +86,7 @@
     <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑角色' : '新增角色'" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
         <el-form-item label="所属机构" prop="organId">
-          <el-select v-model="editForm.organId" :disabled="isEdit" placeholder="请选择所属机构" style="width: 200px">
-            <el-option v-for="item in organOptions" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
+          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :clearable="false" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
         </el-form-item>
 
         <el-form-item label="角色名称" prop="roleName">
@@ -111,10 +105,10 @@
     <el-dialog v-model="detailDialogVisible" title="角色明细" width="520px">
       <el-descriptions :column="1" border>
         <el-descriptions-item label="角色序号">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item label="所属机构">{{ currentRow?.organId }}</el-descriptions-item>
+        <el-descriptions-item label="所属机构">{{ currentRow?.organName }}</el-descriptions-item>
         <el-descriptions-item label="角色类型">
           <el-tag>
-            {{typeOptions.find(item => item.value === currentRow?.roleType)?.label || ''}}
+            <DictText :value="currentRow?.roleType" usage-code="ROLE_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="角色名称">{{ currentRow?.roleName }}</el-descriptions-item>
@@ -171,30 +165,11 @@ import { RoleApi } from './api';
 import { UserApi } from '../user/api'
 import { UserRoleRelationApi } from '../user_role_relation/api'
 import { OrganApi } from '../organ/api';
+import { DictItemApi } from '../dict/api';
 import { RoleControlUnitRelationApi } from '../role_control_unit_relation/api'
 import type { Role, RolePayload, RoleQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@/components';
-
-// 定义字典引用
-const typeOptions = ref<Array<{ label: string; value: string }>>([]);
-const organOptions = ref<Array<{ label: string; value: number }>>([]);
-
-// 获取字典信息
-const loadDicts = async () => {
-  organOptions.value = (await OrganApi.searchOrgans()).map(u => ({
-    value: u.organId,
-    label: u.organName
-  }));
-
-  typeOptions.value = [{
-    label: '超管角色',
-    value: 'ADMIN'
-  }, {
-    label: '用户角色',
-    value: 'USER'
-  }];
-};
+import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText } from '@/components';
 
 // 定义组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
@@ -521,9 +496,6 @@ const assignControlUtils = async () => {
 
 // 挂载回调
 onMounted(async () => {
-  // 先准备字典
-  await loadDicts();
-  // 再查询列表
   await loadData();
 });
 </script>
