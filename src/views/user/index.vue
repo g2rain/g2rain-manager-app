@@ -88,15 +88,7 @@
 
     <!-- 新增 / 编辑弹窗 -->
     <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑用户' : '新增用户'" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
-        <el-form-item label="账号序号" prop="passportId">         
-          <el-input v-model="editForm.passportId" placeholder="请输入账号序号" />        
-        </el-form-item>
-        
-        <el-form-item label="所属机构" prop="organId">
-          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :clearable="false" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
-        </el-form-item>
-
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">        
         <el-form-item label="姓名" prop="realName">
           <el-input v-model="editForm.realName" placeholder="请输入姓名" />          
         </el-form-item>
@@ -108,7 +100,6 @@
         <el-form-item label="手机号码" prop="mobile">       
           <el-input v-model="editForm.mobile" placeholder="请输入手机号码" />      
         </el-form-item>
-
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -339,8 +330,6 @@
 
   // 表单校验规则
   const editRules: FormRules = {
-    passportId: [{ required: true, message: '请输入账号序号', trigger: 'blur' }],
-    organId: [{ required: true, message: '请选择所属机构', trigger: 'blur' }],
     realName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
     email: [{ required: false, message: '请输入邮箱地址', trigger: 'blur' }],
     mobile: [{ required: false, message: '请输入手机号码', trigger: 'blur' }],
