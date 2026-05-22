@@ -6,7 +6,8 @@
     :value-key="valueKey"
     :label-key="labelKey"
     :placeholder="placeholder"
-    :clearable="clearable"
+    :clearable="resolvedClearable"
+    :auto-select-first-when-empty="resolvedAutoSelectFirst"
     :disabled="disabled"
     :width="width"
     :debounce-delay="debounceDelay"
@@ -17,6 +18,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useAccessTokenStore } from '@platform/stores';
 import { RemoteSelect } from './index';
 import type { FetchDataFunction, RemoteSelectOption } from './types';
 
@@ -32,6 +34,8 @@ interface Props {
   placeholder?: string;
   /** 是否可清空 */
   clearable?: boolean;
+  /** 无选中值时是否默认选第一项 */
+  autoSelectFirst?: boolean;
   /** 是否禁用 */
   disabled?: boolean;
   /** 宽度 */
@@ -55,7 +59,6 @@ const props = withDefaults(defineProps<Props>(), {
   valueKey: 'organId',
   labelKey: 'organName',
   placeholder: '请选择所属机构',
-  clearable: true,
   disabled: false,
   width: '200px',
   debounceDelay: 300,
@@ -63,8 +66,22 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<Emits>();
+const tokenStore = useAccessTokenStore();
 
-// 使用本地可写的 ref 作为 v-model 绑定目标
+const resolvedClearable = computed(() => {
+  if (props.clearable !== undefined) {
+    return props.clearable;
+  }
+  return tokenStore.isAdminCompany;
+});
+
+const resolvedAutoSelectFirst = computed(() => {
+  if (props.autoSelectFirst !== undefined) {
+    return props.autoSelectFirst;
+  }
+  return !tokenStore.isAdminCompany;
+});
+
 const innerValue = computed({
   get: () => props.modelValue,
   set: (value: number | null | undefined) => {
@@ -72,21 +89,13 @@ const innerValue = computed({
   },
 });
 
-/**
- * 处理值变化事件，将值转换为 number 类型
- */
 const handleChange = (value: number | string | null | undefined) => {
-  // 将值转换为 number 类型（机构 ID 应该是数字）
   const numValue = typeof value === 'string' ? Number(value) : value;
   emit('change', numValue);
 };
 
-/**
- * 根据属性初始化 fetchData 函数
- * 实现接口：FetchDataFunction<RemoteSelectOption>
- */
 const fetchData: FetchDataFunction<RemoteSelectOption> = async (
-  params: { key?: string; value?: number }
+  params: { key?: string; value?: number },
 ): Promise<RemoteSelectOption[]> => {
   try {
     const data = await props.apiMethod(params);

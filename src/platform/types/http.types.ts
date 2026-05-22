@@ -31,6 +31,7 @@ export interface Token {
   applicationScopes: ApplicationScope[]; // 可用应用列表
   expireAt: number; // 过期时间
   refreshExpireAt: number; // token刷新过期时间
+  adminCompany: boolean; // 平台管理组织标记
 }
 
 export interface ApplicationScope {
@@ -44,31 +45,11 @@ export interface ApplicationScope {
  */
 export interface IHttpClient {
   request<T = any>(config: AxiosRequestConfig): Promise<Result<T>>;
-  get<T = any>(
-    url: string,
-    params?: any,
-    config?: Partial<AxiosRequestConfig>,
-  ): Promise<Result<T>>;
-  post<T = any>(
-    url: string,
-    data?: any,
-    config?: Partial<AxiosRequestConfig>,
-  ): Promise<Result<T>>;
-  put<T = any>(
-    url: string,
-    data?: any,
-    config?: Partial<AxiosRequestConfig>,
-  ): Promise<Result<T>>;
-  delete<T = any>(
-    url: string,
-    params?: any,
-    config?: Partial<AxiosRequestConfig>,
-  ): Promise<Result<T>>;
-  patch<T = any>(
-    url: string,
-    data?: any,
-    config?: Partial<AxiosRequestConfig>,
-  ): Promise<Result<T>>;
+  get<T = any>(url: string, params?: any, config?: Partial<AxiosRequestConfig>): Promise<Result<T>>;
+  post<T = any>(url: string, data?: any, config?: Partial<AxiosRequestConfig>): Promise<Result<T>>;
+  put<T = any>(url: string, data?: any, config?: Partial<AxiosRequestConfig>): Promise<Result<T>>;
+  delete<T = any>(url: string, params?: any, config?: Partial<AxiosRequestConfig>): Promise<Result<T>>;
+  patch<T = any>(url: string, data?: any, config?: Partial<AxiosRequestConfig>): Promise<Result<T>>;
 }
 
 /**

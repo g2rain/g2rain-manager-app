@@ -58,6 +58,10 @@ interface Props {
    * - 用于字典等场景：用户未输入时也需要默认选项列表
    */
   prefetchOnOpen?: boolean;
+  /**
+   * 无选中值且预取/默认列表非空时，自动选中第一项（仅 emit，无业务语义）
+   */
+  autoSelectFirstWhenEmpty?: boolean;
 }
 
 interface Emits {
@@ -75,6 +79,7 @@ const props = withDefaults(defineProps<Props>(), {
   width: '200px',
   debounceDelay: 300,
   prefetchOnOpen: false,
+  autoSelectFirstWhenEmpty: false,
 });
 
 const emit = defineEmits<Emits>();
@@ -138,12 +143,24 @@ const rememberOptions = (incoming: RemoteSelectOption[]) => {
   sourceOptions.value = mergeOptions(sourceOptions.value, incoming);
 };
 
+const tryAutoSelectFirst = (list: RemoteSelectOption[]) => {
+  if (!props.autoSelectFirstWhenEmpty) return;
+  if (props.modelValue !== null && props.modelValue !== undefined) return;
+  if (!list.length) return;
+
+  const firstValue = getValue(list[0]);
+  selectedValue.value = firstValue;
+  emit('update:modelValue', firstValue);
+  emit('change', firstValue);
+};
+
 /** 写入预取/空关键字默认列表，并同步到下拉展示 */
 const applyDefaultOptions = (list: RemoteSelectOption[]) => {
   defaultOptions.value = [...list];
   rememberOptions(list);
   options.value = [...list];
   lastRemoteQuery.value = '';
+  tryAutoSelectFirst(list);
 };
 
 /** 清空搜索词、点 ×、表单重置或再次打开下拉时，恢复为默认列表 */
@@ -338,6 +355,7 @@ watch(
       && (newValue === null || newValue === undefined)
     ) {
       restoreDefaultOptions();
+      tryAutoSelectFirst(defaultOptions.value);
     }
   },
   { immediate: true }

@@ -114,7 +114,7 @@
     <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑应用' : '新增应用'" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="150px">
         <el-form-item label="所属机构" prop="organId">
-          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :api-method="OrganApi.searchOrgans" :clearable="false" placeholder="请选择所属机构" width="200px" />
+          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
         </el-form-item>
 
         <el-form-item label="应用类型" prop="applicationType">
