@@ -50,7 +50,7 @@
       <el-table-column prop="admin" label="管理员" width="140">
         <template #default="{ row }">
           <el-tag :type="row.admin ? 'success' : 'info'" effect="light">
-            {{ adminOptions.find(item => item.value === row?.admin)?.label || ''}}
+            <DictText :value="row?.admin" usage-code="BOOLEAN_FLAG" :api-method="DictItemApi.select" />
           </el-tag>
         </template>
       </el-table-column>
@@ -119,7 +119,7 @@
         <el-descriptions-item label="手机号码">{{ currentRow?.mobile }}</el-descriptions-item>
         <el-descriptions-item label="管理员">
           <el-tag :type="currentRow?.admin ? 'success' : 'info'">
-            {{ adminOptions.find(item => item.value === currentRow?.admin)?.label || '' }}
+            <DictText :value="currentRow?.admin" usage-code="BOOLEAN_FLAG" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
@@ -166,20 +166,6 @@
   import type { Passport } from '../passport/type';
   import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
   import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictText } from '@/components';
-
-  // 定义字典引用
-  const adminOptions = ref<Array<{ label: string; value: boolean }>>([]);
-
-  // 获取字典信息
-  const loadDicts = async () => {
-    adminOptions.value = [{
-      label: '是',
-      value: true
-    },{
-      label: '否',
-      value: false
-    }];
-  };
 
   // 组件引用
   const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
@@ -321,8 +307,6 @@
   // 保存表单状态    
   const editForm = reactive({
     id: undefined as number | undefined,
-    passportId: undefined as number | undefined,
-    organId: undefined as number | undefined,
     realName: '',
     email: '',
     mobile: '',
@@ -341,8 +325,6 @@
     editFormRef.value?.clearValidate();
 
     editForm.id = undefined;
-    editForm.passportId = undefined;
-    editForm.organId = undefined;
     editForm.realName = '';
     editForm.email = '';
     editForm.mobile = '';
@@ -355,8 +337,6 @@
     editFormRef.value?.clearValidate();
 
     editForm.id = row.id;
-    editForm.passportId = row.passportId;
-    editForm.organId = row.organId;
     editForm.realName = row.realName;
     editForm.email = row.email;
     editForm.mobile = row.mobile;
@@ -370,8 +350,6 @@
     if (!valid) return;
 
     const payload: UserPayload = {
-      passportId: editForm.passportId,
-      organId: editForm.organId,
       realName: editForm.realName,
       email: editForm.email,
       mobile: editForm.mobile,
@@ -408,9 +386,7 @@
 
   // 挂载回调
   onMounted(async () => {
-    // 先准备字典
-    await loadDicts(); 
-    // 再查询列表
+    // 查询列表
     await loadData();
   });
 </script>

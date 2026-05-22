@@ -1,32 +1,82 @@
 [
   {
-    "pageName": "g2rain_raindrop",
-    "pageCode": "g2rain_raindrop",
-    "linkPath": "/g2rain_raindrop"
+    "pageName": "passport",
+    "pageCode": "passport",
+    "linkPath": "/passport"
   },
   {
-    "pageName": "dictionary_usage",
-    "pageCode": "dictionary_usage",
-    "linkPath": "/dictionary_usage"
+    "pageName": "user",
+    "pageCode": "user",
+    "linkPath": "/user"
   },
   {
-    "pageName": "route_definition",
-    "pageCode": "route_definition",
-    "linkPath": "/route_definition"
+    "pageName": "organ",
+    "pageCode": "organ",
+    "linkPath": "/organ"
   },
   {
-    "pageName": "locale_setting",
-    "pageCode": "locale_setting",
-    "linkPath": "/locale_setting"
+    "pageName": "resource_menu",
+    "pageCode": "resource_menu",
+    "linkPath": "/resource_menu"
   },
   {
-    "pageName": "i18n_message_usage",
-    "pageCode": "i18n_message_usage",
-    "linkPath": "/i18n_message_usage"
+    "pageName": "resource_page",
+    "pageCode": "resource_page",
+    "linkPath": "/resource_page"
   },
   {
-    "pageName": "i18n_message",
-    "pageCode": "i18n_message",
-    "linkPath": "/i18n_message"
+    "pageName": "control_unit",
+    "pageCode": "control_unit",
+    "linkPath": "/control_unit"
+  },
+  {
+    "pageName": "role",
+    "pageCode": "role",
+    "linkPath": "/role"
+  },
+  {
+    "pageName": "control_domain",
+    "pageCode": "control_domain",
+    "linkPath": "/control_domain"
+  },
+  {
+    "pageName": "application",
+    "pageCode": "application",
+    "linkPath": "/application"
+  },
+  {
+    "pageName": "application_authorization",
+    "pageCode": "application_authorization",
+    "linkPath": "/application_authorization"
+  },
+  {
+    "pageName": "resource_settings",
+    "pageCode": "resource_settings",
+    "linkPath": "/resource_settings"
+  },
+  {
+    "pageName": "service_registry",
+    "pageCode": "service_registry",
+    "linkPath": "/service_registry"
+  },
+  {
+    "pageName": "resource_api",
+    "pageCode": "resource_api",
+    "linkPath": "/resource_api"
+  },
+  {
+    "pageName": "login_token",
+    "pageCode": "login_token",
+    "linkPath": "/login_token"
+  },
+  {
+    "pageName": "audit_event",
+    "pageCode": "audit_event",
+    "linkPath": "/audit_event"
+  },
+  {
+    "pageName": "个人静态访问令牌",
+    "pageCode": "personal_static_access_token",
+    "linkPath": "/personal_static_access_token"
   }
 ]

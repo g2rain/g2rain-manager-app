@@ -1,388 +1,479 @@
 {
   "pages": [
     {
-      "pageName": "g2rain_raindrop",
-      "pageCode": "g2rain_raindrop",
-      "linkPath": "/g2rain_raindrop"
+      "pageName": "passport",
+      "pageCode": "passport",
+      "linkPath": "/passport"
     },
     {
-      "pageName": "dictionary_usage",
-      "pageCode": "dictionary_usage",
-      "linkPath": "/dictionary_usage"
+      "pageName": "user",
+      "pageCode": "user",
+      "linkPath": "/user"
     },
     {
-      "pageName": "route_definition",
-      "pageCode": "route_definition",
-      "linkPath": "/route_definition"
+      "pageName": "organ",
+      "pageCode": "organ",
+      "linkPath": "/organ"
     },
     {
-      "pageName": "locale_setting",
-      "pageCode": "locale_setting",
-      "linkPath": "/locale_setting"
+      "pageName": "resource_menu",
+      "pageCode": "resource_menu",
+      "linkPath": "/resource_menu"
     },
     {
-      "pageName": "i18n_message_usage",
-      "pageCode": "i18n_message_usage",
-      "linkPath": "/i18n_message_usage"
+      "pageName": "resource_page",
+      "pageCode": "resource_page",
+      "linkPath": "/resource_page"
     },
     {
-      "pageName": "i18n_message",
-      "pageCode": "i18n_message",
-      "linkPath": "/i18n_message"
+      "pageName": "control_unit",
+      "pageCode": "control_unit",
+      "linkPath": "/control_unit"
+    },
+    {
+      "pageName": "role",
+      "pageCode": "role",
+      "linkPath": "/role"
+    },
+    {
+      "pageName": "control_domain",
+      "pageCode": "control_domain",
+      "linkPath": "/control_domain"
+    },
+    {
+      "pageName": "application",
+      "pageCode": "application",
+      "linkPath": "/application"
+    },
+    {
+      "pageName": "application_authorization",
+      "pageCode": "application_authorization",
+      "linkPath": "/application_authorization"
+    },
+    {
+      "pageName": "resource_settings",
+      "pageCode": "resource_settings",
+      "linkPath": "/resource_settings"
+    },
+    {
+      "pageName": "service_registry",
+      "pageCode": "service_registry",
+      "linkPath": "/service_registry"
+    },
+    {
+      "pageName": "resource_api",
+      "pageCode": "resource_api",
+      "linkPath": "/resource_api"
+    },
+    {
+      "pageName": "login_token",
+      "pageCode": "login_token",
+      "linkPath": "/login_token"
+    },
+    {
+      "pageName": "audit_event",
+      "pageCode": "audit_event",
+      "linkPath": "/audit_event"
+    },
+    {
+      "pageName": "个人静态访问令牌",
+      "pageCode": "personal_static_access_token",
+      "linkPath": "/personal_static_access_token"
     }
   ],
   "pageElements": [
     {
       "parentId": null,
-      "pageElementName": "新增",
-      "pageElementCode": "dictionary_item:add",
+      "pageElementName": "control_utils_sync",
+      "pageElementCode": "application_authorization:control_utils_sync",
       "pageElementType": "button",
-      "pageCode": "dictionary_usage",
+      "pageCode": "application_authorization",
       "status": "ENABLED"
     },
     {
       "parentId": null,
-      "pageElementName": "删除",
-      "pageElementCode": "dictionary_item:delete",
+      "pageElementName": "manager_api_keys",
+      "pageElementCode": "application_authorization:manager_api_keys",
       "pageElementType": "button",
-      "pageCode": "dictionary_usage",
-      "status": "ENABLED"
-    },
-    {
-      "parentId": null,
-      "pageElementName": "编辑",
-      "pageElementCode": "dictionary_item:edit",
-      "pageElementType": "button",
-      "pageCode": "dictionary_usage",
+      "pageCode": "application_authorization",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "新增",
-      "pageElementCode": "dictionary_usage:add",
+      "pageElementCode": "application:add",
       "pageElementType": "button",
-      "pageCode": "dictionary_usage",
+      "pageCode": "application",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "删除",
-      "pageElementCode": "dictionary_usage:delete",
+      "pageElementCode": "application:delete",
       "pageElementType": "button",
-      "pageCode": "dictionary_usage",
+      "pageCode": "application",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "编辑",
-      "pageElementCode": "dictionary_usage:edit",
+      "pageElementCode": "application:edit",
       "pageElementType": "button",
-      "pageCode": "dictionary_usage",
+      "pageCode": "application",
       "status": "ENABLED"
     },
     {
       "parentId": null,
-      "pageElementName": "字典项",
-      "pageElementCode": "dictionary_usage:items",
+      "pageElementName": "integrate",
+      "pageElementCode": "application:integrate",
       "pageElementType": "button",
-      "pageCode": "dictionary_usage",
+      "pageCode": "application",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "public_key_config",
+      "pageElementCode": "application:public_key_config",
+      "pageElementType": "button",
+      "pageCode": "application",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "新增",
-      "pageElementCode": "g2rain_raindrop:add",
+      "pageElementCode": "control_domain:add",
       "pageElementType": "button",
-      "pageCode": "g2rain_raindrop",
+      "pageCode": "control_domain",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "control_utils_associate",
+      "pageElementCode": "control_domain:control_utils_associate",
+      "pageElementType": "button",
+      "pageCode": "control_domain",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "删除",
-      "pageElementCode": "g2rain_raindrop:delete",
+      "pageElementCode": "control_domain:delete",
       "pageElementType": "button",
-      "pageCode": "g2rain_raindrop",
+      "pageCode": "control_domain",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "编辑",
-      "pageElementCode": "g2rain_raindrop:edit",
+      "pageElementCode": "control_domain:edit",
       "pageElementType": "button",
-      "pageCode": "g2rain_raindrop",
+      "pageCode": "control_domain",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "features_activate",
+      "pageElementCode": "control_domain:features_activate",
+      "pageElementType": "button",
+      "pageCode": "control_domain",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "新增",
-      "pageElementCode": "i18n_message_usage:add",
+      "pageElementCode": "control_unit:add",
       "pageElementType": "button",
-      "pageCode": "i18n_message_usage",
+      "pageCode": "control_unit",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "删除",
-      "pageElementCode": "i18n_message_usage:delete",
+      "pageElementCode": "control_unit:delete",
       "pageElementType": "button",
-      "pageCode": "i18n_message_usage",
+      "pageCode": "control_unit",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "编辑",
-      "pageElementCode": "i18n_message_usage:edit",
+      "pageElementCode": "control_unit:edit",
       "pageElementType": "button",
-      "pageCode": "i18n_message_usage",
+      "pageCode": "control_unit",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "resources_config",
+      "pageElementCode": "control_unit:resources_config",
+      "pageElementType": "button",
+      "pageCode": "control_unit",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "新增",
-      "pageElementCode": "i18n_message:add",
+      "pageElementCode": "organ:add",
       "pageElementType": "button",
-      "pageCode": "i18n_message",
+      "pageCode": "organ",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "删除",
-      "pageElementCode": "i18n_message:delete",
+      "pageElementCode": "organ:delete",
       "pageElementType": "button",
-      "pageCode": "i18n_message",
+      "pageCode": "organ",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "编辑",
-      "pageElementCode": "i18n_message:edit",
+      "pageElementCode": "organ:edit",
       "pageElementType": "button",
-      "pageCode": "i18n_message",
+      "pageCode": "organ",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "reassign",
+      "pageElementCode": "organ:reassign",
+      "pageElementType": "button",
+      "pageCode": "organ",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "新增",
-      "pageElementCode": "locale_setting:add",
+      "pageElementCode": "passport:add",
       "pageElementType": "button",
-      "pageCode": "locale_setting",
+      "pageCode": "passport",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "删除",
-      "pageElementCode": "locale_setting:delete",
+      "pageElementCode": "passport:delete",
       "pageElementType": "button",
-      "pageCode": "locale_setting",
+      "pageCode": "passport",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "编辑",
-      "pageElementCode": "locale_setting:edit",
+      "pageElementCode": "passport:edit",
       "pageElementType": "button",
-      "pageCode": "locale_setting",
+      "pageCode": "passport",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "新增",
-      "pageElementCode": "route_definition:add",
+      "pageElementCode": "personal_static_access_token:add",
       "pageElementType": "button",
-      "pageCode": "route_definition",
+      "pageCode": "personal_static_access_token",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "删除",
-      "pageElementCode": "route_definition:delete",
+      "pageElementCode": "personal_static_access_token:delete",
       "pageElementType": "button",
-      "pageCode": "route_definition",
+      "pageCode": "personal_static_access_token",
       "status": "ENABLED"
     },
     {
       "parentId": null,
       "pageElementName": "编辑",
-      "pageElementCode": "route_definition:edit",
+      "pageElementCode": "personal_static_access_token:edit",
       "pageElementType": "button",
-      "pageCode": "route_definition",
+      "pageCode": "personal_static_access_token",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "resource_api:add",
+      "pageElementType": "button",
+      "pageCode": "resource_api",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "resource_api:delete",
+      "pageElementType": "button",
+      "pageCode": "resource_api",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "resource_api:edit",
+      "pageElementType": "button",
+      "pageCode": "resource_api",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "导入",
+      "pageElementCode": "resource_api:import",
+      "pageElementType": "button",
+      "pageCode": "resource_api",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "resource_menu:add",
+      "pageElementType": "button",
+      "pageCode": "resource_menu",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "resource_menu:delete",
+      "pageElementType": "button",
+      "pageCode": "resource_menu",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "resource_menu:edit",
+      "pageElementType": "button",
+      "pageCode": "resource_menu",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "resource_page:add",
+      "pageElementType": "button",
+      "pageCode": "resource_page",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "resource_page:delete",
+      "pageElementType": "button",
+      "pageCode": "resource_page",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "resource_page:edit",
+      "pageElementType": "button",
+      "pageCode": "resource_page",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "page_element_mgmt",
+      "pageElementCode": "resource_page:page_element_mgmt",
+      "pageElementType": "button",
+      "pageCode": "resource_page",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "upload",
+      "pageElementCode": "resource_settings:upload",
+      "pageElementType": "button",
+      "pageCode": "resource_settings",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "role:add",
+      "pageElementType": "button",
+      "pageCode": "role",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "control_utils_assign",
+      "pageElementCode": "role:control_utils_assign",
+      "pageElementType": "button",
+      "pageCode": "role",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "role:delete",
+      "pageElementType": "button",
+      "pageCode": "role",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "role:edit",
+      "pageElementType": "button",
+      "pageCode": "role",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "users_assign",
+      "pageElementCode": "role:users_assign",
+      "pageElementType": "button",
+      "pageCode": "role",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "service_registry:add",
+      "pageElementType": "button",
+      "pageCode": "service_registry",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "service_registry:delete",
+      "pageElementType": "button",
+      "pageCode": "service_registry",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "service_registry:edit",
+      "pageElementType": "button",
+      "pageCode": "service_registry",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "user:add",
+      "pageElementType": "button",
+      "pageCode": "user",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "user:delete",
+      "pageElementType": "button",
+      "pageCode": "user",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "user:edit",
+      "pageElementType": "button",
+      "pageCode": "user",
       "status": "ENABLED"
     }
   ],
-  "apiEndpoints": [
-    {
-      "apiName": "列表查询",
-      "apiUrl": "/infra/g2rain_raindrop/list",
-      "requestMethod": "GET",
-      "apiTag": "g2rain_raindrop"
-    },
-    {
-      "apiName": "详情查询",
-      "apiUrl": "/infra/g2rain_raindrop/:id",
-      "requestMethod": "GET",
-      "apiTag": "g2rain_raindrop"
-    },
-    {
-      "apiName": "保存",
-      "apiUrl": "/infra/g2rain_raindrop/save",
-      "requestMethod": "POST",
-      "apiTag": "g2rain_raindrop"
-    },
-    {
-      "apiName": "删除",
-      "apiUrl": "/infra/g2rain_raindrop/:id",
-      "requestMethod": "DELETE",
-      "apiTag": "g2rain_raindrop"
-    },
-    {
-      "apiName": "列表查询",
-      "apiUrl": "/infra/dictionary_usage/list",
-      "requestMethod": "GET",
-      "apiTag": "dictionary_usage"
-    },
-    {
-      "apiName": "详情查询",
-      "apiUrl": "/infra/dictionary_usage/:id",
-      "requestMethod": "GET",
-      "apiTag": "dictionary_usage"
-    },
-    {
-      "apiName": "保存",
-      "apiUrl": "/infra/dictionary_usage/save",
-      "requestMethod": "POST",
-      "apiTag": "dictionary_usage"
-    },
-    {
-      "apiName": "删除",
-      "apiUrl": "/infra/dictionary_usage/:id",
-      "requestMethod": "DELETE",
-      "apiTag": "dictionary_usage"
-    },
-    {
-      "apiName": "列表查询",
-      "apiUrl": "/infra/dictionary_item/list",
-      "requestMethod": "GET",
-      "apiTag": "dictionary_usage"
-    },
-    {
-      "apiName": "查询",
-      "apiUrl": "/infra/dictionary_item/tree",
-      "requestMethod": "GET",
-      "apiTag": "dictionary_usage"
-    },
-    {
-      "apiName": "详情查询",
-      "apiUrl": "/infra/dictionary_item/:id",
-      "requestMethod": "GET",
-      "apiTag": "dictionary_usage"
-    },
-    {
-      "apiName": "保存",
-      "apiUrl": "/infra/dictionary_item/save",
-      "requestMethod": "POST",
-      "apiTag": "dictionary_usage"
-    },
-    {
-      "apiName": "删除",
-      "apiUrl": "/infra/dictionary_item/:id",
-      "requestMethod": "DELETE",
-      "apiTag": "dictionary_usage"
-    },
-    {
-      "apiName": "列表查询",
-      "apiUrl": "/infra/route_definition/list",
-      "requestMethod": "GET",
-      "apiTag": "route_definition"
-    },
-    {
-      "apiName": "详情查询",
-      "apiUrl": "/infra/route_definition/:id",
-      "requestMethod": "GET",
-      "apiTag": "route_definition"
-    },
-    {
-      "apiName": "保存",
-      "apiUrl": "/infra/route_definition/save",
-      "requestMethod": "POST",
-      "apiTag": "route_definition"
-    },
-    {
-      "apiName": "删除",
-      "apiUrl": "/infra/route_definition/:id",
-      "requestMethod": "DELETE",
-      "apiTag": "route_definition"
-    },
-    {
-      "apiName": "列表查询",
-      "apiUrl": "/infra/locale_setting/list",
-      "requestMethod": "GET",
-      "apiTag": "locale_setting"
-    },
-    {
-      "apiName": "详情查询",
-      "apiUrl": "/infra/locale_setting/:id",
-      "requestMethod": "GET",
-      "apiTag": "locale_setting"
-    },
-    {
-      "apiName": "保存",
-      "apiUrl": "/infra/locale_setting/save",
-      "requestMethod": "POST",
-      "apiTag": "locale_setting"
-    },
-    {
-      "apiName": "删除",
-      "apiUrl": "/infra/locale_setting/:id",
-      "requestMethod": "DELETE",
-      "apiTag": "locale_setting"
-    },
-    {
-      "apiName": "列表查询",
-      "apiUrl": "/infra/i18n_message_usage/list",
-      "requestMethod": "GET",
-      "apiTag": "i18n_message_usage"
-    },
-    {
-      "apiName": "详情查询",
-      "apiUrl": "/infra/i18n_message_usage/:id",
-      "requestMethod": "GET",
-      "apiTag": "i18n_message_usage"
-    },
-    {
-      "apiName": "保存",
-      "apiUrl": "/infra/i18n_message_usage/save",
-      "requestMethod": "POST",
-      "apiTag": "i18n_message_usage"
-    },
-    {
-      "apiName": "删除",
-      "apiUrl": "/infra/i18n_message_usage/:id",
-      "requestMethod": "DELETE",
-      "apiTag": "i18n_message_usage"
-    },
-    {
-      "apiName": "列表查询",
-      "apiUrl": "/infra/i18n_message/list",
-      "requestMethod": "GET",
-      "apiTag": "i18n_message"
-    },
-    {
-      "apiName": "详情查询",
-      "apiUrl": "/infra/i18n_message/:id",
-      "requestMethod": "GET",
-      "apiTag": "i18n_message"
-    },
-    {
-      "apiName": "保存",
-      "apiUrl": "/infra/i18n_message/save",
-      "requestMethod": "POST",
-      "apiTag": "i18n_message"
-    },
-    {
-      "apiName": "删除",
-      "apiUrl": "/infra/i18n_message/:id",
-      "requestMethod": "DELETE",
-      "apiTag": "i18n_message"
-    }
-  ]
+  "apiEndpoints": []
 }
