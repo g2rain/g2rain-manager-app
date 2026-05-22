@@ -52,8 +52,8 @@ echo "Tag:     $TAG"
 echo "Mode:    $BUILD_MODE"
 
 export DOCKER_BUILDKIT=1
+# 需要排查构建问题时再加: --progress=plain
 docker build \
-  --progress=plain \
   --build-arg "VITE_BUILD_MODE=$BUILD_MODE" \
   -t "$IMAGE:$TAG" \
   .
