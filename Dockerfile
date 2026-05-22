@@ -8,7 +8,7 @@ ARG VITE_BUILD_MODE=production
 # 使用 lockfile 安装（比 npm install 快且可复现）；BuildKit 缓存加速重复构建
 COPY package.json package-lock.json .npmrc ./
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --legacy-peer-deps
+    npm ci --legacy-peer-deps --no-audit --no-fund
 
 COPY . .
 
