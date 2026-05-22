@@ -30,7 +30,6 @@ export const useAccessTokenStore = defineStore('token', {
         const refreshExpireAt = new Date(this.token?.refreshExpireAt * 1000);
 
         // 刷新未到期即认为已登录
-
         return (this.logged = refreshExpireAt > now);
       } catch (error) {
         // 如果日期解析失败，也认为未登录
@@ -40,10 +39,9 @@ export const useAccessTokenStore = defineStore('token', {
     },
     // 检查 access token 是否有效
     isAdminCompany(): boolean {
-      return !!this.token?.adminCompany;
+      return this.token?.adminCompany === true;
     },
     isAccessTokenValid(): boolean {
-
       if (!this.token?.expireAt) return false;
 
       try {

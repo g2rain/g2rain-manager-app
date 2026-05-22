@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, nextTick } from 'vue';
 import { ArrowDown } from '@element-plus/icons-vue';
 import type { FetchDataFunction, RemoteSelectOption } from './types';
 
@@ -58,9 +58,7 @@ interface Props {
    * - 用于字典等场景：用户未输入时也需要默认选项列表
    */
   prefetchOnOpen?: boolean;
-  /**
-   * 无选中值且预取/默认列表非空时，自动选中第一项（仅 emit，无业务语义）
-   */
+  /** 无选中值且默认列表非空时自动选中第一项（通用能力，无业务语义） */
   autoSelectFirstWhenEmpty?: boolean;
 }
 
@@ -143,12 +141,27 @@ const rememberOptions = (incoming: RemoteSelectOption[]) => {
   sourceOptions.value = mergeOptions(sourceOptions.value, incoming);
 };
 
-const tryAutoSelectFirst = (list: RemoteSelectOption[]) => {
-  if (!props.autoSelectFirstWhenEmpty) return;
-  if (props.modelValue !== null && props.modelValue !== undefined) return;
-  if (!list.length) return;
+const isEmptyModelValue = (value: number | string | null | undefined) =>
+  value === null || value === undefined;
+
+const optionValueMatches = (
+  optionValue: number | string,
+  modelValue: number | string | null | undefined,
+) => String(optionValue) === String(modelValue);
+
+/** 预取列表就绪且允许时，选中第一项并同步 v-model */
+const tryAutoSelectFirst = async (list: RemoteSelectOption[]) => {
+  if (!props.autoSelectFirstWhenEmpty || !isEmptyModelValue(props.modelValue) || !list.length) {
+    return;
+  }
 
   const firstValue = getValue(list[0]);
+  if (firstValue === null || firstValue === undefined) {
+    return;
+  }
+
+  options.value = [...list];
+  await nextTick();
   selectedValue.value = firstValue;
   emit('update:modelValue', firstValue);
   emit('change', firstValue);
@@ -160,7 +173,7 @@ const applyDefaultOptions = (list: RemoteSelectOption[]) => {
   rememberOptions(list);
   options.value = [...list];
   lastRemoteQuery.value = '';
-  tryAutoSelectFirst(list);
+  void tryAutoSelectFirst(list);
 };
 
 /** 清空搜索词、点 ×、表单重置或再次打开下拉时，恢复为默认列表 */
@@ -265,7 +278,6 @@ const handleVisibleChange = async (visible: boolean) => {
     }
   }
   if (!visible || !props.prefetchOnOpen) return;
-  // 打开下拉时预取一次空关键字数据（避免用户必须先输入才出现选项）
   if (defaultOptions.value.length > 0 || prefetching.value) return;
 
   loading.value = true;
@@ -345,8 +357,8 @@ watch(
   () => props.modelValue,
   (newValue, oldValue) => {
     selectedValue.value = newValue;
-    if (newValue !== null && newValue !== undefined) {
-      const found = options.value.find(item => getValue(item) === newValue);
+    if (!isEmptyModelValue(newValue)) {
+      const found = options.value.find((item) => optionValueMatches(getValue(item), newValue));
       if (!found) {
         loadInitialOption();
       }
@@ -355,13 +367,24 @@ watch(
       && (newValue === null || newValue === undefined)
     ) {
       restoreDefaultOptions();
-      tryAutoSelectFirst(defaultOptions.value);
+      void tryAutoSelectFirst(defaultOptions.value);
     }
   },
   { immediate: true }
 );
 
-// 组件挂载时，如果有初始值，加载对应的选项
+watch(
+  () => props.autoSelectFirstWhenEmpty,
+  (enabled, prev) => {
+    if (!enabled || enabled === prev) return;
+    if (defaultOptions.value.length > 0) {
+      void tryAutoSelectFirst(defaultOptions.value);
+    } else if (props.prefetchOnOpen) {
+      void prefetchDefaultOptions();
+    }
+  },
+);
+
 onMounted(() => {
   prefetchDefaultOptions();
   if (selectedValue.value !== null && selectedValue.value !== undefined) {
