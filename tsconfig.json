@@ -12,6 +12,7 @@
     "esModuleInterop": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
+    "noEmit": true,
     "types": ["node", "vite/client"],
     "paths": {
       "@/*": ["./src/*"],
