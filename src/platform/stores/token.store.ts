@@ -41,6 +41,9 @@ export const useAccessTokenStore = defineStore('token', {
     isAdminCompany(): boolean {
       return this.token?.adminCompany === true;
     },
+    organId(): number | undefined {
+      return this.token?.organId;
+    },
     isAccessTokenValid(): boolean {
       if (!this.token?.expireAt) return false;
 
@@ -68,6 +71,9 @@ export const useAccessTokenStore = defineStore('token', {
         const { payload } = await jwtVerify(tokenString, publicKeyJwk);
 
         this.tokenString = tokenString;
+        const rawOrganId = payload.organId;
+        const organId = rawOrganId != null && rawOrganId !== '' ? Number(rawOrganId) : undefined;
+
         this.token = {
           clientId: (payload.clientId as string) || '',
           clientPublicKey: (payload.clientPublicKey as string) || '',
@@ -75,6 +81,7 @@ export const useAccessTokenStore = defineStore('token', {
           expireAt: (payload.expireAt as number) || 0,
           refreshExpireAt: (payload.refreshExpireAt as number) || 0,
           adminCompany: payload.adminCompany === true,
+          organId: organId != null && !Number.isNaN(organId) ? organId : undefined,
         };
 
         this.logged = true;
