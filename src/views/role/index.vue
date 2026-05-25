@@ -86,7 +86,7 @@
     <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑角色' : '新增角色'" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
         <el-form-item label="所属机构" prop="organId">
-          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :clearable="false" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
+          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
         </el-form-item>
 
         <el-form-item label="角色名称" prop="roleName">

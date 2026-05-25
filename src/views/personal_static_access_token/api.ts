@@ -53,5 +53,15 @@ export class PersonalStaticAccessTokenApi {
     const http = getHttpClient('default');
     await http.delete(`/basis/personal_static_access_token/${id}`);
   }
+
+  /**
+   * 切换状态
+   * @param id control_unit ID
+   * @param status 状态
+   */
+  static async updateStatus(id: number, status: string): Promise<void> {
+    const http = getHttpClient('default');
+    await http.post(`/basis/personal_static_access_token/${id}/status`, { status });
+  }
 }
 

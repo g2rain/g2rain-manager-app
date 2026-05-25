@@ -36,9 +36,15 @@
       <el-table-column prop="maskedToken" label="脱敏令牌" width="300" />
       <el-table-column prop="status" label="状态" width="180">
         <template #default="{ row }">
-          <el-tag effect="light">
-            <DictText :value="row?.status" usage-code="STATIC_TOKEN_STATUS" :api-method="DictItemApi.select" />
-          </el-tag>
+          <StatusSwitch
+            v-model="row.status"
+            permission="personal_static_access_token:status_update"
+            active-value="ACTIVATED"
+            inactive-value="REVOKED"
+            :options="statusOptions"
+            :api-method="({ nextValue }) => PersonalStaticAccessTokenApi.updateStatus(row.id, String(nextValue))"
+            @success="loadData"
+          />
         </template>
       </el-table-column>
       <el-table-column prop="createTime" label="创建时间" width="180" />
@@ -131,7 +137,26 @@ import type { ApplicationAuthorization } from '../application_authorization/type
 import type { PageSelectListDto } from '@platform/types/api.type';
 
 import { DictItemApi } from '../dict/api';
-import { DictSelect, DictText, showErrorMessage } from '@/components';
+import { DictSelect, DictText, showErrorMessage, StatusSwitch } from '@/components';
+
+// 定义字典引用
+const statusOptions = ref<Array<{ label: string; value: string }>>([]);
+
+// 获取字典信息
+const loadDicts = async () => {
+  try {
+    const items = await DictItemApi.loadByUsageCode('STATIC_TOKEN_STATUS');
+    statusOptions.value = [...items]
+      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+      .map((item) => ({
+        label: item.name || String(item.code),
+        value: String(item.code),
+      }));
+  } catch (error) {
+    console.error('加载授权状态字典失败:', error);
+    statusOptions.value = [];
+  }
+};
 
 const props = withDefaults(defineProps<{
   embedded?: boolean;
@@ -389,6 +414,8 @@ const submitEdit = async () => {
 // 挂载回调
 onMounted(() => {
   syncApplicationAuthorizationQuery();
+  // 查询字典
+  loadDicts();
   // 查询列表
   loadData();
 });
