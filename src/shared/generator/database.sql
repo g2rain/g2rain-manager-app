@@ -34,7 +34,7 @@ CREATE TABLE `passport_idp_binding` (
   `idp_type` varchar(32) NOT NULL COMMENT '身份源类型[DINGTALK|FEISHU|WECHAT_WORK等]',
   `idp_subject` varchar(128) NOT NULL COMMENT 'IdP 侧稳定主体标识，建议存钉钉 unionId',
   `corp_id` varchar(64) DEFAULT NULL COMMENT '钉钉企业 corpId',
-  `idp_user_id` varchar(128) DEFAULT NULL COMMENT '钉钉 userid（corp 内），可选',
+  `idp_user_id` varchar(128) DEFAULT NULL COMMENT '第三方用户ID，可选',
   `idp_application_code` varchar(128) NOT NULL DEFAULT '' COMMENT '三方应用在 IdP 侧的应用标识',
   `bind_mode` varchar(32) DEFAULT NULL COMMENT '接入形态[INTERNAL|THIRD_PARTY]',
   `raw_profile` json DEFAULT NULL COMMENT 'IdP 返回的原始用户信息快照',
@@ -51,9 +51,9 @@ CREATE TABLE `passport_idp_binding` (
 
 CREATE TABLE `application_idp_provision` (
   `id` bigint NOT NULL COMMENT '主键标识',
-  `application_id` bigint NOT NULL COMMENT '平台应用标识，关联 application.id',
+  `application_id` bigint NOT NULL COMMENT '应用ID',
   `idp_type` varchar(32) NOT NULL COMMENT '身份源类型',
-  `idp_application_code` varchar(128) NOT NULL COMMENT '三方应用在 IdP 侧的标识',
+  `idp_application_code` varchar(128) NOT NULL COMMENT 'IDP侧应用ID',
   `remark` varchar(512) DEFAULT NULL COMMENT '备注',
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

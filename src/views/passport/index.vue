@@ -77,8 +77,9 @@
       <el-table-column prop="idNo" label="身份证号" width="180" />
       <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
       <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
-      <el-table-column label="操作" fixed="right" width="280">
+      <el-table-column label="操作" fixed="right" width="360">
         <template #default="{ row }">
+          <el-button type="primary" link size="small" @click="openIdpBindingListDialog(row)">第三方绑定</el-button>
           <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
           <el-button type="primary" v-permission="'passport:edit'" link size="small"
             @click="handleEdit(row)">编辑</el-button>
@@ -196,6 +197,36 @@
         <el-button type="primary" @click="userListDialogVisible = false">关 闭</el-button>
       </template>
     </el-dialog>
+
+    <!-- 第三方身份绑定列表 -->
+    <el-drawer
+      v-model="idpBindingListDrawerVisible"
+      :title="`第三方身份绑定（账号 ${currentPassportId ?? ''}）`"
+      direction="rtl"
+      size="800px"
+      destroy-on-close
+      @closed="idpBindingListRows = []"
+    >
+      <el-table :data="idpBindingListRows" border stripe style="width: 100%">
+        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="idpType" label="身份源类型" width="120">
+          <template #default="{ row: binding }">
+            <el-tag effect="light" size="small">
+              <DictText :value="binding?.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" />
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="idpSubject" label="IDP侧用户授权标识" min-width="160" />
+        <el-table-column prop="corpId" label="IDP侧企业ID" width="140" />
+        <el-table-column prop="idpUserId" label="IDP侧用户ID" width="120" />
+        <el-table-column prop="idpApplicationCode" label="IDP侧的应用ID" width="140" />
+        <el-table-column prop="bindMode" label="接入形态" width="100" />
+        <el-table-column prop="createTime" label="创建时间" width="170" />
+      </el-table>
+      <template #footer>
+        <el-button type="primary" @click="idpBindingListDrawerVisible = false">关 闭</el-button>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
@@ -205,9 +236,11 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { PassportApi } from './api';
 import { UserApi } from '../user/api';
+import { PassportIdpBindingApi } from '../passport_idp_binding/api';
 import { DictItemApi } from '../dict/api';
 import type { Passport, PassportPayload, PassportQuery } from './type';
 import type { User } from '../user/type';
+import type { PassportIdpBinding } from '../passport_idp_binding/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
 
@@ -347,6 +380,21 @@ const openUserListDialog = async (row: Passport) => {
     userListRows.value = await UserApi.list({ passportId: row.id });
   } catch (error: any) {
     ElMessage.error(error.message || '加载用户列表失败');
+  }
+};
+
+// 查看第三方身份绑定列表
+const idpBindingListDrawerVisible = ref(false);
+const idpBindingListRows = ref<PassportIdpBinding[]>([]);
+const currentPassportId = ref<number | undefined>();
+const openIdpBindingListDialog = async (row: Passport) => {
+  currentPassportId.value = row.id;
+  idpBindingListDrawerVisible.value = true;
+  idpBindingListRows.value = [];
+  try {
+    idpBindingListRows.value = await PassportIdpBindingApi.list({ passportId: row.id });
+  } catch (error: any) {
+    ElMessage.error(error.message || '加载第三方绑定列表失败');
   }
 };
 

@@ -82,7 +82,7 @@
 
       <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
 
-      <el-table-column label="操作" fixed="right" width="280">
+      <el-table-column label="操作" fixed="right" width="380">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
           <el-button type="primary" v-permission="'application:edit'" link size="small"
@@ -91,6 +91,8 @@
             v-if="row.canIntegrate" @click="handleIntegrate(row)">关联应用</el-button>
           <el-button type="success" link size="small" v-permission="'application:public_key_config'"
             @click="handlePubKeyConfig(row)">公钥配置</el-button>
+          <el-button type="success" link size="small" v-permission="'application:idp_provision_config'"
+            @click="handleIdpProvisionConfig(row)">三方应用配置</el-button>
           <el-button type="danger" v-permission="'application:delete'" v-if="!row.landing" link size="small"
             @click="handleDelete(row)">删除</el-button>
         </template>
@@ -264,6 +266,73 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 三方应用配置 -->
+    <el-drawer
+      v-model="idpProvisionDialog.visible"
+      :title="`三方应用配置 - ${idpProvisionDialog.applicationName}`"
+      direction="rtl"
+      size="720px"
+      destroy-on-close
+      @closed="idpProvisionRows = []"
+    >
+      <div style="margin-bottom: 12px;">
+        <el-button type="primary" v-permission="'application_idp_provision:add'" @click="handleIdpProvisionCreate">
+          新增绑定
+        </el-button>
+      </div>
+      <el-table :data="idpProvisionRows" border stripe style="width: 100%">
+        <el-table-column prop="idpType" label="身份源类型" width="140">
+          <template #default="{ row: provision }">
+            <el-tag effect="light" size="small">
+              <DictText :value="provision?.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" />
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="idpApplicationCode" label="IDP侧应用ID" min-width="180" />
+        <el-table-column prop="remark" label="备注" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="创建时间" width="170" />
+        <el-table-column label="操作" width="140" fixed="right">
+          <template #default="{ row: provision }">
+            <el-button type="primary" v-permission="'application_idp_provision:edit'" link size="small"
+              @click="handleIdpProvisionEdit(provision)">编辑</el-button>
+            <el-button type="danger" v-permission="'application_idp_provision:delete'" link size="small"
+              @click="handleIdpProvisionDelete(provision)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <el-button type="primary" @click="idpProvisionDialog.visible = false">关 闭</el-button>
+      </template>
+    </el-drawer>
+
+    <!-- 三方应用配置 - 新增/编辑 -->
+    <el-dialog
+      v-model="idpProvisionEditVisible"
+      :title="idpProvisionIsEdit ? '编辑三方应用绑定' : '新增三方应用绑定'"
+      width="520px"
+      append-to-body
+      destroy-on-close
+    >
+      <el-form ref="idpProvisionEditFormRef" :model="idpProvisionEditForm" :rules="idpProvisionEditRules" label-width="160px">
+        <el-form-item label="应用ID">
+          <el-input :model-value="String(idpProvisionDialog.applicationId ?? '')" disabled />
+        </el-form-item>
+        <el-form-item label="身份源类型" prop="idpType">
+          <DictSelect v-model="idpProvisionEditForm.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" :clearable="false" placeholder="请选择身份源类型" />
+        </el-form-item>
+        <el-form-item label="IDP侧应用ID" prop="idpApplicationCode">
+          <el-input v-model="idpProvisionEditForm.idpApplicationCode" placeholder="请输入IDP侧应用ID" />
+        </el-form-item>
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="idpProvisionEditForm.remark" type="textarea" :rows="3" placeholder="请输入备注" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="idpProvisionEditVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitIdpProvisionEdit">保 存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -274,8 +343,10 @@ import { ElMessageBox, ElMessage } from 'element-plus';
 import { ApplicationApi } from './api';
 import { OrganApi } from '../organ/api';
 import { DictItemApi, parseDictCodeAsBoolean } from '../dict/api';
-import { ApplicationSuiteApi } from '../application_suite/api'
+import { ApplicationSuiteApi } from '../application_suite/api';
+import { ApplicationIdpProvisionApi } from '../application_idp_provision/api';
 import type { Application, ApplicationPayload, ApplicationQuery } from './type';
+import type { ApplicationIdpProvision, ApplicationIdpProvisionPayload } from '../application_idp_provision/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText, StatusSwitch } from '@/components';
 
@@ -681,6 +752,115 @@ const downloadPublicKey = () => {
 
   ApplicationApi.downloadPublicKey(pubKeyConfigDialog.applicationId)
 }
+
+// ========================
+// 三方应用配置
+// ========================
+const idpProvisionDialog = reactive({
+  visible: false,
+  applicationId: null as number | null,
+  applicationName: '',
+});
+
+const idpProvisionRows = ref<ApplicationIdpProvision[]>([]);
+const idpProvisionEditVisible = ref(false);
+const idpProvisionIsEdit = ref(false);
+const idpProvisionEditFormRef = ref<FormInstance | null>(null);
+
+const idpProvisionEditForm = reactive({
+  id: undefined as number | undefined,
+  idpType: '',
+  idpApplicationCode: '',
+  remark: '',
+});
+
+const idpProvisionEditRules: FormRules = {
+  idpType: [{ required: true, message: '请选择身份源类型', trigger: 'change' }],
+  idpApplicationCode: [{ required: true, message: '请输入IDP侧应用ID', trigger: 'blur' }],
+};
+
+const loadIdpProvisionList = async () => {
+  if (!idpProvisionDialog.applicationId) {
+    return;
+  }
+  try {
+    idpProvisionRows.value = await ApplicationIdpProvisionApi.list({
+      applicationId: idpProvisionDialog.applicationId,
+    });
+  } catch (error: any) {
+    ElMessage.error(error.message || '加载三方应用配置失败');
+  }
+};
+
+const handleIdpProvisionConfig = async (row: Application) => {
+  idpProvisionDialog.visible = true;
+  idpProvisionDialog.applicationId = row.id;
+  idpProvisionDialog.applicationName = row.applicationName;
+  idpProvisionRows.value = [];
+  await loadIdpProvisionList();
+};
+
+const handleIdpProvisionCreate = () => {
+  idpProvisionIsEdit.value = false;
+  idpProvisionEditFormRef.value?.clearValidate();
+  idpProvisionEditForm.id = undefined;
+  idpProvisionEditForm.idpType = '';
+  idpProvisionEditForm.idpApplicationCode = '';
+  idpProvisionEditForm.remark = '';
+  idpProvisionEditVisible.value = true;
+};
+
+const handleIdpProvisionEdit = (row: ApplicationIdpProvision) => {
+  idpProvisionIsEdit.value = true;
+  idpProvisionEditFormRef.value?.clearValidate();
+  idpProvisionEditForm.id = row.id;
+  idpProvisionEditForm.idpType = row.idpType;
+  idpProvisionEditForm.idpApplicationCode = row.idpApplicationCode;
+  idpProvisionEditForm.remark = row.remark ?? '';
+  idpProvisionEditVisible.value = true;
+};
+
+const handleIdpProvisionDelete = (row: ApplicationIdpProvision) => {
+  ElMessageBox.confirm(`确认删除三方应用绑定「${row.id}」吗？`, '提示', { type: 'warning' })
+    .then(async () => {
+      try {
+        await ApplicationIdpProvisionApi.remove(row.id);
+        ElMessage.success('删除成功');
+        await loadIdpProvisionList();
+      } catch (error: any) {
+        ElMessage.error(error.message || '删除失败');
+      }
+    })
+    .catch(() => {});
+};
+
+const submitIdpProvisionEdit = async () => {
+  if (!idpProvisionEditFormRef.value || !idpProvisionDialog.applicationId) {
+    return;
+  }
+  if (!(await idpProvisionEditFormRef.value.validate())) {
+    return;
+  }
+
+  const payload: ApplicationIdpProvisionPayload = {
+    applicationId: idpProvisionDialog.applicationId,
+    idpType: idpProvisionEditForm.idpType,
+    idpApplicationCode: idpProvisionEditForm.idpApplicationCode,
+    remark: idpProvisionEditForm.remark,
+  };
+  if (idpProvisionIsEdit.value) {
+    payload.id = idpProvisionEditForm.id;
+  }
+
+  try {
+    await ApplicationIdpProvisionApi.save(payload);
+    ElMessage.success(idpProvisionIsEdit.value ? '更新成功' : '新增成功');
+    idpProvisionEditVisible.value = false;
+    await loadIdpProvisionList();
+  } catch (error: any) {
+    ElMessage.error(error.message || '保存失败');
+  }
+};
 
 // 挂载回调
 onMounted(async () => {

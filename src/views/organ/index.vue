@@ -66,13 +66,15 @@
       <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
       <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
 
-      <el-table-column label="操作" fixed="right" width="280">
+      <el-table-column label="操作" fixed="right" width="360">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
           <el-button type="primary" v-permission="'organ:edit'" link size="small"
             @click="handleEdit(row)">编辑</el-button>
           <el-button type="success" v-permission="'organ:reassign'" link size="small" v-if="!row.admin"
             @click="handleReassign(row)">调整归属</el-button>
+          <el-button type="success" link size="small" v-permission="'organ:idp_enterprise_view'"
+            @click="openIdpEnterpriseOrganListDialog(row)">三方企业绑定</el-button>
           <el-button type="danger" v-permission="'organ:delete'" link size="small" v-if="!row.admin"
             @click="handleDelete(row)">删除</el-button>
         </template>
@@ -171,6 +173,40 @@
         <el-button type="primary" @click="reassign">保存</el-button>
       </template>
     </el-dialog>
+
+    <!-- 企业三方授权绑定列表 -->
+    <el-drawer
+      v-model="idpEnterpriseOrganListDrawerVisible"
+      :title="`企业三方授权绑定（机构 ${currentOrganName ?? ''}）`"
+      direction="rtl"
+      size="720px"
+      destroy-on-close
+      @closed="idpEnterpriseOrganListRows = []"
+    >
+      <el-table :data="idpEnterpriseOrganListRows" border stripe style="width: 100%">
+        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="idpType" label="身份源类型" width="120">
+          <template #default="{ row: item }">
+            <el-tag effect="light" size="small">
+              <DictText :value="item?.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" />
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="enterpriseId" label="外部企业/租户ID" min-width="160" />
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row: item }">
+            <el-tag effect="light" size="small">
+              <DictText :value="item?.status" usage-code="STATUS" :api-method="DictItemApi.select" />
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="remark" label="备注" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="createTime" label="创建时间" width="170" />
+      </el-table>
+      <template #footer>
+        <el-button type="primary" @click="idpEnterpriseOrganListDrawerVisible = false">关 闭</el-button>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
@@ -180,7 +216,9 @@ import type { FormInstance, FormRules, FormItemRule } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { OrganApi } from './api';
 import { DictItemApi } from '../dict/api';
+import { IdpEnterpriseOrganApi } from '../idp_enterprise_organ/api';
 import type { Organ, OrganPayload, OrganQuery, OrganHierarchicalRelation } from './type';
+import type { IdpEnterpriseOrgan } from '../idp_enterprise_organ/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
 
@@ -444,6 +482,22 @@ const resetReassignDialog = () => {
   reassignDialog.sourceParentId = null;
   reassignDialog.targetParentId = null;
 }
+
+// 查看企业三方授权绑定列表
+const idpEnterpriseOrganListDrawerVisible = ref(false);
+const idpEnterpriseOrganListRows = ref<IdpEnterpriseOrgan[]>([]);
+const currentOrganName = ref('');
+
+const openIdpEnterpriseOrganListDialog = async (row: Organ) => {
+  currentOrganName.value = row.organName;
+  idpEnterpriseOrganListDrawerVisible.value = true;
+  idpEnterpriseOrganListRows.value = [];
+  try {
+    idpEnterpriseOrganListRows.value = await IdpEnterpriseOrganApi.list({ organId: row.id });
+  } catch (error: any) {
+    ElMessage.error(error.message || '加载企业三方授权绑定失败');
+  }
+};
 
 // 打开调整归属弹窗
 const handleReassign = async (row: Organ) => {
