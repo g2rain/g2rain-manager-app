@@ -66,11 +66,13 @@
       <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
       <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
 
-      <el-table-column label="操作" fixed="right" width="360">
+      <el-table-column label="操作" fixed="right" width="420">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
           <el-button type="primary" v-permission="'organ:edit'" link size="small"
             @click="handleEdit(row)">编辑</el-button>
+          <el-button type="warning" v-permission="'organ:invite_generate'" link size="small" v-if="!row.admin"
+            @click="openInviteDialog(row)">邀请码</el-button>
           <el-button type="success" v-permission="'organ:reassign'" link size="small" v-if="!row.admin"
             @click="handleReassign(row)">调整归属</el-button>
           <el-button type="success" link size="small" v-permission="'organ:idp_enterprise_view'"
@@ -174,6 +176,74 @@
       </template>
     </el-dialog>
 
+    <!-- 生成机构邀请码 -->
+    <el-dialog
+      v-model="inviteDialog.visible"
+      :title="`机构邀请码 — ${inviteDialog.organName ?? ''}`"
+      width="520px"
+      destroy-on-close
+      @closed="resetInviteDialog"
+    >
+      <el-form label-width="100px">
+        <el-form-item label="加入后角色" required>
+          <el-select
+            v-model="inviteDialog.roleId"
+            placeholder="请选择角色"
+            filterable
+            style="width: 100%"
+            :loading="inviteDialog.rolesLoading"
+          >
+            <el-option
+              v-for="role in inviteDialog.roles"
+              :key="role.id"
+              :label="`${role.roleName} (${role.roleType})`"
+              :value="role.id"
+            />
+          </el-select>
+          <div v-if="!inviteDialog.rolesLoading && inviteDialog.roles.length === 0" class="invite-hint">
+            该机构暂无角色，请先在角色管理中创建。
+          </div>
+        </el-form-item>
+        <el-form-item label="有效期">
+          <el-radio-group v-model="inviteDialog.validDays">
+            <el-radio :value="1">24 小时</el-radio>
+            <el-radio :value="7">7 天</el-radio>
+            <el-radio :value="30">30 天</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+
+      <div v-if="inviteDialog.result" class="invite-result">
+        <el-alert
+          type="info"
+          :closable="false"
+          show-icon
+          title="重新生成将使此前未使用的邀请码立即失效。"
+          style="margin-bottom: 12px"
+        />
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="邀请码">
+            <span class="invite-code">{{ inviteDialog.result.inviteCode }}</span>
+            <el-button type="primary" link size="small" @click="copyInviteCode">复制</el-button>
+          </el-descriptions-item>
+          <el-descriptions-item label="过期时间">{{ inviteDialog.result.expireAt }}</el-descriptions-item>
+          <el-descriptions-item label="分配角色">{{ inviteDialog.result.roleName }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+
+      <template #footer>
+        <el-button @click="inviteDialog.visible = false">关 闭</el-button>
+        <el-button
+          type="primary"
+          :loading="inviteDialog.generating"
+          :disabled="!inviteDialog.roleId"
+          @click="generateInvite"
+        >
+          生成邀请码
+        </el-button>
+      </template>
+    </el-dialog>
+
     <!-- 企业三方授权绑定列表 -->
     <el-drawer
       v-model="idpEnterpriseOrganListDrawerVisible"
@@ -215,6 +285,10 @@ import { ref, reactive, onMounted } from 'vue';
 import type { FormInstance, FormRules, FormItemRule } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { OrganApi } from './api';
+import { OrganInviteApi } from './invite.api';
+import type { OrganInviteVo } from './invite.api';
+import { RoleApi } from '../role/api';
+import type { Role } from '../role/type';
 import { DictItemApi } from '../dict/api';
 import { IdpEnterpriseOrganApi } from '../idp_enterprise_organ/api';
 import type { Organ, OrganPayload, OrganQuery, OrganHierarchicalRelation } from './type';
@@ -528,6 +602,74 @@ const reassign = async () => {
   resetReassignDialog()
 };
 
+// 邀请码弹窗
+const inviteDialog = reactive({
+  visible: false,
+  organId: null as number | null,
+  organName: '' as string,
+  roleId: null as number | null,
+  validDays: 7,
+  roles: [] as Role[],
+  rolesLoading: false,
+  generating: false,
+  result: null as OrganInviteVo | null,
+});
+
+const resetInviteDialog = () => {
+  inviteDialog.organId = null;
+  inviteDialog.organName = '';
+  inviteDialog.roleId = null;
+  inviteDialog.validDays = 7;
+  inviteDialog.roles = [];
+  inviteDialog.result = null;
+};
+
+const openInviteDialog = async (row: Organ) => {
+  inviteDialog.organId = row.id;
+  inviteDialog.organName = row.organName;
+  inviteDialog.roleId = null;
+  inviteDialog.validDays = 7;
+  inviteDialog.result = null;
+  inviteDialog.visible = true;
+  inviteDialog.rolesLoading = true;
+  try {
+    inviteDialog.roles = await RoleApi.list({ organId: row.id });
+  } catch (error: any) {
+    ElMessage.error(error.message || '加载角色列表失败');
+    inviteDialog.roles = [];
+  } finally {
+    inviteDialog.rolesLoading = false;
+  }
+};
+
+const generateInvite = async () => {
+  if (!inviteDialog.organId || !inviteDialog.roleId) return;
+  inviteDialog.generating = true;
+  try {
+    inviteDialog.result = await OrganInviteApi.generate({
+      organId: inviteDialog.organId,
+      roleId: inviteDialog.roleId,
+      validDays: inviteDialog.validDays,
+    });
+    ElMessage.success('邀请码已生成');
+  } catch (error: any) {
+    ElMessage.error(error.message || '生成邀请码失败');
+  } finally {
+    inviteDialog.generating = false;
+  }
+};
+
+const copyInviteCode = async () => {
+  const code = inviteDialog.result?.inviteCode;
+  if (!code) return;
+  try {
+    await navigator.clipboard.writeText(code);
+    ElMessage.success('已复制到剪贴板');
+  } catch {
+    ElMessage.error('复制失败，请手动复制');
+  }
+};
+
 // 挂载回调
 onMounted(async () => {
   // 先准备字典
@@ -585,5 +727,21 @@ onMounted(async () => {
   display: flex;
   justify-content: flex-end;
   margin-top: 16px;
+}
+
+.invite-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.invite-result {
+  margin-top: 8px;
+}
+
+.invite-code {
+  font-family: monospace;
+  font-size: 14px;
+  word-break: break-all;
 }
 </style>

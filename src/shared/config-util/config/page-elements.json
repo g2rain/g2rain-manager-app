@@ -225,6 +225,14 @@
   },
   {
     "parentId": null,
+    "pageElementName": "邀请码",
+    "pageElementCode": "organ:invite_generate",
+    "pageElementType": "button",
+    "pageCode": "organ",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
     "pageElementName": "新增",
     "pageElementCode": "passport_idp_binding:add",
     "pageElementType": "button",
