@@ -315,6 +315,14 @@
     },
     {
       "parentId": null,
+      "pageElementName": "invite_generate",
+      "pageElementCode": "organ:invite_generate",
+      "pageElementType": "button",
+      "pageCode": "organ",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
       "pageElementName": "reassign",
       "pageElementCode": "organ:reassign",
       "pageElementType": "button",
@@ -323,32 +331,8 @@
     },
     {
       "parentId": null,
-      "pageElementName": "邀请码",
-      "pageElementCode": "organ:invite_generate",
-      "pageElementType": "button",
-      "pageCode": "organ",
-      "status": "ENABLED"
-    },
-    {
-      "parentId": null,
-      "pageElementName": "新增",
-      "pageElementCode": "passport_idp_binding:add",
-      "pageElementType": "button",
-      "pageCode": "passport_idp_binding",
-      "status": "ENABLED"
-    },
-    {
-      "parentId": null,
       "pageElementName": "删除",
       "pageElementCode": "passport_idp_binding:delete",
-      "pageElementType": "button",
-      "pageCode": "passport_idp_binding",
-      "status": "ENABLED"
-    },
-    {
-      "parentId": null,
-      "pageElementName": "编辑",
-      "pageElementCode": "passport_idp_binding:edit",
       "pageElementType": "button",
       "pageCode": "passport_idp_binding",
       "status": "ENABLED"
