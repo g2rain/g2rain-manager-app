@@ -179,6 +179,21 @@ export const routeMap: Record<string, ViewRouteConfig> = {
             component: () => import('@/views/personal_static_access_token/index.vue'),
             name: 'PersonalStaticAccessToken',
             meta: { title: '个人静态访问令牌', requiresAuth: true, showInHome: true },
+        },
+    '/passport_idp_binding': {
+            component: () => import('@/views/passport_idp_binding/index.vue'),
+            name: 'PassportIdpBinding',
+            meta: { title: '账号与外部身份源绑定表', requiresAuth: true, showInHome: true },
+        },
+    '/application_idp_provision': {
+            component: () => import('@/views/application_idp_provision/index.vue'),
+            name: 'ApplicationIdpProvision',
+            meta: { title: '外部身份源应用与平台应用的绑定', requiresAuth: true, showInHome: true },
+        },
+    '/idp_enterprise_organ': {
+            component: () => import('@/views/idp_enterprise_organ/index.vue'),
+            name: 'IdpEnterpriseOrgan',
+            meta: { title: '外部企业', requiresAuth: true, showInHome: true },
         }
 };
 

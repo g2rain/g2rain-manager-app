@@ -18,6 +18,30 @@
   {
     "parentId": null,
     "pageElementName": "新增",
+    "pageElementCode": "application_idp_provision:add",
+    "pageElementType": "button",
+    "pageCode": "application",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
+    "pageElementName": "删除",
+    "pageElementCode": "application_idp_provision:delete",
+    "pageElementType": "button",
+    "pageCode": "application",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
+    "pageElementName": "编辑",
+    "pageElementCode": "application_idp_provision:edit",
+    "pageElementType": "button",
+    "pageCode": "application",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
+    "pageElementName": "新增",
     "pageElementCode": "application:add",
     "pageElementType": "button",
     "pageCode": "application",
@@ -35,6 +59,14 @@
     "parentId": null,
     "pageElementName": "编辑",
     "pageElementCode": "application:edit",
+    "pageElementType": "button",
+    "pageCode": "application",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
+    "pageElementName": "idp_provision_config",
+    "pageElementCode": "application:idp_provision_config",
     "pageElementType": "button",
     "pageCode": "application",
     "status": "ENABLED"
@@ -130,6 +162,30 @@
   {
     "parentId": null,
     "pageElementName": "新增",
+    "pageElementCode": "idp_enterprise_organ:add",
+    "pageElementType": "button",
+    "pageCode": "idp_enterprise_organ",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
+    "pageElementName": "删除",
+    "pageElementCode": "idp_enterprise_organ:delete",
+    "pageElementType": "button",
+    "pageCode": "idp_enterprise_organ",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
+    "pageElementName": "编辑",
+    "pageElementCode": "idp_enterprise_organ:edit",
+    "pageElementType": "button",
+    "pageCode": "idp_enterprise_organ",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
+    "pageElementName": "新增",
     "pageElementCode": "organ:add",
     "pageElementType": "button",
     "pageCode": "organ",
@@ -153,10 +209,34 @@
   },
   {
     "parentId": null,
+    "pageElementName": "idp_enterprise_view",
+    "pageElementCode": "organ:idp_enterprise_view",
+    "pageElementType": "button",
+    "pageCode": "organ",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
+    "pageElementName": "invite_generate",
+    "pageElementCode": "organ:invite_generate",
+    "pageElementType": "button",
+    "pageCode": "organ",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
     "pageElementName": "reassign",
     "pageElementCode": "organ:reassign",
     "pageElementType": "button",
     "pageCode": "organ",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
+    "pageElementName": "删除",
+    "pageElementCode": "passport_idp_binding:delete",
+    "pageElementType": "button",
+    "pageCode": "passport_idp_binding",
     "status": "ENABLED"
   },
   {
