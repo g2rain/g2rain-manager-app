@@ -44,7 +44,7 @@
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
       <el-table-column prop="id" label="业务能力序号" width="120" />
-      <el-table-column prop="applicationId" label="所属应用" width="140" />
+      <el-table-column prop="applicationName" label="所属应用" width="140" />
       <el-table-column prop="controlDomainType" label="业务能力类型" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
@@ -143,7 +143,7 @@
     <el-dialog v-model="detailDialogVisible" title="业务能力明细" width="520px">
       <el-descriptions :column="1" border>
         <el-descriptions-item label="业务能力序号">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item label="所属应用">{{ currentRow?.applicationId }}</el-descriptions-item>
+        <el-descriptions-item label="所属应用">{{ currentRow?.applicationName }}</el-descriptions-item>
         <el-descriptions-item label="业务能力类型">
           <el-tag>
             <DictText :value="currentRow?.controlDomainType" usage-code="CONTROL_DOMAIN_TYPE" :api-method="DictItemApi.select"/>
