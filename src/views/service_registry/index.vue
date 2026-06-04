@@ -2,27 +2,47 @@
   <div class="service_registry-page">
     <!-- 查询表单 -->
     <el-card class="service_registry-page__search" shadow="never">
+      <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
+        <el-form-item :label="$t('MG_SVC_REG_FIELD_SERVICE_CODE', '服务编码')">
+          <el-input
+            v-model="queryForm.serviceCode"
+            :placeholder="$t('MG_SVC_REG_PH_SERVICE_CODE', '请输入服务编码')"
+            clearable
+            style="width: 200px"
+          />
       <!-- 基础查询表单（BaseSelectListDto） -->
-      <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch" >
         <!-- 业务特定查询字段 -->
-        <el-form-item label="服务编码">
-          <el-input v-model="queryForm.serviceCode" placeholder="请输入服务编码" clearable style="width: 200px" />
         </el-form-item>
-        <el-form-item label="服务名称">
-          <el-input v-model="queryForm.name" placeholder="请输入服务名称" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')">
+          <el-input
+            v-model="queryForm.name"
+            :placeholder="$t('MG_SVC_REG_PH_NAME', '请输入服务名称')"
+            clearable
+            style="width: 200px"
+          />
         </el-form-item>
-        <el-form-item label="目标地址">
-          <el-input v-model="queryForm.endpoint" placeholder="请输入目标地址" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')">
+          <el-input
+            v-model="queryForm.endpoint"
+            :placeholder="$t('MG_SVC_REG_PH_ENDPOINT', '请输入目标地址')"
+            clearable
+            style="width: 200px"
+          />
         </el-form-item>
-        <el-form-item label="路由前缀">
-          <el-input v-model="queryForm.routePrefix" placeholder="请输入路由前缀" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_SVC_REG_FIELD_ROUTE_PREFIX', '路由前缀')">
+          <el-input
+            v-model="queryForm.routePrefix"
+            :placeholder="$t('MG_SVC_REG_PH_ROUTE_PREFIX', '请输入路由前缀')"
+            clearable
+            style="width: 200px"
+          />
         </el-form-item>
 
         <!-- 操作按钮 -->
         <template #actions>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ $t('G2_BTN_QUERY', '查询') }}</el-button>
+            <el-button @click="handleReset">{{ $t('G2_BTN_RESET', '重置') }}</el-button>
           </el-form-item>
         </template>
       </QueryForm>
@@ -31,28 +51,43 @@
     <!-- 标题和操作按钮 -->
     <div class="service_registry-page__header">
       <div class="service_registry-page__title-group">
-        <h2>管理服务注册数据</h2>
+        <h2>{{ $t('MG_SVC_REG_TITLE', '管理服务注册数据') }}</h2>
       </div>
-      <el-button type="primary" v-permission="'service_registry:add'" @click="handleCreate">新增服务注册</el-button>
+      <el-button type="primary" v-permission="'service_registry:add'" @click="handleCreate">
+        {{ $t('MG_SVC_REG_BTN_ADD', '新增服务注册') }}
+      </el-button>
     </div>
 
-    <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true" @sort-change="handleSortChange">
-      <el-table-column prop="id" label="服务注册序号" width="120" />
-      <el-table-column prop="serviceCode" label="服务编号" width="180" />
-      <el-table-column prop="name" label="服务名称" width="180" />
-      <el-table-column prop="endpoint" label="目标地址" width="180" />
-      <el-table-column prop="routePrefix" label="路由前缀" width="180" />
-      <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
-      <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
-      <el-table-column label="操作" fixed="right" width="280">
+    <SortableTable
+      :data="tableData"
+      border
+      stripe
+      style="width: 100%"
+      :enable-multi-sort="true"
+      @sort-change="handleSortChange"
+    >
+      <el-table-column prop="id" :label="$t('MG_SVC_REG_COL_ID', '服务注册序号')" width="120" />
+      <el-table-column prop="serviceCode" :label="$t('MG_SVC_REG_COL_SERVICE_CODE', '服务编号')" width="180" />
+      <el-table-column prop="name" :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')" width="180" />
+      <el-table-column prop="endpoint" :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')" width="180" />
+      <el-table-column prop="routePrefix" :label="$t('MG_SVC_REG_FIELD_ROUTE_PREFIX', '路由前缀')" width="180" />
+      <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
+      <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
         <template #default="{ row }">
-          <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
-          <el-button type="primary" v-permission="'service_registry:edit'" link size="small" @click="handleEdit(row)">编辑</el-button>
-          <el-button type="danger" v-permission="'service_registry:delete'" link size="small" @click="handleDelete(row)">删除</el-button>
+          <el-button type="primary" link size="small" @click="handleView(row)">
+            {{ $t('G2_BTN_DETAIL', '明细') }}
+          </el-button>
+          <el-button type="primary" v-permission="'service_registry:edit'" link size="small" @click="handleEdit(row)">
+            {{ $t('G2_BTN_EDIT', '编辑') }}
+          </el-button>
+          <el-button type="danger" v-permission="'service_registry:delete'" link size="small" @click="handleDelete(row)">
+            {{ $t('G2_BTN_DELETE', '删除') }}
+          </el-button>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span>操作</span>
+            <span>{{ $t('G2_FIELD_ACTION', '操作') }}</span>
             <SortManagerButton />
           </div>
         </template>
@@ -73,48 +108,54 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑服务注册' : '新增服务注册'" width="520px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
-        <el-form-item label="服务编码" prop="serviceCode">
-          <el-input v-model="editForm.serviceCode" placeholder="请输入服务编码" />
+        <el-form-item :label="$t('MG_SVC_REG_FIELD_SERVICE_CODE', '服务编码')" prop="serviceCode">
+          <el-input v-model="editForm.serviceCode" :placeholder="$t('MG_SVC_REG_PH_SERVICE_CODE', '请输入服务编码')" />
         </el-form-item>
-        <el-form-item label="服务名称" prop="name">
-          <el-input v-model="editForm.name" placeholder="请输入服务名称" />
+        <el-form-item :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')" prop="name">
+          <el-input v-model="editForm.name" :placeholder="$t('MG_SVC_REG_PH_NAME', '请输入服务名称')" />
         </el-form-item>
-        <el-form-item label="目标地址" prop="endpoint">
-          <el-input v-model="editForm.endpoint" placeholder="请输入目标地址" />
+        <el-form-item :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')" prop="endpoint">
+          <el-input v-model="editForm.endpoint" :placeholder="$t('MG_SVC_REG_PH_ENDPOINT', '请输入目标地址')" />
         </el-form-item>
-        <el-form-item label="路由前缀" prop="routePrefix">
-          <el-input v-model="editForm.routePrefix" placeholder="请输入路由前缀" />
+        <el-form-item :label="$t('MG_SVC_REG_FIELD_ROUTE_PREFIX', '路由前缀')" prop="routePrefix">
+          <el-input v-model="editForm.routePrefix" :placeholder="$t('MG_SVC_REG_PH_ROUTE_PREFIX', '请输入路由前缀')" />
         </el-form-item>
-        <el-form-item label="服务说明" prop="description">
-          <el-input v-model="editForm.description" type="textarea" :rows="4" placeholder="请输入服务说明" show-word-limit
-            maxlength="200" />
+        <el-form-item :label="$t('MG_SVC_REG_FIELD_DESCRIPTION', '服务说明')" prop="description">
+          <el-input
+            v-model="editForm.description"
+            type="textarea"
+            :rows="4"
+            :placeholder="$t('MG_SVC_REG_PH_DESCRIPTION', '请输入服务说明')"
+            show-word-limit
+            maxlength="200"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitEdit">保 存</el-button>
+          <el-button @click="editDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="submitEdit">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
+    <el-dialog v-model="detailDialogVisible" :title="$t('MG_SVC_REG_DETAIL', '服务注册明细')" width="520px">
     <!-- 明细弹窗 -->
-    <el-dialog v-model="detailDialogVisible" title="服务注册明细" width="520px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="服务注册标识">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item label="服务编码">{{ currentRow?.serviceCode }}</el-descriptions-item>
-        <el-descriptions-item label="服务名称">{{ currentRow?.name }}</el-descriptions-item>
-        <el-descriptions-item label="目标地址">{{ currentRow?.endpoint }}</el-descriptions-item>
-        <el-descriptions-item label="路由前缀">{{ currentRow?.routePrefix }}</el-descriptions-item>
-        <el-descriptions-item label="服务说明">{{ currentRow?.description }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_SVC_REG_COL_REGISTRY_ID', '服务注册标识')">{{ currentRow?.id }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_SERVICE_CODE', '服务编码')">{{ currentRow?.serviceCode }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')">{{ currentRow?.name }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')">{{ currentRow?.endpoint }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_ROUTE_PREFIX', '路由前缀')">{{ currentRow?.routePrefix }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_DESCRIPTION', '服务说明')">{{ currentRow?.description }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <span class="dialog-footer">
-          <el-button type="primary" @click="detailDialogVisible = false">关 闭</el-button>
+          <el-button type="primary" @click="detailDialogVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
         </span>
       </template>
     </el-dialog>
@@ -122,9 +163,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import { t } from '@platform/i18n';
 import { ServiceRegistryApi } from './api';
 import type { ServiceRegistry, ServiceRegistryPayload, ServiceRegistryQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
@@ -178,7 +220,7 @@ const loadData = async () => {
     tableData.value = pageData.records;
     pagination.total = pageData.total;
   } catch (error: any) {
-    showErrorMessage(error || '加载列表失败');
+    showErrorMessage(error || t('G2_MSG_LOAD_FAIL', '加载列表失败'));
   }
 };
 
@@ -190,6 +232,7 @@ const handleSortChange = (params: Record<string, string>) => {
 
 // 查询
 const handleSearch = () => {
+  pagination.pageNum = 1; // 重置到第一页
   pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
@@ -207,12 +250,14 @@ const handleReset = () => {
   queryForm.endpoint = '';
   queryForm.routePrefix = '';
   pagination.pageNum = 1; // 重置到第一页
+  pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
 
 // 分页大小变化
 const handleSizeChange = (size: number) => {
   pagination.pageSize = size;
+  pagination.pageNum = 1; // 重置到第一页
   pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
@@ -236,9 +281,11 @@ const handleView = (row: ServiceRegistry) => {
 
 // 删除数据记录
 const handleDelete = (row: ServiceRegistry) => {
-  ElMessageBox.confirm(`确认删除服务注册「${row.id}」吗？`, '提示', {
-    type: 'warning',
-  })
+  ElMessageBox.confirm(
+    t('MG_SVC_REG_DEL_CONFIRM', `确认删除服务注册「${row.id}」吗？`),
+    t('G2_LBL_TIP', '提示'),
+    { type: 'warning' },
+  )
     .then(async () => {
       try {
         await ServiceRegistryApi.remove(row.id);
@@ -247,9 +294,9 @@ const handleDelete = (row: ServiceRegistry) => {
           pagination.pageNum--;
         }
         await loadData();
-        ElMessage.success('删除成功');
+        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
       } catch (error: any) {
-        showErrorMessage(error || '删除失败');
+        showErrorMessage(error || t('G2_MSG_DELETE_FAIL', '删除失败'));
       }
     })
     .catch(() => {});
@@ -257,10 +304,8 @@ const handleDelete = (row: ServiceRegistry) => {
 
 // 保存弹窗引用
 const editDialogVisible = ref(false);
-
 // 修改标记状态
 const isEdit = ref(false);
-
 // 修改组件引用
 const editFormRef = ref<FormInstance | null>(null);
 
@@ -274,13 +319,17 @@ const editForm = reactive({
   description: '',
 });
 
+const editDialogTitle = computed(() =>
+  isEdit.value ? t('MG_SVC_REG_DLG_EDIT', '编辑服务注册') : t('MG_SVC_REG_DLG_ADD', '新增服务注册'),
+);
+
 // 表单校验规则
-const editRules: FormRules = {
-  serviceCode: [{ required: true, message: '请输入服务编码', trigger: 'blur' }],
-  name: [{ required: true, message: '请输入服务名称', trigger: 'blur' }],
-  endpoint: [{ required: true, message: '请输入目标地址', trigger: 'blur' }],
-  routePrefix: [{ required: true, message: '请输入路由前缀', trigger: 'blur' }],
-};
+const editRules = computed<FormRules>(() => ({
+  serviceCode: [{ required: true, message: t('MG_SVC_REG_PH_SERVICE_CODE', '请输入服务编码'), trigger: 'blur' }],
+  name: [{ required: true, message: t('MG_SVC_REG_PH_NAME', '请输入服务名称'), trigger: 'blur' }],
+  endpoint: [{ required: true, message: t('MG_SVC_REG_PH_ENDPOINT', '请输入目标地址'), trigger: 'blur' }],
+  routePrefix: [{ required: true, message: t('MG_SVC_REG_PH_ROUTE_PREFIX', '请输入路由前缀'), trigger: 'blur' }],
+}));
 
 // 打开创建弹窗
 const handleCreate = () => {
@@ -329,11 +378,11 @@ const submitEdit = async () => {
       payload.id = editForm.id;
     }
     await ServiceRegistryApi.save(payload);
-    ElMessage.success(isEdit.value ? '更新成功' : '新增成功');
+    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
     await loadData();
     editDialogVisible.value = false;
   } catch (error: any) {
-    showErrorMessage(error || '保存失败');
+    showErrorMessage(error || t('G2_MSG_SAVE_FAIL', '保存失败'));
   }
 };
 
@@ -393,4 +442,3 @@ onMounted(() => {
   margin-top: 16px;
 }
 </style>
-

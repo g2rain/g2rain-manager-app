@@ -5,23 +5,23 @@
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <!-- 业务特定查询字段 -->
-        <el-form-item label="所属机构">
-          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
+        <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')">
+          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
         </el-form-item>
 
-        <el-form-item label="角色类型">
-          <DictSelect v-model="queryForm.roleType" usage-code="ROLE_TYPE" :api-method="DictItemApi.select" placeholder="请选择角色类型" />
+        <el-form-item :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')">
+          <DictSelect v-model="queryForm.roleType" usage-code="ROLE_TYPE" :api-method="DictItemApi.select" :placeholder="$t('MG_ROLE_PH_TYPE', '请选择角色类型')" />
         </el-form-item>
 
-        <el-form-item label="角色名称">
-          <el-input v-model="queryForm.roleName" placeholder="请输入角色名称" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_ROLE_FIELD_NAME', '角色名称')">
+          <el-input v-model="queryForm.roleName" :placeholder="$t('MG_ROLE_PH_NAME', '请输入角色名称')" clearable style="width: 200px" />
         </el-form-item>
 
         <!-- 操作按钮 -->
         <template #actions>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ $t('G2_BTN_QUERY', '查询') }}</el-button>
+            <el-button @click="handleReset">{{ $t('G2_BTN_RESET', '重置') }}</el-button>
           </el-form-item>
         </template>
       </QueryForm>
@@ -30,18 +30,18 @@
     <!-- 标题和操作按钮 -->
     <div class="role-page__header">
       <div class="role-page__title-group">
-        <h2>管理角色数据</h2>
+        <h2>{{ $t('MG_ROLE_TITLE', '管理角色数据') }}</h2>
       </div>
-      <el-button type="primary" v-permission="'role:add'" @click="handleCreate">新增角色</el-button>
+      <el-button type="primary" v-permission="'role:add'" @click="handleCreate">{{ $t('MG_ROLE_BTN_ADD', '新增角色') }}</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
-      <el-table-column prop="id" label="角色序号" width="120" />
+      <el-table-column prop="id" :label="$t('MG_ROLE_COL_ID', '角色序号')" width="120" />
 
-      <el-table-column prop="organName" label="所属机构" width="140" />
+      <el-table-column prop="organName" :label="$t('MG_FIELD_ORGAN', '所属机构')" width="140" />
 
-      <el-table-column prop="roleType" label="角色类型" width="180">
+      <el-table-column prop="roleType" :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
             <DictText :value="row?.roleType" usage-code="ROLE_TYPE" :api-method="DictItemApi.select" />
@@ -49,26 +49,26 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="roleName" label="角色名称" width="180" />
+      <el-table-column prop="roleName" :label="$t('MG_ROLE_FIELD_NAME', '角色名称')" width="180" />
 
-      <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
+      <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
 
-      <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
+      <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
 
-      <el-table-column label="操作" fixed="right" width="300">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="300">
         <template #default="{ row }">
-          <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
-          <el-button type="primary" v-permission="'role:edit'" link size="small" @click="handleEdit(row)">编辑</el-button>
+          <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
+          <el-button type="primary" v-permission="'role:edit'" link size="small" @click="handleEdit(row)">{{ $t('G2_BTN_EDIT', '编辑') }}</el-button>
           <el-button type="success" v-permission="'role:users_assign'" link size="small"
-            @click="handleAssignUsers(row)">分配用户</el-button>
+            @click="handleAssignUsers(row)">{{ $t('MG_ROLE_BTN_ASSIGN_USERS', '分配用户') }}</el-button>
           <el-button type="warning" v-permission="'role:control_utils_assign'" link size="small"
-            @click="handleAssignControlUtils(row)">分配功能权限</el-button>
+            @click="handleAssignControlUtils(row)">{{ $t('MG_ROLE_BTN_ASSIGN_CTRL', '分配功能权限') }}</el-button>
           <el-button type="danger" v-permission="'role:delete'" v-if="row.roleType !== 'ADMIN'" link size="small"
-            @click="handleDelete(row)">删除</el-button>
+            @click="handleDelete(row)">{{ $t('G2_BTN_DELETE', '删除') }}</el-button>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span>操作</span>
+            <span>{{ $t('G2_FIELD_ACTION', '操作') }}</span>
             <SortManagerButton />
           </div>
         </template>
@@ -83,74 +83,74 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑角色' : '新增角色'" width="520px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
-        <el-form-item label="所属机构" prop="organId">
-          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
+        <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')" prop="organId">
+          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :api-method="OrganApi.searchOrgans" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
         </el-form-item>
 
-        <el-form-item label="角色名称" prop="roleName">
-          <el-input v-model="editForm.roleName" placeholder="请输入角色名称" />
+        <el-form-item :label="$t('MG_ROLE_FIELD_NAME', '角色名称')" prop="roleName">
+          <el-input v-model="editForm.roleName" :placeholder="$t('MG_ROLE_PH_NAME', '请输入角色名称')" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitEdit">保 存</el-button>
+          <el-button @click="editDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="submitEdit">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- 明细弹窗 -->
-    <el-dialog v-model="detailDialogVisible" title="角色明细" width="520px">
+    <el-dialog v-model="detailDialogVisible" :title="$t('MG_ROLE_DETAIL', '角色明细')" width="520px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="角色序号">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item label="所属机构">{{ currentRow?.organName }}</el-descriptions-item>
-        <el-descriptions-item label="角色类型">
+        <el-descriptions-item :label="$t('MG_ROLE_COL_ID', '角色序号')">{{ currentRow?.id }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')">
           <el-tag>
             <DictText :value="currentRow?.roleType" usage-code="ROLE_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="角色名称">{{ currentRow?.roleName }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_ROLE_FIELD_NAME', '角色名称')">{{ currentRow?.roleName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <span class="dialog-footer">
-          <el-button type="primary" @click="detailDialogVisible = false">关 闭</el-button>
+          <el-button type="primary" @click="detailDialogVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- 分配用户 -->
-    <el-dialog v-model="assignUsersDialog.visible" title="分配用户" width="520px">
+    <el-dialog v-model="assignUsersDialog.visible" :title="$t('MG_ROLE_DLG_ASSIGN_USERS', '分配用户')" width="520px">
       <el-select-v2 
         v-model="selectedUsers" 
         :options="allUsers" 
-        multiple placeholder="请选择用户" 
+        multiple :placeholder="$t('MG_ROLE_PH_USERS', '请选择用户')" 
       />
 
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="resetAssignUsersDialog">取 消</el-button>
-          <el-button type="primary" @click="assignUsers">保 存</el-button>
+          <el-button @click="resetAssignUsersDialog">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="assignUsers">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- 分配功能权限 -->
-    <el-dialog v-model="assignControlUtilsDialog.visible" title="分配功能权限" width="600px">
+    <el-dialog v-model="assignControlUtilsDialog.visible" :title="$t('MG_ROLE_DLG_ASSIGN_CTRL', '分配功能权限')" width="600px">
       <el-transfer 
         v-model="selectedControlUtils" 
         :data="allControlUtils" 
-        filterable filter-placeholder="搜索功能权限" 
-        :titles="['可选功能权限', '已选功能权限']"
+        filterable :filter-placeholder="$t('MG_ROLE_TRANSFER_FILTER', '搜索功能权限')" 
+        :titles="transferTitles"
       />
 
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="resetAssignControlUtilsDialog">取 消</el-button>
-          <el-button type="primary" @click="assignControlUtils" :disabled="assignControlUtilsDialog.isDisabled">保 存</el-button>
+          <el-button @click="resetAssignControlUtilsDialog">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="assignControlUtils" :disabled="assignControlUtilsDialog.isDisabled">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
@@ -158,9 +158,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import { t } from '@platform/i18n';
 import { RoleApi } from './api';
 import { UserApi } from '../user/api'
 import { UserRoleRelationApi } from '../user_role_relation/api'
@@ -218,9 +219,11 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载列表失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
+    ElMessage.error(msg);
   }
+// 表单校验规则
 };
 
 // 处理排序字段
@@ -276,9 +279,11 @@ const handleView = (row: Role) => {
 
 // 删除数据记录
 const handleDelete = (row: Role) => {
-  ElMessageBox.confirm(`确认删除角色「${row.id}」吗？`, '提示', {
-    type: 'warning',
-  })
+  ElMessageBox.confirm(
+    t('MG_ROLE_DEL_CONFIRM', `确认删除角色「${row.id}」吗？`),
+    t('G2_LBL_TIP', '提示'),
+    { type: 'warning' },
+  )
     .then(async () => {
       try {
         await RoleApi.remove(row.id);
@@ -287,9 +292,10 @@ const handleDelete = (row: Role) => {
           pagination.pageNum--;
         }
         await loadData();
-        ElMessage.success('删除成功');
-      } catch (error: any) {
-        ElMessage.error(error.message || '删除失败');
+        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
+        ElMessage.error(msg);
       }
     })
     .catch(() => { });
@@ -311,11 +317,19 @@ const editForm = reactive({
   roleName: '',
 });
 
-// 表单校验规则
-const editRules: FormRules = {
-  organId: [{ required: true, message: '请选择所属机构', trigger: 'blur' }],
-  roleName: [{ required: true, message: '请输入角色名称', trigger: 'blur' }],
-};
+const editDialogTitle = computed(() =>
+  isEdit.value ? t('MG_ROLE_DLG_EDIT', '编辑角色') : t('MG_ROLE_DLG_ADD', '新增角色'),
+);
+
+const editRules = computed<FormRules>(() => ({
+  organId: [{ required: true, message: t('MG_ROLE_VLD_ORGAN', '请选择所属机构'), trigger: 'blur' }],
+  roleName: [{ required: true, message: t('MG_ROLE_VLD_NAME', '请输入角色名称'), trigger: 'blur' }],
+}));
+
+const transferTitles = computed(() => [
+  t('MG_ROLE_TRANSFER_AVAILABLE', '可选功能权限'),
+  t('MG_ROLE_TRANSFER_SELECTED', '已选功能权限'),
+]);
 
 // 打开创建弹窗
 const handleCreate = () => {
@@ -356,11 +370,12 @@ const submitEdit = async () => {
       payload.id = editForm.id;
     }
     await RoleApi.save(payload);
-    ElMessage.success(isEdit.value ? '更新成功' : '新增成功');
+    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
     await loadData();
     editDialogVisible.value = false;
-  } catch (error: any) {
-    ElMessage.error(error.message || '保存失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
+    ElMessage.error(msg);
   }
 };
 
@@ -422,7 +437,7 @@ const assignUsers = async () => {
     deleteUserIds   // 待删用户集合
   })
 
-  ElMessage.success('分配成功')
+  ElMessage.success(t('MG_ROLE_MSG_ASSIGN_OK', '分配成功'))
   resetAssignUsersDialog()
 };
 
@@ -490,7 +505,7 @@ const assignControlUtils = async () => {
     deleteControlUnitIds  // 待删功能权限集合
   })
 
-  ElMessage.success('配置成功')
+  ElMessage.success(t('MG_ROLE_MSG_CONFIG_OK', '配置成功'))
   resetAssignControlUtilsDialog()
 };
 

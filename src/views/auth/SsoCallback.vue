@@ -2,19 +2,20 @@
   <div class="sso-callback">
     <div v-if="isLoading" class="loading-container">
       <div class="spinner"></div>
-      <p>正在处理认证...</p>
+      <p>{{ $t('MG_AU_SSO_PROC', '正在处理认证...') }}</p>
     </div>
+const vueRouter = useRouter(); // 在独立模式下使用 Vue Router 实例
 
     <div v-else-if="error" class="error-container">
-      <h2>认证失败</h2>
+      <h2>{{ $t('MG_AU_SSO_FAIL', '认证失败') }}</h2>
       <p>{{ error }}</p>
-      <button @click="retry" class="retry-button">重试</button>
-      <button @click="goToLogin" class="login-button">返回登录</button>
+      <button @click="retry" class="retry-button">{{ $t('G2_BTN_RETRY', '重试') }}</button>
+      <button @click="goToLogin" class="login-button">{{ $t('MG_AU_BACK_LOGIN', '返回登录') }}</button>
     </div>
 
     <div v-else class="success-container">
-      <h2>认证成功</h2>
-      <p>正在跳转到应用...</p>
+      <h2>{{ $t('MG_AU_SSO_OK', '认证成功') }}</h2>
+      <p>{{ $t('MG_AU_SSO_REDIRECT', '正在跳转到应用...') }}</p>
     </div>
   </div>
 </template>
@@ -24,6 +25,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { sso } from '@runtime/auth';
 import { useAccessTokenStore } from '@platform/stores';
+import { t } from '@platform/i18n';
 
 const isLoading = ref(true);
 const error = ref<string | null>(null);
@@ -40,13 +42,14 @@ const extractClientIdFromUrl = (): string | null => {
 };
 
 const processCallback = async () => {
+    // 短暂延迟，确保 UI 更新
   try {
     const accessTokenStore = useAccessTokenStore();
     accessTokenStore.status = 'SSO';
     const code = extractCodeFromUrl();
     const clientId = extractClientIdFromUrl();
     if (!code || !clientId) {
-      throw new Error('未找到授权码或者客户端ID');
+      throw new Error(t('MG_AU_NO_CODE', '未找到授权码或者客户端ID'));
     }
 
     await sso.generateToken(code);
@@ -56,20 +59,18 @@ const processCallback = async () => {
 
     // 设置加载状态为 false，显示成功状态
     isLoading.value = false;
-    
-    // 短暂延迟，确保 UI 更新
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     // 根据运行模式进行路由跳转
     try {
-        await vueRouter.replace(returnUrl);
+      await vueRouter.replace(returnUrl);
     } catch (routerError) {
       console.error('[SsoCallback] 路由跳转失败:', routerError);
       // 如果路由跳转失败，尝试使用 window.location
       window.location.href = returnUrl;
     }
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '认证处理失败';
+    error.value = err instanceof Error ? err.message : t('MG_AU_SSO_ERR', '认证处理失败');
     isLoading.value = false;
   }
 };
@@ -142,4 +143,3 @@ onMounted(() => {
   color: white;
 }
 </style>
-

@@ -5,23 +5,23 @@
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <!-- 业务特定查询字段 -->
-        <el-form-item label="机构类型">
-          <DictSelect v-model="queryForm.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" placeholder="请选择机构类型" />
+        <el-form-item :label="$t('MG_ORGAN_FIELD_TYPE', '机构类型')">
+          <DictSelect v-model="queryForm.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" :placeholder="$t('MG_ORGAN_PH_TYPE', '请选择机构类型')" />
         </el-form-item>
 
-        <el-form-item label="机构名称">
-          <el-input v-model="queryForm.organName" placeholder="请输入机构名称" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_ORGAN_FIELD_NAME', '机构名称')">
+          <el-input v-model="queryForm.organName" :placeholder="$t('MG_ORGAN_PH_NAME', '请输入机构名称')" clearable style="width: 200px" />
         </el-form-item>
 
-        <el-form-item label="机构状态">
-          <DictSelect v-model="queryForm.status" usage-code="ORGAN_STATUS" :api-method="DictItemApi.select" placeholder="请选择机构状态" />
+        <el-form-item :label="$t('MG_ORGAN_FIELD_STATUS', '机构状态')">
+          <DictSelect v-model="queryForm.status" usage-code="ORGAN_STATUS" :api-method="DictItemApi.select" :placeholder="$t('MG_ORGAN_PH_STATUS', '请选择机构状态')" />
         </el-form-item>
 
         <!-- 操作按钮 -->
         <template #actions>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ $t('G2_BTN_QUERY', '查询') }}</el-button>
+            <el-button @click="handleReset">{{ $t('G2_BTN_RESET', '重置') }}</el-button>
           </el-form-item>
         </template>
       </QueryForm>
@@ -30,16 +30,16 @@
     <!-- 标题和操作按钮 -->
     <div class="organ-page__header">
       <div class="organ-page__title-group">
-        <h2>管理机构数据</h2>
+        <h2>{{ $t('MG_ORGAN_TITLE', '管理机构数据') }}</h2>
       </div>
-      <el-button type="primary" v-permission="'organ:add'" @click="handleCreate">新增机构</el-button>
+      <el-button type="primary" v-permission="'organ:add'" @click="handleCreate">{{ $t('MG_ORGAN_BTN_ADD', '新增机构') }}</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
-      <el-table-column prop="id" label="机构序号" width="120" />
+      <el-table-column prop="id" :label="$t('MG_ORGAN_COL_ID', '机构序号')" width="120" />
 
-      <el-table-column prop="organType" label="机构类型" width="180">
+      <el-table-column prop="organType" :label="$t('MG_ORGAN_FIELD_TYPE', '机构类型')" width="180">
         <template #default="{ row }">
           <el-tag>
             <DictText :value="row?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
@@ -47,13 +47,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="organName" label="机构名称" width="180" />
+      <el-table-column prop="organName" :label="$t('MG_ORGAN_FIELD_NAME', '机构名称')" width="180" />
 
-      <el-table-column prop="status" label="机构状态" width="180">
+      <el-table-column prop="status" :label="$t('MG_ORGAN_FIELD_STATUS', '机构状态')" width="180">
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            permission="organ:status_update"
+            v-permission="'organ:status_update'"
             active-value="ACTIVE"
             inactive-value="INACTIVE"
             :options="statusOptions"
@@ -63,26 +63,26 @@
         </template>
       </el-table-column>
 
-      <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
-      <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
+      <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
+      <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
 
-      <el-table-column label="操作" fixed="right" width="420">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="420">
         <template #default="{ row }">
-          <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
+          <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
           <el-button type="primary" v-permission="'organ:edit'" link size="small"
-            @click="handleEdit(row)">编辑</el-button>
+            @click="handleEdit(row)">{{ $t('G2_BTN_EDIT', '编辑') }}</el-button>
           <el-button type="warning" v-permission="'organ:invite_generate'" link size="small" v-if="!row.admin"
-            @click="openInviteDialog(row)">邀请码</el-button>
+            @click="openInviteDialog(row)">{{ $t('MG_ORGAN_BTN_INVITE', '邀请码') }}</el-button>
           <el-button type="success" v-permission="'organ:reassign'" link size="small" v-if="!row.admin"
-            @click="handleReassign(row)">调整归属</el-button>
+            @click="handleReassign(row)">{{ $t('MG_ORGAN_BTN_REASSIGN', '调整归属') }}</el-button>
           <el-button type="success" link size="small" v-permission="'organ:idp_enterprise_view'"
-            @click="openIdpEnterpriseOrganListDialog(row)">三方企业绑定</el-button>
+            @click="openIdpEnterpriseOrganListDialog(row)">{{ $t('MG_ORGAN_BTN_IDP', '三方企业绑定') }}</el-button>
           <el-button type="danger" v-permission="'organ:delete'" link size="small" v-if="!row.admin"
-            @click="handleDelete(row)">删除</el-button>
+            @click="handleDelete(row)">{{ $t('G2_BTN_DELETE', '删除') }}</el-button>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span>操作</span>
+            <span>{{ $t('G2_FIELD_ACTION', '操作') }}</span>
             <SortManagerButton />
           </div>
         </template>
@@ -97,57 +97,57 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑机构' : '新增机构'" width="520px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
-        <el-form-item label="机构类型" prop="organType">
-          <DictSelect v-model="editForm.organType" usage-code="ORGAN_TYPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" placeholder="请选择机构类型" />
+        <el-form-item :label="$t('MG_ORGAN_FIELD_TYPE', '机构类型')" prop="organType">
+          <DictSelect v-model="editForm.organType" usage-code="ORGAN_TYPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" :placeholder="$t('MG_ORGAN_PH_TYPE', '请选择机构类型')" />
         </el-form-item>
 
-        <el-form-item label="机构名称" prop="organName">
-          <el-input v-model="editForm.organName" placeholder="请输入机构名称" />
+        <el-form-item :label="$t('MG_ORGAN_FIELD_NAME', '机构名称')" prop="organName">
+          <el-input v-model="editForm.organName" :placeholder="$t('MG_ORGAN_PH_NAME', '请输入机构名称')" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitEdit">保 存</el-button>
+          <el-button @click="editDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="submitEdit">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- 明细弹窗 -->
-    <el-dialog v-model="detailDialogVisible" title="机构明细" width="520px">
+    <el-dialog v-model="detailDialogVisible" :title="$t('MG_ORGAN_DETAIL', '机构明细')" width="520px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="机构序号">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item label="机构类型">
+        <el-descriptions-item :label="$t('MG_ORGAN_COL_ID', '机构序号')">{{ currentRow?.id }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_ORGAN_FIELD_TYPE', '机构类型')">
           <el-tag>
             <DictText :value="currentRow?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="机构名称">{{ currentRow?.organName }}</el-descriptions-item>
-        <el-descriptions-item label="机构状态">
+        <el-descriptions-item :label="$t('MG_ORGAN_FIELD_NAME', '机构名称')">{{ currentRow?.organName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_ORGAN_FIELD_STATUS', '机构状态')">
           <el-tag :type="currentRow?.status === 'ACTIVE' ? 'success' : 'info'">
             <DictText :value="currentRow?.status" usage-code="ORGAN_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <span class="dialog-footer">
-          <el-button type="primary" @click="detailDialogVisible = false">关 闭</el-button>
+          <el-button type="primary" @click="detailDialogVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- 调整归属 -->
-    <el-dialog v-model="reassignDialog.visible" title="调整归属" width="500px">
+    <el-dialog v-model="reassignDialog.visible" :title="$t('MG_ORGAN_DLG_REASSIGN', '调整归属')" width="500px">
       <el-form ref="reassignFormRef" :model="reassignDialog" :rules="reassignRules" label-width="120px">
-        <el-form-item label="原始上级机构" prop="sourceParentId">
+        <el-form-item :label="$t('MG_ORGAN_TREE_SOURCE', '原始上级机构')" prop="sourceParentId">
           <el-tree-select
             v-model="reassignDialog.sourceParentId"
             :data="treeData"
-            placeholder="请选择原始上级机构"
+            :placeholder="$t('MG_ORGAN_PH_TREE_SOURCE', '请选择原始上级机构')"
             node-key="organId"
             value-key="organId"
             :props="{ label: 'organName', children: 'subOrgans' }"
@@ -156,11 +156,11 @@
           />
         </el-form-item>
 
-        <el-form-item label="目标上级机构" prop="targetParentId">
+        <el-form-item :label="$t('MG_ORGAN_TREE_TARGET', '目标上级机构')" prop="targetParentId">
           <el-tree-select
             v-model="reassignDialog.targetParentId"
             :data="treeData"
-            placeholder="请选择目标上级机构"  
+            :placeholder="$t('MG_ORGAN_PH_TREE_TARGET', '请选择目标上级机构')"
             node-key="organId"
             value-key="organId"
             :props="{ label: 'organName', children: 'subOrgans' }"
@@ -171,24 +171,24 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="resetReassignDialog">取消</el-button>
-        <el-button type="primary" @click="reassign">保存</el-button>
+        <el-button @click="resetReassignDialog">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+        <el-button type="primary" @click="reassign">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 生成机构邀请码 -->
     <el-dialog
       v-model="inviteDialog.visible"
-      :title="`机构邀请码 — ${inviteDialog.organName ?? ''}`"
+      :title="inviteDialogTitle"
       width="520px"
       destroy-on-close
       @closed="resetInviteDialog"
     >
       <el-form label-width="100px">
-        <el-form-item label="加入后角色" required>
+        <el-form-item :label="$t('MG_ORGAN_INVITE_ROLE', '加入后角色')" required>
           <el-select
             v-model="inviteDialog.roleId"
-            placeholder="请选择角色"
+            :placeholder="$t('MG_ORGAN_PH_ROLE', '请选择角色')"
             filterable
             style="width: 100%"
             :loading="inviteDialog.rolesLoading"
@@ -201,14 +201,14 @@
             />
           </el-select>
           <div v-if="!inviteDialog.rolesLoading && inviteDialog.roles.length === 0" class="invite-hint">
-            该机构暂无角色，请先在角色管理中创建。
+            {{ $t('MG_ORGAN_INVITE_NO_ROLES', '该机构暂无角色，请先在角色管理中创建。') }}
           </div>
         </el-form-item>
-        <el-form-item label="有效期">
+        <el-form-item :label="$t('MG_ORGAN_INVITE_VALIDITY', '有效期')">
           <el-radio-group v-model="inviteDialog.validDays">
-            <el-radio :value="1">24 小时</el-radio>
-            <el-radio :value="7">7 天</el-radio>
-            <el-radio :value="30">30 天</el-radio>
+            <el-radio :value="1">{{ $t('MG_ORGAN_INVITE_24H', '24 小时') }}</el-radio>
+            <el-radio :value="7">{{ $t('MG_ORGAN_INVITE_7D', '7 天') }}</el-radio>
+            <el-radio :value="30">{{ $t('MG_ORGAN_INVITE_30D', '30 天') }}</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -218,28 +218,28 @@
           type="info"
           :closable="false"
           show-icon
-          title="重新生成将使此前未使用的邀请码立即失效。"
+          :title="$t('MG_ORGAN_INVITE_REGEN_WARN', '重新生成将使此前未使用的邀请码立即失效。')"
           style="margin-bottom: 12px"
         />
         <el-descriptions :column="1" border>
-          <el-descriptions-item label="邀请码">
+          <el-descriptions-item :label="$t('MG_ORGAN_INVITE_CODE', '邀请码')">
             <span class="invite-code">{{ inviteDialog.result.inviteCode }}</span>
-            <el-button type="primary" link size="small" @click="copyInviteCode">复制</el-button>
+            <el-button type="primary" link size="small" @click="copyInviteCode">{{ $t('MG_ORGAN_BTN_COPY', '复制') }}</el-button>
           </el-descriptions-item>
-          <el-descriptions-item label="过期时间">{{ inviteDialog.result.expireAt }}</el-descriptions-item>
-          <el-descriptions-item label="分配角色">{{ inviteDialog.result.roleName }}</el-descriptions-item>
+          <el-descriptions-item :label="$t('MG_ORGAN_INVITE_EXPIRE', '过期时间')">{{ inviteDialog.result.expireAt }}</el-descriptions-item>
+          <el-descriptions-item :label="$t('MG_ORGAN_INVITE_ASSIGNED_ROLE', '分配角色')">{{ inviteDialog.result.roleName }}</el-descriptions-item>
         </el-descriptions>
       </div>
 
       <template #footer>
-        <el-button @click="inviteDialog.visible = false">关 闭</el-button>
+        <el-button @click="inviteDialog.visible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
         <el-button
           type="primary"
           :loading="inviteDialog.generating"
           :disabled="!inviteDialog.roleId"
           @click="generateInvite"
         >
-          生成邀请码
+          {{ $t('MG_ORGAN_BTN_GEN_INVITE', '生成邀请码') }}
         </el-button>
       </template>
     </el-dialog>
@@ -247,43 +247,44 @@
     <!-- 企业三方授权绑定列表 -->
     <el-drawer
       v-model="idpEnterpriseOrganListDrawerVisible"
-      :title="`企业三方授权绑定（机构 ${currentOrganName ?? ''}）`"
+      :title="idpDrawerTitle"
       direction="rtl"
       size="720px"
       destroy-on-close
       @closed="idpEnterpriseOrganListRows = []"
     >
       <el-table :data="idpEnterpriseOrganListRows" border stripe style="width: 100%">
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="idpType" label="身份源类型" width="120">
+        <el-table-column prop="id" :label="$t('G2_FIELD_ID', 'ID')" width="80" />
+        <el-table-column prop="idpType" :label="$t('MG_ORGAN_COL_IDP_TYPE', '身份源类型')" width="120">
           <template #default="{ row: item }">
             <el-tag effect="light" size="small">
               <DictText :value="item?.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" />
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="enterpriseId" label="外部企业/租户ID" min-width="160" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="enterpriseId" :label="$t('MG_ORGAN_COL_ENTERPRISE_ID', '外部企业/租户ID')" min-width="160" />
+        <el-table-column prop="status" :label="$t('G2_FIELD_STATUS', '状态')" width="100">
           <template #default="{ row: item }">
             <el-tag effect="light" size="small">
               <DictText :value="item?.status" usage-code="STATUS" :api-method="DictItemApi.select" />
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="remark" label="备注" min-width="140" show-overflow-tooltip />
-        <el-table-column prop="createTime" label="创建时间" width="170" />
+        <el-table-column prop="remark" :label="$t('MG_ORGAN_COL_REMARK', '备注')" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="170" />
       </el-table>
       <template #footer>
-        <el-button type="primary" @click="idpEnterpriseOrganListDrawerVisible = false">关 闭</el-button>
+        <el-button type="primary" @click="idpEnterpriseOrganListDrawerVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
       </template>
     </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import type { FormInstance, FormRules, FormItemRule } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import { t } from '@platform/i18n';
 import { OrganApi } from './api';
 import { OrganInviteApi } from './invite.api';
 import type { OrganInviteVo } from './invite.api';
@@ -313,6 +314,7 @@ const loadDicts = async () => {
     console.error('加载机构状态字典失败:', error);
     statusOptions.value = [];
   }
+// 表单校验规则
 };
 
 // 组件引用
@@ -362,8 +364,9 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载列表失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
+    ElMessage.error(msg);
   }
 };
 
@@ -420,9 +423,11 @@ const handleView = (row: Organ) => {
 
 // 删除数据记录
 const handleDelete = (row: Organ) => {
-  ElMessageBox.confirm(`确认删除机构「${row.id}」吗？`, '提示', {
-    type: 'warning',
-  })
+  ElMessageBox.confirm(
+    t('MG_ORGAN_DEL_CONFIRM', `确认删除机构「${row.id}」吗？`),
+    t('G2_LBL_TIP', '提示'),
+    { type: 'warning' },
+  )
     .then(async () => {
       try {
         await OrganApi.remove(row.id);
@@ -431,9 +436,10 @@ const handleDelete = (row: Organ) => {
           pagination.pageNum--;
         }
         await loadData();
-        ElMessage.success('删除成功');
-      } catch (error: any) {
-        ElMessage.error(error.message || '删除失败');
+        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
+        ElMessage.error(msg);
       }
     })
     .catch(() => { });
@@ -455,11 +461,14 @@ const editForm = reactive({
   organName: '',
 });
 
-// 表单校验规则
-const editRules: FormRules = {
-  organType: [{ required: true, message: '请选择机构类型', trigger: 'blur' }],
-  organName: [{ required: true, message: '请输入机构名称', trigger: 'blur' }],
-};
+const editDialogTitle = computed(() =>
+  isEdit.value ? t('MG_ORGAN_DLG_EDIT', '编辑机构') : t('MG_ORGAN_DLG_ADD', '新增机构'),
+);
+
+const editRules = computed<FormRules>(() => ({
+  organType: [{ required: true, message: t('G2_VLD_REQ_ORG_TYPE', '请选择机构类型'), trigger: 'blur' }],
+  organName: [{ required: true, message: t('G2_VLD_REQ_ORG_NAME', '请输入机构名称'), trigger: 'blur' }],
+}));
 
 // 打开创建弹窗
 const handleCreate = () => {
@@ -500,11 +509,12 @@ const submitEdit = async () => {
       payload.id = editForm.id;
     }
     await OrganApi.save(payload);
-    ElMessage.success(isEdit.value ? '更新成功' : '新增成功');
+    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
     await loadData();
     editDialogVisible.value = false;
-  } catch (error: any) {
-    ElMessage.error(error.message || '保存失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
+    ElMessage.error(msg);
   }
 };
 
@@ -520,13 +530,13 @@ const reassignDialog = reactive({
   targetParentId: null as number | null
 })
 
+const reassignRules = computed<Record<string, FormItemRule[]>>(() => ({
 // 关键：联动校验规则
-const reassignRules: Record<string, FormItemRule[]> = {
   sourceParentId: [
     {
       validator: (_, value, callback) => {
         if (!value && !reassignDialog.targetParentId) {
-          callback(new Error('原始或目标上级机构至少选择一个'));
+          callback(new Error(t('MG_ORGAN_VLD_REASSIGN', '原始或目标上级机构至少选择一个')));
         } else {
           callback();
         }
@@ -538,7 +548,7 @@ const reassignRules: Record<string, FormItemRule[]> = {
     {
       validator: (_, value, callback) => {
         if (!value && !reassignDialog.sourceParentId) {
-          callback(new Error('原始或目标上级机构至少选择一个'));
+          callback(new Error(t('MG_ORGAN_VLD_REASSIGN', '原始或目标上级机构至少选择一个')));
         } else {
           callback();
         }
@@ -546,7 +556,7 @@ const reassignRules: Record<string, FormItemRule[]> = {
       trigger: 'change',
     },
   ],
-};
+}));
 
 // 重置调整归属弹窗引用
 const resetReassignDialog = () => {
@@ -568,8 +578,9 @@ const openIdpEnterpriseOrganListDialog = async (row: Organ) => {
   idpEnterpriseOrganListRows.value = [];
   try {
     idpEnterpriseOrganListRows.value = await IdpEnterpriseOrganApi.list({ organId: row.id });
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载企业三方授权绑定失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('MG_ORGAN_MSG_IDP_LOAD_FAIL', '加载企业三方授权绑定失败');
+    ElMessage.error(msg);
   }
 };
 
@@ -598,8 +609,8 @@ const reassign = async () => {
     sourceAncestorId: sourceParentId || undefined,
     targetAncestorId: targetParentId || undefined
   });
-  ElMessage.success('分配成功')
-  resetReassignDialog()
+  ElMessage.success(t('MG_ORGAN_MSG_REASSIGN_OK', '分配成功'));
+  resetReassignDialog();
 };
 
 // 邀请码弹窗
@@ -614,6 +625,14 @@ const inviteDialog = reactive({
   generating: false,
   result: null as OrganInviteVo | null,
 });
+
+const inviteDialogTitle = computed(() =>
+  t('MG_ORGAN_DLG_INVITE_TITLE', `机构邀请码 — ${inviteDialog.organName ?? ''}`),
+);
+
+const idpDrawerTitle = computed(() =>
+  t('MG_ORGAN_DLG_IDP_TITLE', `企业三方授权绑定（机构 ${currentOrganName.value ?? ''}）`),
+);
 
 const resetInviteDialog = () => {
   inviteDialog.organId = null;
@@ -634,8 +653,9 @@ const openInviteDialog = async (row: Organ) => {
   inviteDialog.rolesLoading = true;
   try {
     inviteDialog.roles = await RoleApi.list({ organId: row.id });
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载角色列表失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('MG_ORGAN_MSG_ROLES_FAIL', '加载角色列表失败');
+    ElMessage.error(msg);
     inviteDialog.roles = [];
   } finally {
     inviteDialog.rolesLoading = false;
@@ -651,9 +671,10 @@ const generateInvite = async () => {
       roleId: inviteDialog.roleId,
       validDays: inviteDialog.validDays,
     });
-    ElMessage.success('邀请码已生成');
-  } catch (error: any) {
-    ElMessage.error(error.message || '生成邀请码失败');
+    ElMessage.success(t('MG_ORGAN_MSG_INVITE_OK', '邀请码已生成'));
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('MG_ORGAN_MSG_INVITE_FAIL', '生成邀请码失败');
+    ElMessage.error(msg);
   } finally {
     inviteDialog.generating = false;
   }
@@ -664,9 +685,9 @@ const copyInviteCode = async () => {
   if (!code) return;
   try {
     await navigator.clipboard.writeText(code);
-    ElMessage.success('已复制到剪贴板');
+    ElMessage.success(t('MG_ORGAN_MSG_COPY_OK', '已复制到剪贴板'));
   } catch {
-    ElMessage.error('复制失败，请手动复制');
+    ElMessage.error(t('MG_ORGAN_MSG_COPY_FAIL', '复制失败，请手动复制'));
   }
 };
 

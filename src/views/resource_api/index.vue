@@ -4,30 +4,55 @@
     <el-card class="resource_api-page__search" shadow="never">
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
+        <el-form-item :label="$t('MG_RES_API_FIELD_SERVICE', '服务名称')">
+          <el-select
+            v-model="queryForm.serviceCode"
+            :placeholder="$t('MG_RES_API_PH_SERVICE', '请选择服务名称')"
+            clearable
+            style="width: 200px"
+          >
         <!-- 业务特定查询字段 -->
-        <el-form-item label="服务名称">
-          <el-select v-model="queryForm.serviceCode" placeholder="请选择服务名称" clearable style="width: 200px">
             <el-option v-for="item in srvRegistryOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="接口标签">
-          <el-input v-model="queryForm.apiTags" placeholder="请输入接口标签" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_RES_API_FIELD_TAGS', '接口标签')">
+          <el-input
+            v-model="queryForm.apiTags"
+            :placeholder="$t('MG_RES_API_PH_TAGS', '请输入接口标签')"
+            clearable
+            style="width: 200px"
+          />
         </el-form-item>
-        <el-form-item label="接口名称">
-          <el-input v-model="queryForm.name" placeholder="请输入接口名称" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_RES_API_FIELD_NAME', '接口名称')">
+          <el-input
+            v-model="queryForm.name"
+            :placeholder="$t('MG_RES_API_PH_NAME', '请输入接口名称')"
+            clearable
+            style="width: 200px"
+          />
         </el-form-item>
-        <el-form-item label="请求方法">
-          <el-input v-model="queryForm.method" placeholder="请输入请求方法" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_RES_API_FIELD_METHOD', '请求方法')">
+          <el-input
+            v-model="queryForm.method"
+            :placeholder="$t('MG_RES_API_PH_METHOD', '请输入请求方法')"
+            clearable
+            style="width: 200px"
+          />
         </el-form-item>
-        <el-form-item label="请求路径">
-          <el-input v-model="queryForm.path" placeholder="请输入请求路径" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_RES_API_FIELD_PATH', '请求路径')">
+          <el-input
+            v-model="queryForm.path"
+            :placeholder="$t('MG_RES_API_PH_PATH', '请输入请求路径')"
+            clearable
+            style="width: 200px"
+          />
         </el-form-item>
 
         <!-- 操作按钮 -->
         <template #actions>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ $t('G2_BTN_QUERY', '查询') }}</el-button>
+            <el-button @click="handleReset">{{ $t('G2_BTN_RESET', '重置') }}</el-button>
           </el-form-item>
         </template>
       </QueryForm>
@@ -36,32 +61,49 @@
     <!-- 标题和操作按钮 -->
     <div class="resource_api-page__header">
       <div class="resource_api-page__title-group">
-        <h2>管理资源接口数据</h2>
+        <h2>{{ $t('MG_RES_API_TITLE', '管理资源接口数据') }}</h2>
       </div>
       <div style="display:flex; gap:8px;">
-        <el-button type="primary" v-permission="'resource_api:import'" @click="handleImport">导入资源接口</el-button> 
-        <el-button type="primary" v-permission="'resource_api:add'" @click="handleCreate">新增资源接口</el-button>
+        <el-button type="primary" v-permission="'resource_api:import'" @click="handleImport">
+          {{ $t('MG_RES_API_BTN_IMPORT', '导入资源接口') }}
+        </el-button>
+        <el-button type="primary" v-permission="'resource_api:add'" @click="handleCreate">
+          {{ $t('MG_RES_API_BTN_ADD', '新增资源接口') }}
+        </el-button>
       </div>
     </div>
 
-    <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true" @sort-change="handleSortChange">
-      <el-table-column prop="id" label="资源接口标识" width="120" />
-      <el-table-column prop="serviceName" label="服务名称" width="180" />
-      <el-table-column prop="apiTags" label="接口标签" width="180" />
-      <el-table-column prop="name" label="接口名称" width="180" />
-      <el-table-column prop="method" label="请求方法" width="180" />
-      <el-table-column prop="path" label="请求路径" width="180" />
-      <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
-      <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
-      <el-table-column label="操作" fixed="right" width="280">
+    <SortableTable
+      :data="tableData"
+      border
+      stripe
+      style="width: 100%"
+      :enable-multi-sort="true"
+      @sort-change="handleSortChange"
+    >
+      <el-table-column prop="id" :label="$t('MG_RES_API_COL_ID', '资源接口标识')" width="120" />
+      <el-table-column prop="serviceName" :label="$t('MG_RES_API_FIELD_SERVICE', '服务名称')" width="180" />
+      <el-table-column prop="apiTags" :label="$t('MG_RES_API_FIELD_TAGS', '接口标签')" width="180" />
+      <el-table-column prop="name" :label="$t('MG_RES_API_FIELD_NAME', '接口名称')" width="180" />
+      <el-table-column prop="method" :label="$t('MG_RES_API_FIELD_METHOD', '请求方法')" width="180" />
+      <el-table-column prop="path" :label="$t('MG_RES_API_FIELD_PATH', '请求路径')" width="180" />
+      <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
+      <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
         <template #default="{ row }">
-          <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
-          <el-button type="primary" v-permission="'resource_api:edit'" link size="small" @click="handleEdit(row)">编辑</el-button>
-          <el-button type="danger" v-permission="'resource_api:delete'" link size="small" @click="handleDelete(row)">删除</el-button>
+          <el-button type="primary" link size="small" @click="handleView(row)">
+            {{ $t('G2_BTN_DETAIL', '明细') }}
+          </el-button>
+          <el-button type="primary" v-permission="'resource_api:edit'" link size="small" @click="handleEdit(row)">
+            {{ $t('G2_BTN_EDIT', '编辑') }}
+          </el-button>
+          <el-button type="danger" v-permission="'resource_api:delete'" link size="small" @click="handleDelete(row)">
+            {{ $t('G2_BTN_DELETE', '删除') }}
+          </el-button>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span>操作</span>
+            <span>{{ $t('G2_FIELD_ACTION', '操作') }}</span>
             <SortManagerButton />
           </div>
         </template>
@@ -82,73 +124,90 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑资源接口' : '新增资源接口'" width="520px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
-        <el-form-item label="服务名称" prop="serviceCode">
-          <el-select v-model="editForm.serviceCode" :disabled="isEdit" placeholder="请选择服务名称" style="width: 200px">
+        <el-form-item :label="$t('MG_RES_API_FIELD_SERVICE', '服务名称')" prop="serviceCode">
+          <el-select
+            v-model="editForm.serviceCode"
+            :disabled="isEdit"
+            :placeholder="$t('MG_RES_API_PH_SERVICE', '请选择服务名称')"
+            style="width: 200px"
+          >
             <el-option v-for="item in srvRegistryOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="接口标签" prop="apiTags">
-          <el-input v-model="editForm.apiTags" placeholder="请输入接口标签" />
+        <el-form-item :label="$t('MG_RES_API_FIELD_TAGS', '接口标签')" prop="apiTags">
+          <el-input v-model="editForm.apiTags" :placeholder="$t('MG_RES_API_PH_TAGS', '请输入接口标签')" />
         </el-form-item>
-        <el-form-item label="接口名称" prop="name">
-          <el-input v-model="editForm.name" placeholder="请输入接口名称" />
+        <el-form-item :label="$t('MG_RES_API_FIELD_NAME', '接口名称')" prop="name">
+          <el-input v-model="editForm.name" :placeholder="$t('MG_RES_API_PH_NAME', '请输入接口名称')" />
         </el-form-item>
-        <el-form-item label="请求方法" prop="method">
-          <el-input v-model="editForm.method" placeholder="请输入请求方法" />
+        <el-form-item :label="$t('MG_RES_API_FIELD_METHOD', '请求方法')" prop="method">
+          <el-input v-model="editForm.method" :placeholder="$t('MG_RES_API_PH_METHOD', '请输入请求方法')" />
         </el-form-item>
-        <el-form-item label="请求路径" prop="path">
-          <el-input v-model="editForm.path" placeholder="请输入请求路径" />
+        <el-form-item :label="$t('MG_RES_API_FIELD_PATH', '请求路径')" prop="path">
+          <el-input v-model="editForm.path" :placeholder="$t('MG_RES_API_PH_PATH', '请输入请求路径')" />
         </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="editForm.description" placeholder="请输入描述" />
+        <el-form-item :label="$t('MG_RES_API_FIELD_DESC', '描述')" prop="description">
+          <el-input v-model="editForm.description" :placeholder="$t('MG_RES_API_PH_DESC', '请输入描述')" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitEdit">保 存</el-button>
+          <el-button @click="editDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="submitEdit">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
+    <el-dialog v-model="detailDialogVisible" :title="$t('MG_RES_API_DETAIL', '资源接口明细')" width="520px">
     <!-- 明细弹窗 -->
-    <el-dialog v-model="detailDialogVisible" title="资源接口明细" width="520px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="服务名称">
+        <el-descriptions-item :label="$t('MG_RES_API_FIELD_SERVICE', '服务名称')">
           <el-tag>
-            {{srvRegistryOptions.find(item => item.value === currentRow?.serviceCode)?.label || ''}}
+            {{ srvRegistryOptions.find(item => item.value === currentRow?.serviceCode)?.label || '' }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="接口标签">{{ currentRow?.apiTags }}</el-descriptions-item>
-        <el-descriptions-item label="接口名称">{{ currentRow?.name }}</el-descriptions-item>
-        <el-descriptions-item label="请求方法">{{ currentRow?.method }}</el-descriptions-item>
-        <el-descriptions-item label="请求路径">{{ currentRow?.path }}</el-descriptions-item>
-        <el-descriptions-item label="描述">{{ currentRow?.description }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_RES_API_FIELD_TAGS', '接口标签')">{{ currentRow?.apiTags }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_RES_API_FIELD_NAME', '接口名称')">{{ currentRow?.name }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_RES_API_FIELD_METHOD', '请求方法')">{{ currentRow?.method }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_RES_API_FIELD_PATH', '请求路径')">{{ currentRow?.path }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_RES_API_FIELD_DESC', '描述')">{{ currentRow?.description }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <span class="dialog-footer">
-          <el-button type="primary" @click="detailDialogVisible = false">关 闭</el-button>
+          <el-button type="primary" @click="detailDialogVisible = false">
+            {{ $t('G2_BTN_CLOSE', '关闭') }}
+          </el-button>
         </span>
       </template>
     </el-dialog>
 
+    <el-dialog v-model="importDialogVisible" :title="$t('MG_RES_API_DLG_IMPORT', '导入资源接口')" width="520px">
     <!-- 导入弹窗 -->
-    <el-dialog v-model="importDialogVisible" title="导入资源接口" width="520px">
       <el-form ref="importFormRef" :model="importForm" :rules="importRules" label-width="100px">
-        <el-form-item label="服务名称" prop="serviceCode">
-          <el-select v-model="importForm.serviceCode" placeholder="请选择服务名称" style="width: 200px" @change="handleImportServiceChange">
-            <el-option v-for="item in routeOptions" :key="item.serviceCode" :label="item.name" :value="item.serviceCode" />
+        <el-form-item :label="$t('MG_RES_API_FIELD_SERVICE', '服务名称')" prop="serviceCode">
+          <el-select
+            v-model="importForm.serviceCode"
+            :placeholder="$t('MG_RES_API_PH_SERVICE', '请选择服务名称')"
+            style="width: 200px"
+            @change="handleImportServiceChange"
+          >
+            <el-option
+              v-for="item in routeOptions"
+              :key="item.serviceCode"
+              :label="item.name"
+              :value="item.serviceCode"
+            />
           </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="importDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitImport">保 存</el-button>
+          <el-button @click="importDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="submitImport">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
@@ -156,12 +215,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import { t } from '@platform/i18n';
 import { ResourceApiApi } from './api';
 import { ServiceRegistryApi } from '../service_registry/api';
-import type { ResourceApi, ResourceApiPayload, ResourceApiQuery, UploadApiDto} from './type';
+import type { ResourceApi, ResourceApiPayload, ResourceApiQuery, UploadApiDto } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMessage } from '@/components';
@@ -185,6 +245,7 @@ const loadDicts = async () => {
     routePrefix: u.routePrefix,
     name: u.name,
   }));
+// 表单校验规则 
 };
 
 // 组件引用
@@ -222,8 +283,9 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
-        .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
+      Object.entries({ ...baseQueryForm, ...queryForm }).filter(
+        ([_, v]) => (v ?? '') !== '' && [v].flat().length,
+      ),
     ) as ResourceApiQuery;
 
     // 请求分页数据
@@ -236,8 +298,9 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    showErrorMessage(error || '加载列表失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
+    showErrorMessage(msg);
   }
 };
 
@@ -249,6 +312,7 @@ const handleSortChange = (params: Record<string, string>) => {
 
 // 查询
 const handleSearch = () => {
+  pagination.pageNum = 1; // 重置到第一页
   pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
@@ -267,12 +331,14 @@ const handleReset = () => {
   queryForm.method = '';
   queryForm.path = '';
   pagination.pageNum = 1; // 重置到第一页
+  pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
 
 // 分页大小变化
 const handleSizeChange = (size: number) => {
   pagination.pageSize = size;
+  pagination.pageNum = 1; // 重置到第一页
   pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
@@ -296,9 +362,11 @@ const handleView = (row: ResourceApi) => {
 
 // 删除数据记录
 const handleDelete = (row: ResourceApi) => {
-  ElMessageBox.confirm(`确认删除资源「${row.id}」吗？`, '提示', {
-    type: 'warning',
-  })
+  ElMessageBox.confirm(
+    t('MG_RES_API_DEL_CONFIRM', `确认删除资源「${row.id}」吗？`),
+    t('G2_LBL_TIP', '提示'),
+    { type: 'warning' },
+  )
     .then(async () => {
       try {
         await ResourceApiApi.remove(row.id);
@@ -307,9 +375,10 @@ const handleDelete = (row: ResourceApi) => {
           pagination.pageNum--;
         }
         await loadData();
-        ElMessage.success('删除成功');
-      } catch (error: any) {
-        showErrorMessage(error || '删除失败');
+        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
+        showErrorMessage(msg);
       }
     })
     .catch(() => {});
@@ -317,10 +386,8 @@ const handleDelete = (row: ResourceApi) => {
 
 // 保存弹窗引用
 const editDialogVisible = ref(false);
-
 // 修改标记状态
 const isEdit = ref(false);
-
 // 修改组件引用
 const editFormRef = ref<FormInstance | null>(null);
 
@@ -335,14 +402,17 @@ const editForm = reactive({
   description: '',
 });
 
-// 表单校验规则 
-const editRules: FormRules = {
-  serviceCode: [{ required: true, message: '请输入服务编码', trigger: 'blur' }],
-  apiTags: [{ required: true, message: '请输入接口标签', trigger: 'blur' }],
-  name: [{ required: true, message: '请输入接口名称', trigger: 'blur' }],
-  method: [{ required: true, message: '请输入请求方法', trigger: 'blur' }],
-  path: [{ required: true, message: '请输入请求路径', trigger: 'blur' }],
-};
+const editDialogTitle = computed(() =>
+  isEdit.value ? t('MG_RES_API_DLG_EDIT', '编辑资源接口') : t('MG_RES_API_DLG_ADD', '新增资源接口'),
+);
+
+const editRules = computed<FormRules>(() => ({
+  serviceCode: [{ required: true, message: t('MG_RES_API_VLD_SERVICE', '请输入服务编码'), trigger: 'blur' }],
+  apiTags: [{ required: true, message: t('MG_RES_API_VLD_TAGS', '请输入接口标签'), trigger: 'blur' }],
+  name: [{ required: true, message: t('MG_RES_API_VLD_NAME', '请输入接口名称'), trigger: 'blur' }],
+  method: [{ required: true, message: t('MG_RES_API_VLD_METHOD', '请输入请求方法'), trigger: 'blur' }],
+  path: [{ required: true, message: t('MG_RES_API_VLD_PATH', '请输入请求路径'), trigger: 'blur' }],
+}));
 
 // 打开创建弹窗
 const handleCreate = () => {
@@ -395,17 +465,17 @@ const submitEdit = async () => {
       payload.id = editForm.id;
     }
     await ResourceApiApi.save(payload);
-    ElMessage.success(isEdit.value ? '更新成功' : '新增成功');
+    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
     await loadData();
     editDialogVisible.value = false;
-  } catch (error: any) {
-    showErrorMessage(error || '保存失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
+    showErrorMessage(msg);
   }
 };
 
 // 导入弹窗引用
 const importDialogVisible = ref(false);
-
 // 导入组件引用
 const importFormRef = ref<FormInstance | null>(null);
 
@@ -414,15 +484,14 @@ const importForm = reactive({
   serviceCode: '',
 });
 
-// 表单校验规则 
-const importRules: FormRules = {
-  serviceCode: [{ required: true, message: '请输入服务编码', trigger: 'blur' }],
-};
+const importRules = computed<FormRules>(() => ({
+  serviceCode: [{ required: true, message: t('MG_RES_API_VLD_SERVICE', '请输入服务编码'), trigger: 'blur' }],
+}));
 
 // 打开导入弹窗
 const handleImport = () => {
   importFormRef.value?.clearValidate();
-  importForm.serviceCode = "";
+  importForm.serviceCode = '';
   importApiDocs.value = [];
   importDialogVisible.value = true;
 };
@@ -468,9 +537,10 @@ const handleImportServiceChange = async (serviceCode: string) => {
     });
 
     importApiDocs.value = parsed;
-  } catch (error: any) {
+  } catch (error: unknown) {
     importApiDocs.value = [];
-    showErrorMessage(error || '加载 API 文档失败');
+    const msg = error instanceof Error ? error.message : t('MG_RES_API_MSG_DOCS_FAIL', '加载 API 文档失败');
+    showErrorMessage(msg);
   }
 };
 
@@ -482,7 +552,7 @@ const submitImport = async () => {
 
   try {
     if (!importApiDocs.value.length) {
-      ElMessage.warning('未获取到可导入的接口，请先选择服务并确认 api-docs 可访问');
+      ElMessage.warning(t('MG_RES_API_WARN_NO_IMPORT', '未获取到可导入的接口，请先选择服务并确认 api-docs 可访问'));
       return;
     }
 
@@ -490,17 +560,18 @@ const submitImport = async () => {
       apis: importApiDocs.value,
     });
 
-    ElMessage.success(`导入成功，共 ${importCount} 条`);
+    ElMessage.success(t('MG_RES_API_MSG_IMPORT_OK', `导入成功，共 ${importCount} 条`));
     await loadData();
     importDialogVisible.value = false;
-  } catch (error: any) {
-    showErrorMessage(error || '导入失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('MG_RES_API_MSG_IMPORT_FAIL', '导入失败');
+    showErrorMessage(msg);
   }
 };
 
-// 挂载回调
-onMounted(async() => {
+onMounted(async () => {
   // 先准备字典
+// 挂载回调
   await loadDicts();
   // 再查询列表
   await loadData();
@@ -557,4 +628,3 @@ onMounted(async() => {
   margin-top: 16px;
 }
 </style>
-

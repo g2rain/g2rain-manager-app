@@ -12,6 +12,7 @@
  */
 
 import type { RouteRecordRaw } from 'vue-router';
+import { t } from '@platform/i18n';
 
 /**
  * 单条路由配置
@@ -24,13 +25,20 @@ export interface ViewRouteConfig {
   name?: string;
   /** 路由元信息 */
   meta: {
-    /** 标题，用于菜单和面包屑展示 */
-    title: string;
+    /** i18n key，用于菜单和面包屑展示 */
+    titleKey: string;
+    /** 标题降级文案 */
+    titleDefault: string;
     /** 是否需要登录权限 */
+    /** 标题，用于菜单和面包屑展示 */
     requiresAuth: boolean;
     /** 是否在首页展示入口 */
     showInHome?: boolean;
   };
+}
+
+function resolveRouteTitle(meta: ViewRouteConfig['meta']): string {
+  return t(meta.titleKey, meta.titleDefault);
 }
 
 /**
@@ -43,7 +51,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/passport/index.vue'),
     name: 'Passport',
     meta: {
-      title: 'passport',
+      titleKey: 'MG_ROUTE_PASSPORT',
+      titleDefault: '账号管理',
       requiresAuth: true,
       showInHome: true,
     },
@@ -52,7 +61,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/user/index.vue'),
     name: 'User',
     meta: {
-      title: 'user',
+      titleKey: 'MG_ROUTE_USER',
+      titleDefault: '用户管理',
       requiresAuth: true,
       showInHome: true,
     },
@@ -61,7 +71,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/organ/index.vue'),
     name: 'Organ',
     meta: {
-      title: 'organ',
+      titleKey: 'MG_ROUTE_ORGAN',
+      titleDefault: '机构管理',
       requiresAuth: true,
       showInHome: true,
     },
@@ -70,7 +81,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/resource_menu/index.vue'),
     name: 'ResourceMenu',
     meta: {
-      title: 'resource_menu',
+      titleKey: 'MG_ROUTE_RESOURCE_MENU',
+      titleDefault: '菜单资源',
       requiresAuth: true,
       showInHome: true,
     },
@@ -79,7 +91,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/resource_page/index.vue'),
     name: 'ResourcePage',
     meta: {
-      title: 'resource_page',
+      titleKey: 'MG_ROUTE_RESOURCE_PAGE',
+      titleDefault: '页面资源',
       requiresAuth: true,
       showInHome: true,
     },
@@ -88,7 +101,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/control_unit/index.vue'),
     name: 'ControlUnit',
     meta: {
-      title: 'control_unit',
+      titleKey: 'MG_ROUTE_CONTROL_UNIT',
+      titleDefault: '功能权限',
       requiresAuth: true,
       showInHome: true,
     },
@@ -97,7 +111,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/role/index.vue'),
     name: 'Role',
     meta: {
-      title: 'role',
+      titleKey: 'MG_ROUTE_ROLE',
+      titleDefault: '角色管理',
       requiresAuth: true,
       showInHome: true,
     },
@@ -106,7 +121,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/control_domain/index.vue'),
     name: 'ControlDomain',
     meta: {
-      title: 'control_domain',
+      titleKey: 'MG_ROUTE_CONTROL_DOMAIN',
+      titleDefault: '业务能力',
       requiresAuth: true,
       showInHome: true,
     },
@@ -115,7 +131,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/application/index.vue'),
     name: 'Application',
     meta: {
-      title: 'application',
+      titleKey: 'MG_ROUTE_APPLICATION',
+      titleDefault: '应用管理',
       requiresAuth: true,
       showInHome: true,
     },
@@ -124,7 +141,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/application_authorization/index.vue'),
     name: 'ApplicationAuthorization',
     meta: {
-      title: 'application_authorization',
+      titleKey: 'MG_ROUTE_APPLICATION_AUTHORIZATION',
+      titleDefault: '应用授权',
       requiresAuth: true,
       showInHome: true,
     },
@@ -133,7 +151,8 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/resource_settings/index.vue'),
     name: 'ResourceSettings',
     meta: {
-      title: 'resource_settings',
+      titleKey: 'MG_ROUTE_RESOURCE_SETTINGS',
+      titleDefault: '资源设置',
       requiresAuth: true,
       showInHome: true,
     },
@@ -142,59 +161,82 @@ export const routeMap: Record<string, ViewRouteConfig> = {
     component: () => import('@/views/service_registry/index.vue'),
     name: 'ServiceRegistry',
     meta: {
-      title: 'service_registry',
+      titleKey: 'MG_ROUTE_SERVICE_REGISTRY',
+      titleDefault: '服务注册',
       requiresAuth: true,
-      showInHome: true
-
+      showInHome: true,
     },
   },
   '/resource_api': {
     component: () => import('@/views/resource_api/index.vue'),
     name: 'ResourceApi',
     meta: {
-      title: 'resource_api',
+      titleKey: 'MG_ROUTE_RESOURCE_API',
+      titleDefault: '资源接口',
       requiresAuth: true,
-      showInHome: true
+      showInHome: true,
     },
   },
   '/login_token': {
     component: () => import('@/views/login_token/index.vue'),
     name: 'LoginToken',
     meta: {
-      title: 'login_token',
+      titleKey: 'MG_ROUTE_LOGIN_TOKEN',
+      titleDefault: '登陆日志',
       requiresAuth: true,
-      showInHome: true
+      showInHome: true,
     },
   },
   '/audit_event': {
     component: () => import('@/views/audit_event/index.vue'),
     name: 'AuditEvent',
     meta: {
-      title: 'audit_event',
+      titleKey: 'MG_ROUTE_AUDIT_EVENT',
+      titleDefault: '审计日志',
       requiresAuth: true,
-      showInHome: true
+      showInHome: true,
     },
   },
-    '/personal_static_access_token': {
-            component: () => import('@/views/personal_static_access_token/index.vue'),
-            name: 'PersonalStaticAccessToken',
-            meta: { title: '个人静态访问令牌', requiresAuth: true, showInHome: true },
-        },
-    '/passport_idp_binding': {
-            component: () => import('@/views/passport_idp_binding/index.vue'),
-            name: 'PassportIdpBinding',
-            meta: { title: '账号与外部身份源绑定表', requiresAuth: true, showInHome: true },
-        },
-    '/application_idp_provision': {
-            component: () => import('@/views/application_idp_provision/index.vue'),
-            name: 'ApplicationIdpProvision',
-            meta: { title: '外部身份源应用与平台应用的绑定', requiresAuth: true, showInHome: true },
-        },
-    '/idp_enterprise_organ': {
-            component: () => import('@/views/idp_enterprise_organ/index.vue'),
-            name: 'IdpEnterpriseOrgan',
-            meta: { title: '外部企业', requiresAuth: true, showInHome: true },
-        }
+  '/personal_static_access_token': {
+    component: () => import('@/views/personal_static_access_token/index.vue'),
+    name: 'PersonalStaticAccessToken',
+    meta: {
+      titleKey: 'MG_ROUTE_PAT',
+      titleDefault: '个人静态访问令牌',
+      requiresAuth: true,
+      showInHome: true,
+    },
+  },
+  '/passport_idp_binding': {
+    component: () => import('@/views/passport_idp_binding/index.vue'),
+    name: 'PassportIdpBinding',
+    meta: {
+      titleKey: 'MG_ROUTE_PASSPORT_IDP_BINDING',
+      titleDefault: '账号与外部身份源绑定',
+      requiresAuth: true,
+      showInHome: true,
+    },
+  },
+  '/application_idp_provision': {
+    component: () => import('@/views/application_idp_provision/index.vue'),
+    name: 'ApplicationIdpProvision',
+    meta: {
+      titleKey: 'MG_ROUTE_APPLICATION_IDP_PROVISION',
+      titleDefault: '外部身份源应用绑定',
+      requiresAuth: true,
+      showInHome: true,
+    },
+  },
+  '/idp_enterprise_organ': {
+    component: () => import('@/views/idp_enterprise_organ/index.vue'),
+    name: 'IdpEnterpriseOrgan',
+    meta: {
+      titleKey: 'MG_ROUTE_IDP_ENTERPRISE_ORGAN',
+      titleDefault: '外部企业',
+      requiresAuth: true,
+      showInHome: true,
+    },
+  },
 };
 
 /**
@@ -208,7 +250,10 @@ export function getRouteConfig(): RouteRecordRaw[] {
       path,
       name,
       component,
-      meta,
+      meta: {
+        ...meta,
+        title: resolveRouteTitle(meta),
+      },
     } as RouteRecordRaw;
   });
 }
@@ -242,9 +287,8 @@ export function getHomeRoutes(): Array<{ path: string; title: string; name?: str
       const { meta, name } = config;
       return {
         path,
-        title: meta.title,
+        title: resolveRouteTitle(meta),
         name,
       };
     });
 }
-

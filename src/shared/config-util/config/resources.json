@@ -115,6 +115,14 @@
     },
     {
       "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "application_authorization:status_update",
+      "pageElementType": "switch",
+      "pageCode": "application_authorization",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
       "pageElementName": "新增",
       "pageElementCode": "application_idp_provision:add",
       "pageElementType": "button",
@@ -182,6 +190,14 @@
       "pageElementName": "public_key_config",
       "pageElementCode": "application:public_key_config",
       "pageElementType": "button",
+      "pageCode": "application",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "application:status_update",
+      "pageElementType": "switch",
       "pageCode": "application",
       "status": "ENABLED"
     },
@@ -259,6 +275,14 @@
     },
     {
       "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "control_unit:status_update",
+      "pageElementType": "switch",
+      "pageCode": "control_unit",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
       "pageElementName": "新增",
       "pageElementCode": "idp_enterprise_organ:add",
       "pageElementType": "button",
@@ -331,6 +355,14 @@
     },
     {
       "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "organ:status_update",
+      "pageElementType": "switch",
+      "pageCode": "organ",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
       "pageElementName": "删除",
       "pageElementCode": "passport_idp_binding:delete",
       "pageElementType": "button",
@@ -363,6 +395,14 @@
     },
     {
       "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "passport:status_update",
+      "pageElementType": "switch",
+      "pageCode": "passport",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
       "pageElementName": "新增",
       "pageElementCode": "personal_static_access_token:add",
       "pageElementType": "button",
@@ -382,6 +422,14 @@
       "pageElementName": "编辑",
       "pageElementCode": "personal_static_access_token:edit",
       "pageElementType": "button",
+      "pageCode": "personal_static_access_token",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "personal_static_access_token:status_update",
+      "pageElementType": "switch",
       "pageCode": "personal_static_access_token",
       "status": "ENABLED"
     },

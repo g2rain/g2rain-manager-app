@@ -5,29 +5,29 @@
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <!-- 业务特定查询字段 -->
-        <el-form-item label="所属应用">
-          <el-select v-model="queryForm.applicationId" placeholder="请选择所属应用" clearable style="width: 200px">
+        <el-form-item :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')">
+          <el-select v-model="queryForm.applicationId" :placeholder="$t('MG_CTRL_DOM_PH_APP', '请选择所属应用')" clearable style="width: 200px">
             <el-option v-for="item in applicationOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="业务能力类型">
-          <DictSelect v-model="queryForm.controlDomainType" usage-code="CONTROL_DOMAIN_TYPE" :api-method="DictItemApi.select" placeholder="请选择业务能力类型"/>
+        <el-form-item :label="$t('MG_CTRL_DOM_FIELD_TYPE', '业务能力类型')">
+          <DictSelect v-model="queryForm.controlDomainType" usage-code="CONTROL_DOMAIN_TYPE" :api-method="DictItemApi.select" :placeholder="$t('MG_CTRL_DOM_PH_TYPE', '请选择业务能力类型')"/>
         </el-form-item>
 
-        <el-form-item label="业务能力名称">
-          <el-input v-model="queryForm.controlDomainName" placeholder="请输入业务能力名称" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_CTRL_DOM_FIELD_NAME', '业务能力名称')">
+          <el-input v-model="queryForm.controlDomainName" :placeholder="$t('MG_CTRL_DOM_PH_NAME', '请输入业务能力名称')" clearable style="width: 200px" />
         </el-form-item>
 
-        <el-form-item label="业务能力范围">
-          <DictSelect v-model="queryForm.controlDomainScope" usage-code="CONTROL_DOMAIN_SCOPE" :api-method="DictItemApi.select" placeholder="请选择业务能力范围"/>
+        <el-form-item :label="$t('MG_CTRL_DOM_FIELD_SCOPE', '业务能力范围')">
+          <DictSelect v-model="queryForm.controlDomainScope" usage-code="CONTROL_DOMAIN_SCOPE" :api-method="DictItemApi.select" :placeholder="$t('MG_CTRL_DOM_PH_SCOPE', '请选择业务能力范围')"/>
         </el-form-item>
 
         <!-- 操作按钮 -->
         <template #actions>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ $t('G2_BTN_QUERY', '查询') }}</el-button>
+            <el-button @click="handleReset">{{ $t('G2_BTN_RESET', '重置') }}</el-button>
           </el-form-item>
         </template>
       </QueryForm>
@@ -36,47 +36,47 @@
     <!-- 标题和操作按钮 -->
     <div class="control-domain-page__header">
       <div class="control-domain-page__title-group">
-        <h2>管理业务能力数据</h2>
+        <h2>{{ $t('MG_CTRL_DOM_TITLE', '管理业务能力数据') }}</h2>
       </div>
-      <el-button type="primary" v-permission="'control_domain:add'" @click="handleCreate">新增业务能力</el-button>
+      <el-button type="primary" v-permission="'control_domain:add'" @click="handleCreate">{{ $t('MG_CTRL_DOM_BTN_ADD', '新增业务能力') }}</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
-      <el-table-column prop="id" label="业务能力序号" width="120" />
-      <el-table-column prop="applicationName" label="所属应用" width="140" />
-      <el-table-column prop="controlDomainType" label="业务能力类型" width="180">
+      <el-table-column prop="id" :label="$t('MG_CTRL_DOM_COL_ID', '业务能力序号')" width="120" />
+      <el-table-column prop="applicationName" :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')" width="140" />
+      <el-table-column prop="controlDomainType" :label="$t('MG_CTRL_DOM_FIELD_TYPE', '业务能力类型')" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
             <DictText :value="row?.controlDomainType" usage-code="CONTROL_DOMAIN_TYPE" :api-method="DictItemApi.select"/>
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="controlDomainName" label="业务能力名称" width="180" />
-      <el-table-column prop="controlDomainScope" label="业务能力范围" width="180">
+      <el-table-column prop="controlDomainName" :label="$t('MG_CTRL_DOM_FIELD_NAME', '业务能力名称')" width="180" />
+      <el-table-column prop="controlDomainScope" :label="$t('MG_CTRL_DOM_FIELD_SCOPE', '业务能力范围')" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
             <DictText :value="row?.controlDomainScope" usage-code="CONTROL_DOMAIN_SCOPE" :api-method="DictItemApi.select"/>
           </el-tag>
         </template>
       </el-table-column>
-      <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
-      <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
-      <el-table-column label="操作" fixed="right" width="300">
+      <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
+      <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="300">
         <template #default="{ row }">
-          <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
+          <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
           <el-button type="primary" v-permission="'control_domain:edit'" link size="small"
-            @click="handleEdit(row)">编辑</el-button>
+            @click="handleEdit(row)">{{ $t('G2_BTN_EDIT', '编辑') }}</el-button>
           <el-button type="success" v-permission="'control_domain:control_utils_associate'" link size="small"
-            @click="handleAssociateControlUtils(row)">关联功能权限</el-button>
+            @click="handleAssociateControlUtils(row)">{{ $t('MG_CTRL_DOM_BTN_ASSOCIATE', '关联功能权限') }}</el-button>
           <el-button type="warning" v-permission="'control_domain:features_activate'" link size="small"
-            @click="handleActivateFeatures(row)">开通功能</el-button>
+            @click="handleActivateFeatures(row)">{{ $t('MG_CTRL_DOM_BTN_ACTIVATE', '开通功能') }}</el-button>
           <el-button type="danger" v-permission="'control_domain:delete'" link size="small"
-            @click="handleDelete(row)">删除</el-button>
+            @click="handleDelete(row)">{{ $t('G2_BTN_DELETE', '删除') }}</el-button>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span>操作</span>
+            <span>{{ $t('G2_FIELD_ACTION', '操作') }}</span>
             <SortManagerButton />
           </div>
         </template>
@@ -91,30 +91,30 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑业务能力' : '新增业务能力'" width="520px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="150px">
-        <el-form-item label="所属应用" prop="applicationId">
-          <el-select v-model="editForm.applicationId" :disabled="isEdit" placeholder="请选择所属应用" style="width: 200px">
+        <el-form-item :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')" prop="applicationId">
+          <el-select v-model="editForm.applicationId" :disabled="isEdit" :placeholder="$t('MG_CTRL_DOM_PH_APP', '请选择所属应用')" style="width: 200px">
             <el-option v-for="item in applicationOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="业务能力类型" prop="controlDomainType">
+        <el-form-item :label="$t('MG_CTRL_DOM_FIELD_TYPE', '业务能力类型')" prop="controlDomainType">
           <DictSelect 
             v-model="editForm.controlDomainType" 
             usage-code="CONTROL_DOMAIN_TYPE" 
             :disabled="isEdit" 
             :api-method="DictItemApi.select" 
             :clearable="false"
-            placeholder="请选择业务能力类型"
+            :placeholder="$t('MG_CTRL_DOM_PH_TYPE', '请选择业务能力类型')"
           />
         </el-form-item>
 
-        <el-form-item label="业务能力名称" prop="controlDomainName">
-          <el-input v-model="editForm.controlDomainName" placeholder="请输入业务能力名称"  style="width: 200px"/>
+        <el-form-item :label="$t('MG_CTRL_DOM_FIELD_NAME', '业务能力名称')" prop="controlDomainName">
+          <el-input v-model="editForm.controlDomainName" :placeholder="$t('MG_CTRL_DOM_PH_NAME', '请输入业务能力名称')"  style="width: 200px"/>
         </el-form-item>
 
-        <el-form-item label="业务能力范围" prop="controlDomainScope">
+        <el-form-item :label="$t('MG_CTRL_DOM_FIELD_SCOPE', '业务能力范围')" prop="controlDomainScope">
           <DictSelect
             :key="editForm.controlDomainType || '_empty'"
             v-model="editForm.controlDomainScope"
@@ -122,52 +122,52 @@
             :disabled="isEdit"
             :api-method="selectControlDomainScope"
             :clearable="false"
-            placeholder="请选择业务能力范围"
+            :placeholder="$t('MG_CTRL_DOM_PH_SCOPE', '请选择业务能力范围')"
           />
         </el-form-item>
 
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="editForm.description" type="textarea" :rows="4" placeholder="请输入描述" show-word-limit
+        <el-form-item :label="$t('MG_FIELD_DESC', '描述')" prop="description">
+          <el-input v-model="editForm.description" type="textarea" :rows="4" :placeholder="$t('MG_PH_DESC', '请输入描述')" show-word-limit
             maxlength="200" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitEdit">保 存</el-button>
+          <el-button @click="editDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="submitEdit">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- 明细弹窗 -->
-    <el-dialog v-model="detailDialogVisible" title="业务能力明细" width="520px">
+    <el-dialog v-model="detailDialogVisible" :title="$t('MG_CTRL_DOM_DETAIL', '业务能力明细')" width="520px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="业务能力序号">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item label="所属应用">{{ currentRow?.applicationName }}</el-descriptions-item>
-        <el-descriptions-item label="业务能力类型">
+        <el-descriptions-item :label="$t('MG_CTRL_DOM_COL_ID', '业务能力序号')">{{ currentRow?.id }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')">{{ currentRow?.applicationName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_CTRL_DOM_FIELD_TYPE', '业务能力类型')">
           <el-tag>
             <DictText :value="currentRow?.controlDomainType" usage-code="CONTROL_DOMAIN_TYPE" :api-method="DictItemApi.select"/>
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="业务能力名称">{{ currentRow?.controlDomainName }}</el-descriptions-item>
-        <el-descriptions-item label="业务能力范围">
+        <el-descriptions-item :label="$t('MG_CTRL_DOM_FIELD_NAME', '业务能力名称')">{{ currentRow?.controlDomainName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_CTRL_DOM_FIELD_SCOPE', '业务能力范围')">
           <el-tag>
             <DictText :value="currentRow?.controlDomainScope" usage-code="CONTROL_DOMAIN_SCOPE" :api-method="DictItemApi.select"/>
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="描述">{{ currentRow?.description }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_FIELD_DESC', '描述')">{{ currentRow?.description }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <span class="dialog-footer">
-          <el-button type="primary" @click="detailDialogVisible = false">关 闭</el-button>
+          <el-button type="primary" @click="detailDialogVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- 关联功能权限 -->
-    <el-dialog v-model="associateControlUtilsDialog.visible" title="关联功能权限" width="600px">
+    <el-dialog v-model="associateControlUtilsDialog.visible" :title="$t('MG_CTRL_DOM_DLG_ASSOCIATE', '关联功能权限')" width="600px">
       <el-table :data="associateControlUtilsDialog.tableData" border>
         <!-- 多选框列 -->
         <el-table-column width="100">
@@ -176,8 +176,8 @@
           </template>
         </el-table-column>
         <!-- 业务展示列 -->
-        <el-table-column prop="controlUnitName" label="功能权限名称" />
-        <el-table-column prop="controlUnitScope" label="功能权限范围">
+        <el-table-column prop="controlUnitName" :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')" />
+        <el-table-column prop="controlUnitScope" :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')">
           <template #default="{ row }">
             <DictText :value="row?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
           </template>
@@ -185,26 +185,27 @@
       </el-table>
 
       <template #footer>
-        <el-button @click="resetAssociateControlUtilsDialog">取 消</el-button>
-        <el-button type="primary" @click="associateControlUtils">确 定</el-button>
+        <el-button @click="resetAssociateControlUtilsDialog">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+        <el-button type="primary" @click="associateControlUtils">{{ $t('G2_BTN_CONFIRM', '确定') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 开通功能 -->
-    <el-dialog v-model="activateFeaturesDialog.visible" title="开通功能" width="600px">
-      <OrganSelect v-model="activateFeaturesDialog.organId" :api-method="OrganApi.searchOrgans" placeholder="请选择所属机构" width="200px" />
+    <el-dialog v-model="activateFeaturesDialog.visible" :title="$t('MG_CTRL_DOM_DLG_ACTIVATE', '开通功能')" width="600px">
+      <OrganSelect v-model="activateFeaturesDialog.organId" :api-method="OrganApi.searchOrgans" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
       <template #footer>
-        <el-button @click="resetActivateFeaturesDialogDialog">取 消</el-button>
-        <el-button type="primary" @click="activateFeatures">确 定</el-button>
+        <el-button @click="resetActivateFeaturesDialogDialog">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+        <el-button type="primary" @click="activateFeatures">{{ $t('G2_BTN_CONFIRM', '确定') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, onMounted } from 'vue';
+import { ref, reactive, computed, watch, onMounted } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import { t } from '@platform/i18n';
 import { ControlDomainApi } from './api';
 import { ControlUnitApi } from '../control_unit/api'
 import { ApplicationApi } from '../application/api';
@@ -276,8 +277,9 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载列表失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
+    ElMessage.error(msg);
   }
 };
 
@@ -335,9 +337,11 @@ const handleView = (row: ControlDomain) => {
 
 // 删除数据记录
 const handleDelete = (row: ControlDomain) => {
-  ElMessageBox.confirm(`确认删除业务能力「${row.id}」吗？`, '提示', {
-    type: 'warning',
-  })
+  ElMessageBox.confirm(
+    t('MG_CTRL_DOM_DEL_CONFIRM', `确认删除业务能力「${row.id}」吗？`),
+    t('G2_LBL_TIP', '提示'),
+    { type: 'warning' },
+  )
     .then(async () => {
       try {
         await ControlDomainApi.remove(row.id);
@@ -346,9 +350,10 @@ const handleDelete = (row: ControlDomain) => {
           pagination.pageNum--;
         }
         await loadData();
-        ElMessage.success('删除成功');
-      } catch (error: any) {
-        ElMessage.error(error.message || '删除失败');
+        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
+        ElMessage.error(msg);
       }
     })
     .catch(() => { });
@@ -373,14 +378,18 @@ const editForm = reactive({
   description: '',
 });
 
+const editDialogTitle = computed(() =>
+  isEdit.value ? t('MG_CTRL_DOM_DLG_EDIT', '编辑业务能力') : t('MG_CTRL_DOM_DLG_ADD', '新增业务能力'),
+);
+
 // 表单校验规则
-const editRules: FormRules = {
-  applicationId: [{ required: true, message: '请选择所属应用', trigger: 'blur' }],
-  controlDomainName: [{ required: true, message: '请输入业务能力名称', trigger: 'blur' }],
-  controlDomainType: [{ required: true, message: '请选择业务能力类型', trigger: 'blur' }],
-  controlDomainScope: [{ required: true, message: '请选择业务能力范围', trigger: 'blur' }],
-  description: [{ required: false, message: '请输入描述', trigger: 'blur' }],
-};
+const editRules = computed<FormRules>(() => ({
+  applicationId: [{ required: true, message: t('MG_CTRL_DOM_VLD_APP', '请选择所属应用'), trigger: 'blur' }],
+  controlDomainName: [{ required: true, message: t('MG_CTRL_DOM_VLD_NAME', '请输入业务能力名称'), trigger: 'blur' }],
+  controlDomainType: [{ required: true, message: t('MG_CTRL_DOM_VLD_TYPE', '请选择业务能力类型'), trigger: 'blur' }],
+  controlDomainScope: [{ required: true, message: t('MG_CTRL_DOM_VLD_SCOPE', '请选择业务能力范围'), trigger: 'blur' }],
+  description: [{ required: false, message: t('MG_PH_DESC', '请输入描述'), trigger: 'blur' }],
+}));
 
 /** 类型为 TRADE 时，范围仅允许 CUSTOMER */
 const TRADE_SCOPE_CODE = 'CUSTOMER';
@@ -458,18 +467,19 @@ const submitEdit = async () => {
       payload.id = editForm.id;
     }
     await ControlDomainApi.save(payload);
-    ElMessage.success(isEdit.value ? '更新成功' : '新增成功');
+    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
     await loadData();
     editDialogVisible.value = false;
-  } catch (error: any) {
-    ElMessage.error(error.message || '保存失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
+    ElMessage.error(msg);
   }
 };
 
 // 关联功能权限弹窗引用
 const associateControlUtilsDialog = reactive({
-  visible: false,
-  controlDomainId: null as number | null,
+  visible: false,                             // 弹窗显示状态
+  controlDomainId: null as number | null,     // 当前记录的业务能力 ID
   tableData: [] as ControlUnit[], // 弹窗列表
   originIds: [] as number[],      // 打开弹窗时已选功能权限 id
   checkedIds: [] as number[],     // 勾选后的功能权限 id
@@ -524,8 +534,8 @@ const associateControlUtils = async () => {
     deleteControlUnitIds      // 待删功能权限
   })
 
-  ElMessage.success('配置成功')
-  resetAssociateControlUtilsDialog()
+  ElMessage.success(t('MG_CTRL_DOM_MSG_CONFIG_OK', '配置成功'));
+  resetAssociateControlUtilsDialog();
 };
 
 // 开通功能弹窗引用
@@ -555,8 +565,8 @@ const handleActivateFeatures = async (row: ControlDomain) => {
 // 提交开通功能数据
 const activateFeatures = async () => {
   if (!activateFeaturesDialog.organId) {
-    ElMessage.error('请选择机构');
-    return
+    ElMessage.error(t('MG_CTRL_DOM_MSG_SELECT_ORGAN', '请选择机构'));
+    return;
   }
 
   if (!activateFeaturesDialog.controlDomainId || !activateFeaturesDialog.applicationId) return
@@ -568,8 +578,8 @@ const activateFeatures = async () => {
     applicationId,
   })
 
-  ElMessage.success('配置成功')
-  resetActivateFeaturesDialogDialog()
+  ElMessage.success(t('MG_CTRL_DOM_MSG_CONFIG_OK', '配置成功'));
+  resetActivateFeaturesDialogDialog();
 };
 
 // 挂载回调

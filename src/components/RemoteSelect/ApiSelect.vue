@@ -5,7 +5,7 @@
     :prefetch-on-open="prefetchOnOpen"
     :value-key="valueKey"
     :label-key="labelKey"
-    :placeholder="placeholder"
+    :placeholder="resolvedPlaceholder"
     :clearable="clearable"
     :disabled="disabled"
     :width="width"
@@ -17,6 +17,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { t } from '@platform/i18n';
 import { RemoteSelect } from './index';
 import type { FetchDataFunction, RemoteSelectOption } from './types';
 
@@ -64,7 +65,7 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   valueKey: 'id',
   labelKey: 'name',
-  placeholder: '请选择',
+  placeholder: undefined,
   clearable: true,
   disabled: false,
   width: '200px',
@@ -74,6 +75,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<Emits>();
+
+const resolvedPlaceholder = computed(() => props.placeholder ?? t('G2_PH_SELECT', '请选择'));
 
 const innerValue = computed({
   get: () => props.modelValue,

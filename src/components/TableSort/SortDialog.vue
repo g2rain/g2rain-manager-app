@@ -2,7 +2,7 @@
   <!-- 排序配置弹窗 -->
   <el-dialog
       :model-value="sortDialogVisible"
-      title="排序配置"
+      :title="$t('G2_SORT_TITLE', '排序配置')"
       width="500px"
       destroy-on-close
       @update:model-value="handleDialogVisibleChange"
@@ -24,12 +24,12 @@
             <el-col :span="8">
               <el-select
                   v-model="item.order"
-                  placeholder="选择排序方式"
+                  :placeholder="$t('G2_SORT_SELECT_ORDER', '选择排序方式')"
                   size="small"
                   @change="handleSortChange"
               >
-                <el-option label="升序" value="ascending" />
-                <el-option label="降序" value="descending" />
+                <el-option :label="$t('G2_SORT_ASC', '升序')" value="ascending" />
+                <el-option :label="$t('G2_SORT_DESC', '降序')" value="descending" />
               </el-select>
             </el-col>
             <el-col :span="8">
@@ -40,7 +40,7 @@
                     size="small"
                     @click="removeSort(index)"
                 >
-                  删除
+                  {{ $t('G2_BTN_DELETE', '删除') }}
                 </el-button>
               </div>
             </el-col>
@@ -54,7 +54,7 @@
           <el-col :span="12">
             <el-select
                 v-model="newSort.prop"
-                placeholder="选择列"
+                :placeholder="$t('G2_SORT_SELECT_COL', '选择列')"
                 size="small"
                 filterable
             >
@@ -69,16 +69,16 @@
           <el-col :span="8">
             <el-select
                 v-model="newSort.order"
-                placeholder="排序方式"
+                :placeholder="$t('G2_SORT_ORDER', '排序方式')"
                 size="small"
             >
-              <el-option label="升序" value="ascending" />
-              <el-option label="降序" value="descending" />
+              <el-option :label="$t('G2_SORT_ASC', '升序')" value="ascending" />
+              <el-option :label="$t('G2_SORT_DESC', '降序')" value="descending" />
             </el-select>
           </el-col>
           <el-col :span="4">
             <el-button type="primary" size="small" @click="addSort">
-              添加
+              {{ $t('G2_BTN_ADD', '添加') }}
             </el-button>
           </el-col>
         </el-row>
@@ -87,8 +87,8 @@
 
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="handleCancel">取消</el-button>
-        <el-button type="primary" @click="applySortConfig">应用</el-button>
+        <el-button @click="handleCancel">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+        <el-button type="primary" @click="applySortConfig">{{ $t('G2_BTN_APPLY', '应用') }}</el-button>
       </span>
     </template>
   </el-dialog>
@@ -101,7 +101,7 @@
         size="small"
         @click="openSortConfig"
     >
-      排序配置
+      {{ $t('G2_SORT_CONFIG', '排序配置') }}
     </el-button>
   </template>
 </template>
