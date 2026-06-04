@@ -64,7 +64,6 @@
             active-value="PUBLISHED"
             inactive-value="UNPUBLISHED"
             usage-code="APPLICATION_STATUS"
-            :options="statusOptions"
             :api-method="({ nextValue }) => ApplicationApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"
           />
@@ -355,24 +354,10 @@ import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.t
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText, StatusSwitch } from '@/components';
 
 // 定义字典引用
-const statusOptions = ref<Array<{ label: string; value: string }>>([]);
 const boolOptions = ref<Array<{ label: string; value: boolean }>>([]);
 
 // 获取字典信息
 const loadDicts = async () => {
-  try {
-    const items = await DictItemApi.loadByUsageCode('APPLICATION_STATUS');
-    statusOptions.value = [...items]
-      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
-      .map((item) => ({
-        label: item.name || String(item.code),
-        value: String(item.code),
-      }));
-  } catch (error) {
-    console.error('加载应用状态字典失败:', error);
-    statusOptions.value = [];
-  }
-
   try {
     const items = await DictItemApi.loadByUsageCode('BOOLEAN_FLAG');
     boolOptions.value = [...items]

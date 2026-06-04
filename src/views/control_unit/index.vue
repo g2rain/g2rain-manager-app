@@ -61,7 +61,6 @@
             active-value="PUBLISHED"
             inactive-value="UNPUBLISHED"
             usage-code="CONTROL_UNIT_STATUS"
-            :options="statusOptions"
             :api-method="({ nextValue }) => ControlUnitApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"
           />
@@ -314,7 +313,6 @@ import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.t
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
 
 // 定义字典引用
-const statusOptions = ref<Array<{ label: string; value: string }>>([]);
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
 const srvRegistryOptions = ref<Array<{ label: string; value: string }>>([]);
 
@@ -328,19 +326,6 @@ const loadDicts = async () => {
     value: u.serviceCode,
     label: u.name,
   }));
-
-  try {
-    const items = await DictItemApi.loadByUsageCode('CONTROL_UNIT_STATUS');
-    statusOptions.value = [...items]
-      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
-      .map((item) => ({
-        label: item.name || String(item.code),
-        value: String(item.code),
-      }));
-  } catch (error) {
-    console.error('加载功能权限状态字典失败:', error);
-    statusOptions.value = [];
-  }
 };
 
 // 基础查询状态（使用 reactive v-model 替换整个对象时保持响应式）

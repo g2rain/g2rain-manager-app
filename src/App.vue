@@ -7,16 +7,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { shallowRef, watch, onMounted } from 'vue';
 import { ElConfigProvider } from 'element-plus';
+import type { Language } from 'element-plus/es/locale';
 import { storeToRefs } from 'pinia';
 import { sso } from '@runtime/auth';
 import { isAloneMode } from '@shared/utils/mode.util';
 import { useLocaleStore } from '@platform/stores/locale.store';
-import { resolveElementPlusLocale } from '@platform/locale';
+import { loadElementPlusLocaleByCode } from '@platform/locale';
 
 const { locale: userLocale } = storeToRefs(useLocaleStore());
-const elementPlusLocale = computed(() => resolveElementPlusLocale(userLocale.value));
+const elementPlusLocale = shallowRef<Language>();
+
+watch(
+  userLocale,
+  (code) => {
+    void loadElementPlusLocaleByCode(code || 'zh-CN').then((loc) => {
+      elementPlusLocale.value = loc;
+    });
+  },
+  { immediate: true },
+);
 
 onMounted(() => {
   // qiankun 集成运行时由主应用统一管理 token

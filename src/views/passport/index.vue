@@ -59,7 +59,6 @@
             active-value="NORMAL"
             inactive-value="FROZEN"
             usage-code="PASSPORT_STATUS"
-            :options="statusOptions"
             :api-method="({ nextValue }) => PassportApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"
           />
@@ -245,25 +244,6 @@ import type { User } from '../user/type';
 import type { PassportIdpBinding } from '../passport_idp_binding/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
-
-// 定义字典引用
-const statusOptions = ref<Array<{ label: string; value: string }>>([]);
-
-// 获取字典信息
-const loadDicts = async () => {
-  try {
-    const items = await DictItemApi.loadByUsageCode('PASSPORT_STATUS');
-    statusOptions.value = [...items]
-      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
-      .map((item) => ({
-        label: item.name || String(item.code),
-        value: String(item.code),
-      }));
-  } catch (error) {
-    console.error('加载账号状态字典失败:', error);
-    statusOptions.value = [];
-  }
-};
 
 // 定义组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
@@ -544,9 +524,6 @@ const submitEdit = async () => {
 
 // 挂载回调
 onMounted(async () => {
-  // 先准备字典
-  await loadDicts();
-  // 再查询列表
   await loadData();
 });
 </script>

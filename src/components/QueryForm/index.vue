@@ -1,6 +1,5 @@
 <template>
-  <el-config-provider :locale="locale">
-    <el-form :model="model" :inline="true" class="query-form">
+  <el-form :model="model" :inline="true" class="query-form">
 
       <!-- ID -->
       <el-form-item :label="$t('G2_FIELD_ID', 'ID')">
@@ -64,15 +63,10 @@
       </slot>
 
     </el-form>
-  </el-config-provider>
 </template>
 
 <script setup lang="ts">
 import { computed, isReactive } from 'vue'
-import { ElConfigProvider } from 'element-plus'
-import { storeToRefs } from 'pinia'
-import { useLocaleStore } from '@platform/stores/locale.store'
-import { resolveElementPlusLocale } from '@platform/locale'
 
 /**
  * Query 数据结构
@@ -92,9 +86,6 @@ interface Emits {
 
 const model = defineModel<QueryFormData>({ required: true })
 const emit = defineEmits<Emits>()
-
-const { locale: userLocale } = storeToRefs(useLocaleStore())
-const locale = computed(() => resolveElementPlusLocale(userLocale.value))
 
 /**
  * 更新字段（兼容父级 reactive：就地修改，避免 v-model 整对象替换导致失活）

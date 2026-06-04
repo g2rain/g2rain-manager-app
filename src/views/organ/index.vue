@@ -57,7 +57,6 @@
             active-value="ACTIVE"
             inactive-value="INACTIVE"
             usage-code="ORGAN_STATUS"
-            :options="statusOptions"
             :api-method="({ nextValue }) => OrganApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"
           />
@@ -297,26 +296,6 @@ import type { Organ, OrganPayload, OrganQuery, OrganHierarchicalRelation } from 
 import type { IdpEnterpriseOrgan } from '../idp_enterprise_organ/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
-
-// 定义字典引用
-const statusOptions = ref<Array<{ label: string; value: string }>>([]);
-
-// 获取字典信息
-const loadDicts = async () => {
-  try {
-    const items = await DictItemApi.loadByUsageCode('ORGAN_STATUS');
-    statusOptions.value = [...items]
-      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
-      .map((item) => ({
-        label: item.name || String(item.code),
-        value: String(item.code),
-      }));
-  } catch (error) {
-    console.error('加载机构状态字典失败:', error);
-    statusOptions.value = [];
-  }
-// 表单校验规则
-};
 
 // 组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
@@ -694,9 +673,6 @@ const copyInviteCode = async () => {
 
 // 挂载回调
 onMounted(async () => {
-  // 先准备字典
-  await loadDicts();
-  // 再查询列表
   await loadData();
 });
 </script>

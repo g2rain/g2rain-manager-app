@@ -42,7 +42,6 @@
             active-value="ACTIVATED"
             inactive-value="REVOKED"
             usage-code="STATIC_TOKEN_STATUS"
-            :options="statusOptions"
             :api-method="({ nextValue }) => PersonalStaticAccessTokenApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"
           />
@@ -140,26 +139,6 @@ import type { PageSelectListDto } from '@platform/types/api.type';
 
 import { DictItemApi } from '../dict/api';
 import { DictSelect, DictText, showErrorMessage, StatusSwitch } from '@/components';
-
-// 定义字典引用
-const statusOptions = ref<Array<{ label: string; value: string }>>([]);
-
-// 获取字典信息
-const loadDicts = async () => {
-  try {
-    const items = await DictItemApi.loadByUsageCode('STATIC_TOKEN_STATUS');
-    statusOptions.value = [...items]
-      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
-      .map((item) => ({
-        label: item.name || String(item.code),
-        value: String(item.code),
-      }));
-  } catch (error) {
-    console.error('加载授权状态字典失败:', error);
-    statusOptions.value = [];
-  }
-// 表单校验规则
-};
 
 const props = withDefaults(defineProps<{
   embedded?: boolean;
@@ -425,9 +404,6 @@ const submitEdit = async () => {
 // 挂载回调
 onMounted(() => {
   syncApplicationAuthorizationQuery();
-  // 查询字典
-  loadDicts();
-  // 查询列表
   loadData();
 });
 

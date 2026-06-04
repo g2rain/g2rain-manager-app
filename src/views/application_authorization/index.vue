@@ -61,7 +61,6 @@
             active-value="ACTIVATED"
             inactive-value="DEACTIVATED"
             usage-code="AUTHORIZATION_STATUS"
-            :options="statusOptions"
             :api-method="({ nextValue }) => ApplicationAuthorizationApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"
           />
@@ -111,7 +110,6 @@ import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, 
 import PersonalStaticAccessToken from '../personal_static_access_token/index.vue';
 
 // 定义字典引用
-const statusOptions = ref<Array<{ label: string; value: string }>>([]);
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
 
 // 获取字典信息
@@ -120,19 +118,6 @@ const loadDicts = async () => {
     value: u.id,
     label: u.applicationName || `${u.id}`
   }));
-  
-  try {
-    const items = await DictItemApi.loadByUsageCode('AUTHORIZATION_STATUS');
-    statusOptions.value = [...items]
-      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
-      .map((item) => ({
-        label: item.name || String(item.code),
-        value: String(item.code),
-      }));
-  } catch (error) {
-    console.error('加载授权状态字典失败:', error);
-    statusOptions.value = [];
-  }
 };
 
 // 组件引用

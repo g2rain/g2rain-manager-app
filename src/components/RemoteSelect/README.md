@@ -216,19 +216,19 @@ const form = reactive({
 ### StatusSwitch（推荐：状态列封装）
 
 权限与按钮一致：在组件上写 `v-permission="'xxx:status_update'"`，`build:config` 会扫描；运行时 ENABLED 可操作，VISIBLE/无权限置灰。
-## 特性
 
 ```vue
 <template>
   <StatusSwitch
     v-model="row.status"
     v-permission="'application_authorization:status_update'"
-    :options="statusOptions"
+    active-value="ACTIVATED"
+    inactive-value="DEACTIVATED"
+    usage-code="AUTHORIZATION_STATUS"
     :api-method="({ nextValue }) => ApplicationAuthorizationApi.updateStatus(row.id, String(nextValue))"
   />
 </template>
 ```
-## FetchDataFunction 接口
 
 ## Props
 
@@ -284,7 +284,8 @@ const form = reactive({
 | apiMethod | 状态切换请求方法（必填） | `(params: { nextValue; prevValue }) => Promise<void>` | - |
 | activeValue | 激活值 | `string \| number \| boolean` | `'ACTIVE'` |
 | inactiveValue | 非激活值 | `string \| number \| boolean` | `'INACTIVE'` |
-| options | 状态值与文案映射 | `{ label: string; value: string \| number \| boolean }[]` | `[]` |
+| usageCode | 字典 usageCode；传入时按 locale 拉取开关文案（推荐） | `string` | - |
+| options | 状态文案映射（无 usageCode 时使用） | `{ label: string; value: string \| number \| boolean }[]` | `[]` |
 | disabled | 是否禁用（与 v-permission 置灰叠加；loading 时也会禁用） | `boolean` | `false` |
 | inlinePrompt | 是否显示开关文案 | `boolean` | `true` |
 | successMessage | 成功提示文案 | `string` | `'更新成功'` |
