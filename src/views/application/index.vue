@@ -63,6 +63,7 @@
             v-permission="'application:status_update'"
             active-value="PUBLISHED"
             inactive-value="UNPUBLISHED"
+            usage-code="APPLICATION_STATUS"
             :options="statusOptions"
             :api-method="({ nextValue }) => ApplicationApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"

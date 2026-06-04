@@ -60,6 +60,7 @@
             v-permission="'application_authorization:status_update'"
             active-value="ACTIVATED"
             inactive-value="DEACTIVATED"
+            usage-code="AUTHORIZATION_STATUS"
             :options="statusOptions"
             :api-method="({ nextValue }) => ApplicationAuthorizationApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"

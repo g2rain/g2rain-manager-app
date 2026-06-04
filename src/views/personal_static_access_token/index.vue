@@ -41,6 +41,7 @@
             v-permission="'personal_static_access_token:status_update'"
             active-value="ACTIVATED"
             inactive-value="REVOKED"
+            usage-code="STATIC_TOKEN_STATUS"
             :options="statusOptions"
             :api-method="({ nextValue }) => PersonalStaticAccessTokenApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"

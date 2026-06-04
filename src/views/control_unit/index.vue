@@ -60,6 +60,7 @@
             v-permission="'control_unit:status_update'"
             active-value="PUBLISHED"
             inactive-value="UNPUBLISHED"
+            usage-code="CONTROL_UNIT_STATUS"
             :options="statusOptions"
             :api-method="({ nextValue }) => ControlUnitApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"

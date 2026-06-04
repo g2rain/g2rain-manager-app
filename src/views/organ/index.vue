@@ -56,6 +56,7 @@
             v-permission="'organ:status_update'"
             active-value="ACTIVE"
             inactive-value="INACTIVE"
+            usage-code="ORGAN_STATUS"
             :options="statusOptions"
             :api-method="({ nextValue }) => OrganApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"

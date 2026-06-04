@@ -58,6 +58,7 @@
             v-permission="'passport:status_update'"
             active-value="NORMAL"
             inactive-value="FROZEN"
+            usage-code="PASSPORT_STATUS"
             :options="statusOptions"
             :api-method="({ nextValue }) => PassportApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"
