@@ -338,7 +338,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useLocaleStore } from '@platform/stores/locale.store';
 import type { FormInstance, FormRules, UploadFile } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { t } from '@platform/i18n';
@@ -877,6 +879,11 @@ const submitIdpProvisionEdit = async () => {
     ElMessage.error(msg);
   }
 };
+
+const { locale: userLocale } = storeToRefs(useLocaleStore());
+watch(userLocale, () => {
+  void loadDicts();
+});
 
 // 挂载回调
 onMounted(async () => {

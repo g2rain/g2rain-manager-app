@@ -12,7 +12,14 @@ export const i18n = createI18n({
   missing: (_locale, key) => key,
 });
 
+function currentI18nLocale(): string {
+  const loc = i18n.global.locale;
+  return typeof loc === 'string' ? loc : loc.value;
+}
+
+/** script 中取文案；读取当前 locale 以便 computed 内随语言切换重算 */
 export function t(code: string, defaultText?: string): string {
+  void currentI18nLocale();
   if (defaultText !== undefined) {
     return i18n.global.t(code, defaultText);
   }

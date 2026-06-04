@@ -70,10 +70,9 @@
 <script setup lang="ts">
 import { computed, isReactive } from 'vue'
 import { ElConfigProvider } from 'element-plus'
-
-import zhCn from 'element-plus/es/locale/lang/zh-cn'
-import zhTw from 'element-plus/es/locale/lang/zh-tw'
-import en from 'element-plus/es/locale/lang/en'
+import { storeToRefs } from 'pinia'
+import { useLocaleStore } from '@platform/stores/locale.store'
+import { resolveElementPlusLocale } from '@platform/locale'
 
 /**
  * Query 数据结构
@@ -94,33 +93,8 @@ interface Emits {
 const model = defineModel<QueryFormData>({ required: true })
 const emit = defineEmits<Emits>()
 
-/**
- * 浏览器语言
- */
-function getBrowserLocale() {
-  const browserLang =
-    navigator.language ||
-    navigator.languages?.[0] ||
-    'zh-CN'
-
-  const [lang, region] =
-    browserLang.toLowerCase().split('-')
-
-  if (lang === 'zh') {
-    if (['tw', 'hk', 'mo'].includes(region)) {
-      return zhTw
-    }
-    return zhCn
-  }
-
-  if (lang === 'en') {
-    return en
-  }
-
-  return zhCn
-}
-
-const locale = getBrowserLocale()
+const { locale: userLocale } = storeToRefs(useLocaleStore())
+const locale = computed(() => resolveElementPlusLocale(userLocale.value))
 
 /**
  * 更新字段（兼容父级 reactive：就地修改，避免 v-model 整对象替换导致失活）

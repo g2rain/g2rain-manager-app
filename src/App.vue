@@ -1,14 +1,22 @@
 <template>
-  <div id="app">
-    <!-- 使用默认的 router-view，不使用 v-slot -->
-    <router-view />
-  </div>
+  <el-config-provider :locale="elementPlusLocale">
+    <div id="app">
+      <router-view />
+    </div>
+  </el-config-provider>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
+import { ElConfigProvider } from 'element-plus';
+import { storeToRefs } from 'pinia';
 import { sso } from '@runtime/auth';
 import { isAloneMode } from '@shared/utils/mode.util';
+import { useLocaleStore } from '@platform/stores/locale.store';
+import { resolveElementPlusLocale } from '@platform/locale';
+
+const { locale: userLocale } = storeToRefs(useLocaleStore());
+const elementPlusLocale = computed(() => resolveElementPlusLocale(userLocale.value));
 
 onMounted(() => {
   // qiankun 集成运行时由主应用统一管理 token
