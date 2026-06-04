@@ -59,14 +59,10 @@ const props = withDefaults(defineProps<Props>(), {
   inactiveValue: 'INACTIVE',
   disabled: false,
   inlinePrompt: true,
- * 权限：始终展示开关；仅 ENABLED 可操作，VISIBLE / 无权限则置灰
 });
 
 const emit = defineEmits<Emits>();
 
- * ======================
- * 核心状态（使用 active/inactive 值）
- * ======================
 const innerValue = ref<StatusValue>(props.modelValue);
 const loading = ref(false);
 /** 外部同步 innerValue 时忽略 change，避免误调接口 */
@@ -74,7 +70,6 @@ const ignoreChange = ref(false);
 /** 回滚保护 */
 const isRollingBack = ref(false);
 
- * 文案
 const activeLabel = computed(() => {
   const hit = props.options?.find(i => i.value === props.activeValue);
   return hit?.label || (props.activeValue === 'ACTIVE' ? t('G2_OPT_ACTIVE', '有效') : String(props.activeValue));
@@ -85,7 +80,6 @@ const inactiveLabel = computed(() => {
   return hit?.label || (props.inactiveValue === 'INACTIVE' ? t('G2_OPT_INACTIVE', '无效') : String(props.inactiveValue));
 });
 
- * 外部值 → 内部同步（无副作用）
 watch(
   () => props.modelValue,
   async (val) => {
@@ -96,19 +90,14 @@ watch(
   }
 );
 
- * 状态变更处理（核心逻辑）
 const handleChange = async (val: StatusValue) => {
   if (ignoreChange.value || isRollingBack.value) return;
 
   const nextValue = val;
   const prevValue = props.modelValue;
 
-  /**
-   * 无变化不处理
-   */
   if (nextValue === prevValue) return;
 
-   * 乐观更新
   emit('update:modelValue', nextValue);
 
   loading.value = true;
@@ -123,9 +112,6 @@ const handleChange = async (val: StatusValue) => {
 
     emit('success', { nextValue, prevValue });
   } catch (error) {
-    /**
-     * 回滚（不会触发接口）
-     */
     isRollingBack.value = true;
 
     innerValue.value = prevValue;

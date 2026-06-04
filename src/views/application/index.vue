@@ -685,14 +685,9 @@ const submitIntegrate = async () => {
 
   const masterApplicationIds = selectedApplications.value.filter(id => !originalApplications.has(id))                 // 新增
   const deleteMasterApplicationIds = [...originalApplications].filter(id => !selectedApplications.value.includes(id)) // 删除
-  // 计算删除的用户 ID：在 originalAssignedKey 里但不在 assignedKeys.value 中
-  const masterApplicationIds = selectedApplications.value.filter(id => !originalApplications.has(id))                 // 新增
-  const deleteMasterApplicationIds = [...originalApplications].filter(id => !selectedApplications.value.includes(id)) // 删除
 
   await ApplicationSuiteApi.save({
     applicationId: integrateDialog.applicationId,
-    masterApplicationIds,         // 新增应用
-    deleteMasterApplicationIds    // 待删应用
     masterApplicationIds,         // 新增应用
     deleteMasterApplicationIds    // 待删应用
   })

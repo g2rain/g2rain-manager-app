@@ -4,7 +4,6 @@
       <div class="spinner"></div>
       <p>{{ $t('MG_AU_SSO_PROC', '正在处理认证...') }}</p>
     </div>
-const vueRouter = useRouter(); // 在独立模式下使用 Vue Router 实例
 
     <div v-else-if="error" class="error-container">
       <h2>{{ $t('MG_AU_SSO_FAIL', '认证失败') }}</h2>
