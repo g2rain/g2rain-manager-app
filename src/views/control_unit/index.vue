@@ -5,25 +5,25 @@
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <!-- 业务特定查询字段 -->
-        <el-form-item label="所属应用">
-          <el-select v-model="queryForm.applicationId" placeholder="请选择所属应用" clearable style="width: 200px">
+        <el-form-item :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')">
+          <el-select v-model="queryForm.applicationId" :placeholder="$t('MG_CTRL_DOM_PH_APP', '请选择所属应用')" clearable style="width: 200px">
             <el-option v-for="item in applicationOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="功能权限名称">
-          <el-input v-model="queryForm.controlUnitName" placeholder="请输入功能权限名称" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')">
+          <el-input v-model="queryForm.controlUnitName" :placeholder="$t('MG_CTRL_UNIT_PH_NAME', '请输入功能权限名称')" clearable style="width: 200px" />
         </el-form-item>
 
-        <el-form-item label="功能权限范围">
-          <DictSelect v-model="queryForm.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" placeholder="请选择功能权限范围" />
+        <el-form-item :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')">
+          <DictSelect v-model="queryForm.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" :placeholder="$t('MG_CTRL_UNIT_PH_SCOPE', '请选择功能权限范围')" />
         </el-form-item>
 
         <!-- 操作按钮 -->
         <template #actions>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ $t('G2_BTN_QUERY', '查询') }}</el-button>
+            <el-button @click="handleReset">{{ $t('G2_BTN_RESET', '重置') }}</el-button>
           </el-form-item>
         </template>
       </QueryForm>
@@ -32,55 +32,55 @@
     <!-- 标题和操作按钮 -->
     <div class="control-unit-page__header">
       <div class="control-unit-page__title-group">
-        <h2>管理功能权限数据</h2>
+        <h2>{{ $t('MG_CTRL_UNIT_TITLE', '管理功能权限数据') }}</h2>
       </div>
-      <el-button type="primary" v-permission="'control_unit:add'" @click="handleCreate">新增功能权限</el-button>
+      <el-button type="primary" v-permission="'control_unit:add'" @click="handleCreate">{{ $t('MG_CTRL_UNIT_BTN_ADD', '新增功能权限') }}</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
-      <el-table-column prop="id" label="功能权限ID" width="120" />
-      <el-table-column prop="applicationId" label="所属应用" width="150">
+      <el-table-column prop="id" :label="$t('MG_CTRL_UNIT_COL_ID', '功能权限ID')" width="120" />
+      <el-table-column prop="applicationId" :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')" width="150">
         <template #default="{ row }">
           {{applicationOptions.find(item => item.value === row?.applicationId)?.label || ''}}
         </template>
       </el-table-column>
-      <el-table-column prop="controlUnitName" label="功能权限名称" width="180" />
-      <el-table-column prop="controlUnitScope" label="功能权限范围" width="180">
+      <el-table-column prop="controlUnitName" :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')" width="180" />
+      <el-table-column prop="controlUnitScope" :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
             <DictText :value="row?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="status" label="功能权限状态" width="180">
+      <el-table-column prop="status" :label="$t('MG_CTRL_UNIT_FIELD_STATUS', '功能权限状态')" width="180">
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            permission="control_unit:status_update"
+            v-permission="'control_unit:status_update'"
             active-value="PUBLISHED"
             inactive-value="UNPUBLISHED"
-            :options="statusOptions"
+            usage-code="CONTROL_UNIT_STATUS"
             :api-method="({ nextValue }) => ControlUnitApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"
           />
         </template>
       </el-table-column>
-      <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
-      <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
-      <el-table-column label="操作" fixed="right" width="280">
+      <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
+      <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
         <template #default="{ row }">
-          <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
+          <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
           <el-button type="primary" v-permission="'control_unit:edit'" link size="small"
-            @click="handleEdit(row)">编辑</el-button>
+            @click="handleEdit(row)">{{ $t('G2_BTN_EDIT', '编辑') }}</el-button>
           <el-button type="success" v-permission="'control_unit:resources_config'" link size="small"
-            @click="handleConfigureResources(row)">配置资源</el-button>
+            @click="handleConfigureResources(row)">{{ $t('MG_CTRL_UNIT_BTN_RESOURCES', '配置资源') }}</el-button>
           <el-button type="danger" v-permission="'control_unit:delete'" v-if="!row.landing" link size="small"
-            @click="handleDelete(row)">删除</el-button>
+            @click="handleDelete(row)">{{ $t('G2_BTN_DELETE', '删除') }}</el-button>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span>操作</span>
+            <span>{{ $t('G2_FIELD_ACTION', '操作') }}</span>
             <SortManagerButton />
           </div>
         </template>
@@ -95,62 +95,62 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑功能权限' : '新增功能权限'" width="520px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="120px">
         <!-- 所属应用 -->
-        <el-form-item label="所属应用" prop="applicationId" v-if="!isEdit">
-          <el-select v-model="editForm.applicationId" placeholder="请选择所属应用" style="width: 200px">
+        <el-form-item :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')" prop="applicationId" v-if="!isEdit">
+          <el-select v-model="editForm.applicationId" :placeholder="$t('MG_CTRL_DOM_PH_APP', '请选择所属应用')" style="width: 200px">
             <el-option v-for="item in applicationOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="功能权限名称" prop="controlUnitName">
-          <el-input v-model="editForm.controlUnitName" placeholder="请输入功能权限名称" />
+        <el-form-item :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')" prop="controlUnitName">
+          <el-input v-model="editForm.controlUnitName" :placeholder="$t('MG_CTRL_UNIT_PH_NAME', '请输入功能权限名称')" />
         </el-form-item>
 
-        <el-form-item label="功能权限范围" prop="controlUnitScope">
-          <DictSelect v-model="editForm.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" placeholder="请选择功能权限范围" />
+        <el-form-item :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')" prop="controlUnitScope">
+          <DictSelect v-model="editForm.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" :placeholder="$t('MG_CTRL_UNIT_PH_SCOPE', '请选择功能权限范围')" />
         </el-form-item>
 
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="editForm.description" type="textarea" :rows="4" placeholder="请输入描述" show-word-limit
+        <el-form-item :label="$t('MG_FIELD_DESC', '描述')" prop="description">
+          <el-input v-model="editForm.description" type="textarea" :rows="4" :placeholder="$t('MG_PH_DESC', '请输入描述')" show-word-limit
             maxlength="200" />
         </el-form-item>
 
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitEdit">保 存</el-button>
+          <el-button @click="editDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="submitEdit">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- 明细弹窗 -->
-    <el-dialog v-model="detailDialogVisible" title="功能权限明细" width="520px">
+    <el-dialog v-model="detailDialogVisible" :title="$t('MG_CTRL_UNIT_DETAIL', '功能权限明细')" width="520px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="功能权限序号">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item label="所属应用">
+        <el-descriptions-item :label="$t('MG_CTRL_UNIT_COL_SEQ', '功能权限序号')">{{ currentRow?.id }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')">
           {{applicationOptions.find(item => item.value === currentRow?.applicationId)?.label || ''}}
         </el-descriptions-item>
-        <el-descriptions-item label="功能权限名称">{{ currentRow?.controlUnitName }}</el-descriptions-item>
-        <el-descriptions-item label="功能权限范围">
+        <el-descriptions-item :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')">{{ currentRow?.controlUnitName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')">
           <el-tag>
             <DictText :value="currentRow?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="应用状态">
+        <el-descriptions-item :label="$t('MG_CTRL_UNIT_FIELD_STATUS', '功能权限状态')">
           <el-tag>
             <DictText :value="currentRow?.status" usage-code="CONTROL_UNIT_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="描述">{{ currentRow?.description }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_FIELD_DESC', '描述')">{{ currentRow?.description }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <span class="dialog-footer">
-          <el-button type="primary" @click="detailDialogVisible = false">关 闭</el-button>
+          <el-button type="primary" @click="detailDialogVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
         </span>
       </template>
     </el-dialog>
@@ -159,13 +159,13 @@
     <el-dialog
       v-model="configureResourcesDialog.visible"
       class="resources-dialog"
-      title="配置资源"
+      :title="$t('MG_CTRL_UNIT_DLG_RESOURCES', '配置资源')"
       width="900px"
       @closed="resetConfigureResourcesDialog"
     >
       <el-tabs type="border-card" v-model="activeName">
         <!-- 菜单 -->
-        <el-tab-pane label="菜单资源" name="menu">
+        <el-tab-pane :label="$t('MG_CTRL_UNIT_TAB_MENU', '菜单资源')" name="menu">
           <el-scrollbar max-height="58vh">
             <el-tree
               v-if="menuTreeData.length > 0"
@@ -181,12 +181,12 @@
         </el-tab-pane>
 
         <!-- 界面 -->
-        <el-tab-pane label="界面资源" name="view">
+        <el-tab-pane :label="$t('MG_CTRL_UNIT_TAB_VIEW', '界面资源')" name="view">
           <el-scrollbar max-height="58vh">
             <div class="table-wrapper">
               <el-table :data="pages" style="width: 100%">
                 <!-- 页面 -->
-                <el-table-column label="页面" width="200" header-align="center">
+                <el-table-column :label="$t('MG_CTRL_UNIT_COL_PAGE', '页面')" width="200" header-align="center">
                   <template #default="{ row }">
                     <el-checkbox v-model="row.checked" @change="togglePage(row)">
                       <el-badge class="custom-badge" type="primary"
@@ -198,12 +198,12 @@
                 </el-table-column>
 
                 <!-- 元素 -->
-                <el-table-column label="元素" header-align="center">
+                <el-table-column :label="$t('MG_CTRL_UNIT_COL_ELEMENT', '元素')" header-align="center">
                   <template #default="{ row }">
                     <div class="elements-row">
                       <div v-for="el in row.elements" :key="el.id" class="element-item">
                         <el-checkbox v-model="el.checked" @change="toggleElement(row, el)" />
-                        <DictSelect v-model="el.status" usage-code="RESOURCE_STATUS" :disabled="!el.checked" :clearable="false" :api-method="DictItemApi.select" width="90px" placeholder="状态" />
+                        <DictSelect v-model="el.status" usage-code="RESOURCE_STATUS" :disabled="!el.checked" :clearable="false" :api-method="DictItemApi.select" width="90px" :placeholder="$t('G2_FIELD_STATUS', '状态')" />
                         <span @click.stop="el.checked = !el.checked; toggleElement(row, el)">
                           {{ el.name }}
                         </span>
@@ -217,13 +217,13 @@
         </el-tab-pane>
 
         <!-- 接口 -->
-        <el-tab-pane label="接口资源" name="apis">
+        <el-tab-pane :label="$t('MG_CTRL_UNIT_TAB_API', '接口资源')" name="apis">
           <div class="api-toolbar">
             <el-select
               v-model="apiServiceCode"
               clearable
               filterable
-              placeholder="请选择服务后加载接口"
+              :placeholder="$t('MG_CTRL_UNIT_PH_API_SERVICE', '请选择服务后加载接口')"
               style="width: 260px"
               @change="handleApiServiceChange"
             >
@@ -241,7 +241,7 @@
                 :disabled="!apiGroups.length"
                 @click="handleSelectAllApis"
               >
-                全部选中
+                {{ $t('MG_CTRL_UNIT_BTN_SELECT_ALL', '全部选中') }}
               </el-button>
               <el-button
                 type="primary"
@@ -249,7 +249,7 @@
                 :disabled="!apiGroups.length"
                 @click="handleUnselectAllApis"
               >
-                全部取消
+                {{ $t('MG_CTRL_UNIT_BTN_UNSELECT_ALL', '全部取消') }}
               </el-button>
             </div>
           </div>
@@ -284,17 +284,18 @@
       </el-tabs>
 
       <template #footer>
-        <el-button @click="resetConfigureResourcesDialog">取 消</el-button>
-        <el-button type="primary" @click="configureResources">保 存</el-button>
+        <el-button @click="resetConfigureResourcesDialog">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+        <el-button type="primary" @click="configureResources">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from 'vue';
+import { ref, reactive, computed, onMounted, nextTick } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import { t } from '@platform/i18n';
 import { ControlUnitApi } from './api';
 import { ApplicationApi } from '../application/api';
 import { ResourceMenuApi } from '../resource_menu/api';
@@ -312,7 +313,6 @@ import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.t
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
 
 // 定义字典引用
-const statusOptions = ref<Array<{ label: string; value: string }>>([]);
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
 const srvRegistryOptions = ref<Array<{ label: string; value: string }>>([]);
 
@@ -326,19 +326,6 @@ const loadDicts = async () => {
     value: u.serviceCode,
     label: u.name,
   }));
-
-  try {
-    const items = await DictItemApi.loadByUsageCode('CONTROL_UNIT_STATUS');
-    statusOptions.value = [...items]
-      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
-      .map((item) => ({
-        label: item.name || String(item.code),
-        value: String(item.code),
-      }));
-  } catch (error) {
-    console.error('加载功能权限状态字典失败:', error);
-    statusOptions.value = [];
-  }
 };
 
 // 基础查询状态（使用 reactive v-model 替换整个对象时保持响应式）
@@ -388,8 +375,9 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载列表失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
+    ElMessage.error(msg);
   }
 };
 
@@ -446,9 +434,11 @@ const handleView = (row: ControlUnit) => {
 
 // 删除数据记录
 const handleDelete = (row: ControlUnit) => {
-  ElMessageBox.confirm(`确认删除功能权限「${row.id}」吗？`, '提示', {
-    type: 'warning',
-  })
+  ElMessageBox.confirm(
+    t('MG_CTRL_UNIT_DEL_CONFIRM', `确认删除功能权限「${row.id}」吗？`),
+    t('G2_LBL_TIP', '提示'),
+    { type: 'warning' },
+  )
     .then(async () => {
       try {
         await ControlUnitApi.remove(row.id);
@@ -457,9 +447,10 @@ const handleDelete = (row: ControlUnit) => {
           pagination.pageNum--;
         }
         await loadData();
-        ElMessage.success('删除成功');
-      } catch (error: any) {
-        ElMessage.error(error.message || '删除失败');
+        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
+        ElMessage.error(msg);
       }
     })
     .catch(() => { });
@@ -483,13 +474,17 @@ const editForm = reactive({
   description: '',
 });
 
+const editDialogTitle = computed(() =>
+  isEdit.value ? t('MG_CTRL_UNIT_DLG_EDIT', '编辑功能权限') : t('MG_CTRL_UNIT_DLG_ADD', '新增功能权限'),
+);
+
 // 表单校验规则
-const editRules: FormRules = {
-  applicationId: [{ required: true, message: '请选择归属应用', trigger: 'blur' }],
-  controlUnitName: [{ required: true, message: '请输入功能权限名称', trigger: 'blur' }],
-  controlUnitScope: [{ required: true, message: '请选择功能权限范围', trigger: 'blur' }],
-  description: [{ required: false, message: '请输入范围', trigger: 'blur' }],
-};
+const editRules = computed<FormRules>(() => ({
+  applicationId: [{ required: true, message: t('MG_CTRL_UNIT_VLD_APP', '请选择归属应用'), trigger: 'blur' }],
+  controlUnitName: [{ required: true, message: t('MG_CTRL_UNIT_VLD_NAME', '请输入功能权限名称'), trigger: 'blur' }],
+  controlUnitScope: [{ required: true, message: t('MG_CTRL_UNIT_VLD_SCOPE', '请选择功能权限范围'), trigger: 'blur' }],
+  description: [{ required: false, message: t('MG_PH_DESC', '请输入描述'), trigger: 'blur' }],
+}));
 
 // 打开创建弹窗
 const handleCreate = () => {
@@ -536,13 +531,15 @@ const submitEdit = async () => {
       payload.id = editForm.id;
     }
     await ControlUnitApi.save(payload);
-    ElMessage.success(isEdit.value ? '更新成功' : '新增成功');
+    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
     await loadData();
     editDialogVisible.value = false;
-  } catch (error: any) {
-    ElMessage.error(error.message || '保存失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
+    ElMessage.error(msg);
   }
 };
+// --------------------关联资源-----------------------------------
 
 // --------------------关联资源-----------------------------------
 
@@ -665,8 +662,9 @@ const loadMenuTree = async (row: ControlUnit) => {
 
     sortTree(tree);
     menuTreeData.value = tree;
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载菜单树失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('MG_CTRL_UNIT_MSG_MENU_LOAD_FAIL', '加载菜单树失败');
+    ElMessage.error(msg);
   }
 
   // 再加载已选菜单并回显
@@ -806,7 +804,7 @@ const loadApiEndpoints = async (row: ControlUnit, serviceCode?: string) => {
 
   const groupMap = new Map<string, ApiItem[]>();
   (await ResourceApiApi.list({ serviceCode })).forEach(api => {
-    const tag = api.apiTags || '未分类'
+    const tag = api.apiTags || t('MG_CTRL_UNIT_API_UNTAGGED', '未分类');
     if (!groupMap.has(tag)) {
       groupMap.set(tag, [])
     }
@@ -995,8 +993,8 @@ const configureResources = async () => {
     const updateRelations = [...elemToUpdate];
     const deleteRelations = [...menuToDelete, ...pageToDelete, ...elemToDelete, ...apisToDelete];
     if (createRelations.length === 0 && updateRelations.length === 0 && deleteRelations.length === 0) {
-      ElMessage.success('资源更新成功')
-      return
+      ElMessage.success(t('MG_CTRL_UNIT_MSG_RESOURCE_OK', '资源更新成功'));
+      return;
     }
 
     const payload: ControlUnitResourceRelationPayload = {
@@ -1006,10 +1004,11 @@ const configureResources = async () => {
       deleteRelations
     };
     await ControlUnitResourceRelationApi.save(payload);
-    ElMessage.success('资源更新成功')
-    resetConfigureResourcesDialog()
-  } catch (error: any) {
-    ElMessage.error(error.message || '菜单资源更新失败')
+    ElMessage.success(t('MG_CTRL_UNIT_MSG_RESOURCE_OK', '资源更新成功'));
+    resetConfigureResourcesDialog();
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('MG_CTRL_UNIT_MSG_RESOURCE_FAIL', '菜单资源更新失败');
+    ElMessage.error(msg);
   }
 };
 

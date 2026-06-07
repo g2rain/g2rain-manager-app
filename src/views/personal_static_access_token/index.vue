@@ -5,16 +5,16 @@
     <el-card v-if="!embedded" class="personal_static_access_token-page__search" shadow="never">
       <el-form :model="queryForm" :inline="true" class="query-form">
         <!-- 业务特定查询字段 -->
-        <el-form-item label="名称">
-          <el-input v-model="queryForm.name" placeholder="请输入名称" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_PAT_FIELD_NAME', '名称')">
+          <el-input v-model="queryForm.name" :placeholder="$t('MG_PAT_PH_NAME', '请输入名称')" clearable style="width: 200px" />
         </el-form-item>
-        <el-form-item label="状态">
-          <DictSelect v-model="queryForm.status" usage-code="STATIC_TOKEN_STATUS" :api-method="DictItemApi.select" placeholder="请选择状态" clearable style="width: 200px" />
+        <el-form-item :label="$t('G2_FIELD_STATUS', '状态')">
+          <DictSelect v-model="queryForm.status" usage-code="STATIC_TOKEN_STATUS" :api-method="DictItemApi.select" :placeholder="$t('MG_PAT_PH_STATUS', '请选择状态')" clearable style="width: 200px" />
         </el-form-item>
         <!-- 操作按钮 -->
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
+          <el-button type="primary" @click="handleSearch">{{ $t('G2_BTN_QUERY', '查询') }}</el-button>
+          <el-button @click="handleReset">{{ $t('G2_BTN_RESET', '重置') }}</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -22,38 +22,38 @@
     <!-- 标题和操作按钮 -->
     <div class="personal_static_access_token-page__header">
       <div class="personal_static_access_token-page__title-group">
-        <h2>模型秘钥管理</h2>
+        <h2>{{ $t('MG_PAT_TITLE', '模型秘钥管理') }}</h2>
       </div>
-      <el-button type="primary" v-permission="'personal_static_access_token:add'" @click="handleCreate">新增 Api Key</el-button>
+      <el-button type="primary" v-permission="'personal_static_access_token:add'" @click="handleCreate">{{ $t('MG_PAT_BTN_ADD', '新增 Api Key') }}</el-button>
     </div>
 
     <el-table :data="tableData" border stripe style="width: 100%">
-      <el-table-column prop="id" label="ID" width="120" />
-      <el-table-column prop="applicationName" label="应用名称" width="140" />
-      <el-table-column prop="organName" label="机构名称" width="140" />
-      <el-table-column prop="userName" label="用户名称" width="140" />
-      <el-table-column prop="name" label="访问令牌名称" width="180" />
-      <el-table-column prop="maskedToken" label="脱敏令牌" width="300" />
-      <el-table-column prop="status" label="状态" width="180">
+      <el-table-column prop="id" :label="$t('G2_FIELD_ID', 'ID')" width="120" />
+      <el-table-column prop="applicationName" :label="$t('MG_PAT_COL_APP_NAME', '应用名称')" width="140" />
+      <el-table-column prop="organName" :label="$t('MG_PAT_COL_ORGAN_NAME', '机构名称')" width="140" />
+      <el-table-column prop="userName" :label="$t('MG_PAT_COL_USER_NAME', '用户名称')" width="140" />
+      <el-table-column prop="name" :label="$t('MG_PAT_COL_TOKEN_NAME', '访问令牌名称')" width="180" />
+      <el-table-column prop="maskedToken" :label="$t('MG_PAT_COL_MASKED_TOKEN', '脱敏令牌')" width="300" />
+      <el-table-column prop="status" :label="$t('G2_FIELD_STATUS', '状态')" width="180">
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            permission="personal_static_access_token:status_update"
+            v-permission="'personal_static_access_token:status_update'"
             active-value="ACTIVATED"
             inactive-value="REVOKED"
-            :options="statusOptions"
+            usage-code="STATIC_TOKEN_STATUS"
             :api-method="({ nextValue }) => PersonalStaticAccessTokenApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"
           />
         </template>
       </el-table-column>
-      <el-table-column prop="createTime" label="创建时间" width="180" />
-      <el-table-column prop="updateTime" label="更新时间" width="180" />
-      <el-table-column label="操作" fixed="right" width="280">
+      <el-table-column prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" />
+      <el-table-column prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" />
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
         <template #default="{ row }">
-          <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
-          <el-button type="primary" v-permission="'personal_static_access_token:edit'" link size="small" @click="handleEdit(row)">编辑</el-button>
-          <el-button type="danger" v-permission="'personal_static_access_token:delete'" link size="small" @click="handleDelete(row)">删除</el-button>
+          <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
+          <el-button type="primary" v-permission="'personal_static_access_token:edit'" link size="small" @click="handleEdit(row)">{{ $t('G2_BTN_EDIT', '编辑') }}</el-button>
+          <el-button type="danger" v-permission="'personal_static_access_token:delete'" link size="small" @click="handleDelete(row)">{{ $t('G2_BTN_DELETE', '删除') }}</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -72,54 +72,54 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑' : '创建 Api Key'" width="520px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="editForm.name" placeholder="test" />
+        <el-form-item :label="$t('MG_PAT_FIELD_NAME', '名称')" prop="name">
+          <el-input v-model="editForm.name" :placeholder="$t('MG_PAT_PH_NAME_EDIT', 'test')" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="editDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitEdit">{{ isEdit ? '保 存' : '创建' }}</el-button>
+          <el-button @click="editDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="submitEdit">{{ isEdit ? $t('G2_BTN_SAVE', '保存') : $t('MG_PAT_BTN_CREATE', '创建') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- API key 创建结果弹窗 -->
-    <el-dialog v-model="apiKeyDialogVisible" title="创建 Api Key" width="560px" :close-on-click-modal="false" :close-on-press-escape="false">
+    <el-dialog v-model="apiKeyDialogVisible" :title="$t('MG_PAT_DLG_CREATE_RESULT', '创建 Api Key')" width="560px" :close-on-click-modal="false" :close-on-press-escape="false">
       <p class="api-key-dialog__tips">
-        请将此APIkey保存在安全且易于访问的地方。出于安全原因，你将无法通过 API keys管理界面再次查看它。如果你丢失了这个key，将需要重新创建。
+        {{ $t('MG_PAT_CREATE_TIPS', '请将此APIkey保存在安全且易于访问的地方。出于安全原因，你将无法通过 API keys管理界面再次查看它。如果你丢失了这个key，将需要重新创建。') }}
       </p>
       <el-input v-model="createdApiKey" readonly />
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="closeApiKeyDialog">关闭</el-button>
-          <el-button type="primary" @click="copyApiKey">复制</el-button>
+          <el-button @click="closeApiKeyDialog">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
+          <el-button type="primary" @click="copyApiKey">{{ $t('MG_PAT_BTN_COPY', '复制') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
     <!-- 明细弹窗 -->
-    <el-dialog v-model="detailDialogVisible" title="模型秘钥明细" width="520px">
+    <el-dialog v-model="detailDialogVisible" :title="$t('MG_PAT_DETAIL', '模型秘钥明细')" width="520px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="ID">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item label="应用名称">{{ currentRow?.applicationName }}</el-descriptions-item>
-        <el-descriptions-item label="机构名称">{{ currentRow?.organName }}</el-descriptions-item>
-        <el-descriptions-item label="用户名称">{{ currentRow?.userName }}</el-descriptions-item>
-        <el-descriptions-item label="访问令牌名称">{{ currentRow?.name }}</el-descriptions-item>
-        <el-descriptions-item label="脱敏令牌">{{ currentRow?.maskedToken }}</el-descriptions-item>
-        <el-descriptions-item label="状态">
+        <el-descriptions-item :label="$t('G2_FIELD_ID', 'ID')">{{ currentRow?.id }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_PAT_COL_APP_NAME', '应用名称')">{{ currentRow?.applicationName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_PAT_COL_ORGAN_NAME', '机构名称')">{{ currentRow?.organName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_PAT_COL_USER_NAME', '用户名称')">{{ currentRow?.userName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_PAT_COL_TOKEN_NAME', '访问令牌名称')">{{ currentRow?.name }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_PAT_COL_MASKED_TOKEN', '脱敏令牌')">{{ currentRow?.maskedToken }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_STATUS', '状态')">
           <el-tag effect="light">
             <DictText :value="currentRow?.status" usage-code="STATIC_TOKEN_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <span class="dialog-footer">
-          <el-button type="primary" @click="detailDialogVisible = false">关 闭</el-button>
+          <el-button type="primary" @click="detailDialogVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
         </span>
       </template>
     </el-dialog>
@@ -127,10 +127,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { sha256 } from 'js-sha256';
+import { t } from '@platform/i18n';
 import { PersonalStaticAccessTokenApi } from './api';
 import type { PersonalStaticAccessToken, PersonalStaticAccessTokenPayload, PersonalStaticAccessTokenQuery } from './type';
 import type { ApplicationAuthorization } from '../application_authorization/type';
@@ -138,25 +139,6 @@ import type { PageSelectListDto } from '@platform/types/api.type';
 
 import { DictItemApi } from '../dict/api';
 import { DictSelect, DictText, showErrorMessage, StatusSwitch } from '@/components';
-
-// 定义字典引用
-const statusOptions = ref<Array<{ label: string; value: string }>>([]);
-
-// 获取字典信息
-const loadDicts = async () => {
-  try {
-    const items = await DictItemApi.loadByUsageCode('STATIC_TOKEN_STATUS');
-    statusOptions.value = [...items]
-      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
-      .map((item) => ({
-        label: item.name || String(item.code),
-        value: String(item.code),
-      }));
-  } catch (error) {
-    console.error('加载授权状态字典失败:', error);
-    statusOptions.value = [];
-  }
-};
 
 const props = withDefaults(defineProps<{
   embedded?: boolean;
@@ -208,8 +190,9 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    showErrorMessage(error || '加载列表失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
+    showErrorMessage(msg);
   }
 };
 
@@ -255,9 +238,11 @@ const handleView = (row: PersonalStaticAccessToken) => {
 
 // 删除数据记录
 const handleDelete = (row: PersonalStaticAccessToken) => {
-  ElMessageBox.confirm(`确认删除个人静态访问令牌「${row.id}」吗？`, '提示', {
-    type: 'warning',
-  })
+  ElMessageBox.confirm(
+    t('MG_PAT_DEL_CONFIRM', `确认删除个人静态访问令牌「${row.id}」吗？`),
+    t('G2_LBL_TIP', '提示'),
+    { type: 'warning' },
+  )
     .then(async () => {
       try {
         await PersonalStaticAccessTokenApi.remove(row.id);
@@ -266,9 +251,10 @@ const handleDelete = (row: PersonalStaticAccessToken) => {
           pagination.pageNum--;
         }
         await loadData();
-        ElMessage.success('删除成功');
-      } catch (error: any) {
-        showErrorMessage(error || '删除失败');
+        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
+        showErrorMessage(msg);
       }
     })
     .catch(() => {});
@@ -292,10 +278,13 @@ const editForm = reactive({
   maskedToken: '',
 });
 
-// 表单校验规则
-const editRules: FormRules = {
-  name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-};
+const editDialogTitle = computed(() =>
+  isEdit.value ? t('MG_PAT_DLG_EDIT', '编辑') : t('MG_PAT_DLG_CREATE', '创建 Api Key'),
+);
+
+const editRules = computed<FormRules>(() => ({
+  name: [{ required: true, message: t('MG_PAT_VLD_NAME', '请输入名称'), trigger: 'blur' }],
+}));
 
 // 打开创建弹窗
 const handleCreate = () => {
@@ -367,9 +356,9 @@ const closeApiKeyDialog = () => {
 const copyApiKey = async () => {
   try {
     await navigator.clipboard.writeText(createdApiKey.value);
-    ElMessage.success('复制成功');
+    ElMessage.success(t('MG_PAT_MSG_COPY_OK', '复制成功'));
   } catch (error) {
-    ElMessage.warning('复制失败，请手动复制 API key');
+    ElMessage.warning(t('MG_PAT_MSG_COPY_FAIL', '复制失败，请手动复制 API key'));
   }
 };
 
@@ -397,7 +386,7 @@ const submitEdit = async () => {
     }
     
     await PersonalStaticAccessTokenApi.save(payload);
-    ElMessage.success(isEdit.value ? '更新成功' : '创建成功');
+    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('MG_PAT_MSG_CREATE_OK', '创建成功'));
     await loadData();
     
     editDialogVisible.value = false;
@@ -406,17 +395,15 @@ const submitEdit = async () => {
       createdApiKey.value = apiKey;
       apiKeyDialogVisible.value = true;
     }
-  } catch (error: any) {
-    showErrorMessage(error || '保存失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
+    showErrorMessage(msg);
   }
 };
 
 // 挂载回调
 onMounted(() => {
   syncApplicationAuthorizationQuery();
-  // 查询字典
-  loadDicts();
-  // 查询列表
   loadData();
 });
 
@@ -424,7 +411,7 @@ watch(
   () => props.applicationAuthorization?.id,
   () => {
     syncApplicationAuthorizationQuery();
-    pagination.pageNum = 1;
+  pagination.pageNum = 1; // 重置到第一页
     loadData();
   }
 );

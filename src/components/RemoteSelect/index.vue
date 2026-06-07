@@ -1,7 +1,7 @@
 <template>
   <el-select
     v-model="selectedValue"
-    :placeholder="placeholder"
+    :placeholder="resolvedPlaceholder"
     :clearable="clearable"
     :disabled="disabled"
     :loading="loading"
@@ -27,8 +27,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from 'vue';
+import { ref, watch, onMounted, nextTick, computed } from 'vue';
 import { ArrowDown } from '@element-plus/icons-vue';
+import { useLocaleStore } from '@platform/stores/locale.store';
+import { t } from '@platform/i18n';
 import type { FetchDataFunction, RemoteSelectOption } from './types';
 
 // 导出类型供外部使用
@@ -71,7 +73,7 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   valueKey: 'value',
   labelKey: 'label',
-  placeholder: '请选择',
+  placeholder: undefined,
   clearable: true,
   disabled: false,
   width: '200px',
@@ -81,6 +83,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<Emits>();
+
+const resolvedPlaceholder = computed(() => props.placeholder ?? t('G2_PH_SELECT', '请选择'));
 
 const selectedValue = ref<number | string | null | undefined>(props.modelValue);
 /** 下拉展示用的选项 */
@@ -382,6 +386,31 @@ watch(
     } else if (props.prefetchOnOpen) {
       void prefetchDefaultOptions();
     }
+  },
+);
+
+const localeStore = useLocaleStore();
+
+const reloadForLocaleChange = async () => {
+  defaultOptions.value = [];
+  sourceOptions.value = [];
+  options.value = [];
+  lastRemoteQuery.value = null;
+  userTypedSearch.value = false;
+
+  if (props.prefetchOnOpen) {
+    await prefetchDefaultOptions();
+  }
+  if (selectedValue.value !== null && selectedValue.value !== undefined) {
+    await loadInitialOption();
+  }
+};
+
+watch(
+  () => localeStore.locale,
+  (next, prev) => {
+    if (!next || next === prev) return;
+    void reloadForLocaleChange();
   },
 );
 

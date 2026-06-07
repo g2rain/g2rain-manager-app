@@ -5,7 +5,7 @@
     :prefetch-on-open="Boolean(props.usageCode?.trim())"
     :value-key="valueKey"
     :label-key="labelKey"
-    :placeholder="placeholder"
+    :placeholder="resolvedPlaceholder"
     :clearable="clearable"
     :disabled="disabled"
     :width="width"
@@ -17,6 +17,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { t } from '@platform/i18n';
 import { RemoteSelect } from './index';
 import type { FetchDataFunction, RemoteSelectOption } from './types';
 
@@ -56,7 +57,7 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   valueKey: 'code',
   labelKey: 'name',
-  placeholder: '请选择字典项',
+  placeholder: undefined,
   clearable: true,
   disabled: false,
   width: '200px',
@@ -64,6 +65,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<Emits>();
+
+const resolvedPlaceholder = computed(() => props.placeholder ?? t('G2_PH_DICT_ITEM', '请选择字典项'));
 
 // 使用本地可写的 ref 作为 v-model 绑定目标
 const innerValue = computed({

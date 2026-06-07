@@ -4,32 +4,32 @@
     <el-card class="passport-page__search" shadow="never">
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
+        <el-form-item :label="$t('G2_FIELD_USERNAME', '用户名')">
+          <el-input v-model="queryForm.username" :placeholder="$t('G2_PH_USERNAME', '请输入用户名')" clearable style="width: 200px" />
         <!-- 业务特定查询字段 -->
-        <el-form-item label="用户名">
-          <el-input v-model="queryForm.username" placeholder="请输入用户名" clearable style="width: 200px" />
         </el-form-item>
 
-        <el-form-item label="姓名">
-          <el-input v-model="queryForm.realName" placeholder="请输入姓名" clearable style="width: 200px" />
+        <el-form-item :label="$t('G2_FIELD_REAL_NAME', '姓名')">
+          <el-input v-model="queryForm.realName" :placeholder="$t('G2_PH_REALNAME', '请输入姓名')" clearable style="width: 200px" />
         </el-form-item>
 
-        <el-form-item label="手机号码">
-          <el-input v-model="queryForm.mobile" placeholder="请输入手机号码" clearable style="width: 200px" />
+        <el-form-item :label="$t('G2_FIELD_MOBILE', '手机号码')">
+          <el-input v-model="queryForm.mobile" :placeholder="$t('G2_PH_MOBILE', '请输入手机号码')" clearable style="width: 200px" />
         </el-form-item>
 
-        <el-form-item label="邮箱地址">
-          <el-input v-model="queryForm.email" placeholder="请输入邮箱地址" clearable style="width: 200px" />
+        <el-form-item :label="$t('G2_FIELD_EMAIL', '邮箱地址')">
+          <el-input v-model="queryForm.email" :placeholder="$t('G2_PH_EMAIL', '请输入邮箱地址')" clearable style="width: 200px" />
         </el-form-item>
 
-        <el-form-item label="账号状态">
-          <DictSelect v-model="queryForm.status" usage-code="PASSPORT_STATUS" :api-method="DictItemApi.select" placeholder="请选择状态" />
+        <el-form-item :label="$t('MG_PP_FIELD_STATUS', '账号状态')">
+          <DictSelect v-model="queryForm.status" usage-code="PASSPORT_STATUS" :api-method="DictItemApi.select" :placeholder="$t('MG_PP_PH_STATUS', '请选择状态')" />
         </el-form-item>
 
         <!-- 操作按钮 -->
         <template #actions>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ $t('G2_BTN_QUERY', '查询') }}</el-button>
+            <el-button @click="handleReset">{{ $t('G2_BTN_RESET', '重置') }}</el-button>
           </el-form-item>
         </template>
       </QueryForm>
@@ -38,57 +38,57 @@
     <!-- 标题和操作按钮 -->
     <div class="passport-page__header">
       <div class="passport-page__title-group">
-        <h2>管理账号数据</h2>
+        <h2>{{ $t('MG_PP_TITLE', '管理账号数据') }}</h2>
       </div>
-      <el-button type="primary" v-permission="'passport:add'" @click="handleCreate">新增账号</el-button>
+      <el-button type="primary" v-permission="'passport:add'" @click="handleCreate">{{ $t('MG_PP_BTN_ADD', '新增账号') }}</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true" @sort-change="handleSortChange">
-      <el-table-column prop="id" label="账号标识" width="180">
+      <el-table-column prop="id" :label="$t('MG_USER_PASSPORT_ID', '账号标识')" width="180">
         <template #default="{ row }">
           <el-button type="primary" link @click="openUserListDialog(row)">{{ row.id }}</el-button>
         </template>
       </el-table-column>
-      <el-table-column prop="username" label="用户名" width="180" />
-      <el-table-column prop="realName" label="姓名" width="180" />
-      <el-table-column prop="status" label="账号状态" width="180">
+      <el-table-column prop="username" :label="$t('G2_FIELD_USERNAME', '用户名')" width="180" />
+      <el-table-column prop="realName" :label="$t('G2_FIELD_REAL_NAME', '姓名')" width="180" />
+      <el-table-column prop="status" :label="$t('MG_PP_FIELD_STATUS', '账号状态')" width="180">
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            permission="passport:status_update"
+            v-permission="'passport:status_update'"
             active-value="NORMAL"
             inactive-value="FROZEN"
-            :options="statusOptions"
+            usage-code="PASSPORT_STATUS"
             :api-method="({ nextValue }) => PassportApi.updateStatus(row.id, String(nextValue))"
             @success="loadData"
           />
         </template>
       </el-table-column>
-      <el-table-column prop="mobile" label="手机号码" width="180" />
-      <el-table-column prop="email" label="邮箱地址" width="180" />
-      <el-table-column prop="sex" label="性别" width="180">
+      <el-table-column prop="mobile" :label="$t('G2_FIELD_MOBILE', '手机号码')" width="180" />
+      <el-table-column prop="email" :label="$t('G2_FIELD_EMAIL', '邮箱地址')" width="180" />
+      <el-table-column prop="sex" :label="$t('G2_FIELD_SEX', '性别')" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
             <DictText :value="row?.sex" usage-code="SEX" :api-method="DictItemApi.select" />
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="birthday" label="出身日期" width="180" />
-      <el-table-column prop="idNo" label="身份证号" width="180" />
-      <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
-      <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
-      <el-table-column label="操作" fixed="right" width="360">
+      <el-table-column prop="birthday" :label="$t('MG_PP_COL_BIRTHDAY', '出身日期')" width="180" />
+      <el-table-column prop="idNo" :label="$t('G2_FIELD_ID_NO', '身份证号')" width="180" />
+      <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
+      <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="360">
         <template #default="{ row }">
-          <el-button type="primary" link size="small" @click="openIdpBindingListDialog(row)">第三方绑定</el-button>
-          <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
+          <el-button type="primary" link size="small" @click="openIdpBindingListDialog(row)">{{ $t('MG_PP_BTN_IDP_BINDING', '第三方绑定') }}</el-button>
+          <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
           <el-button type="primary" v-permission="'passport:edit'" link size="small"
-            @click="handleEdit(row)">编辑</el-button>
+            @click="handleEdit(row)">{{ $t('G2_BTN_EDIT', '编辑') }}</el-button>
           <el-button type="danger" v-permission="'passport:delete'" link size="small"
-            @click="handleDelete(row)">删除</el-button>
+            @click="handleDelete(row)">{{ $t('G2_BTN_DELETE', '删除') }}</el-button>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span>操作</span>
+            <span>{{ $t('G2_FIELD_ACTION', '操作') }}</span>
             <SortManagerButton />
           </div>
         </template>
@@ -103,137 +103,138 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑账号' : '新增账号'" width="520px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="editForm.username" placeholder="请输入用户名" :disabled="isEdit" />
+        <el-form-item :label="$t('G2_FIELD_USERNAME', '用户名')" prop="username">
+          <el-input v-model="editForm.username" :placeholder="$t('G2_PH_USERNAME', '请输入用户名')" :disabled="isEdit" />
         </el-form-item>
 
-        <el-form-item label="密码" prop="password" v-if="!isEdit">
-          <el-input v-model="editForm.password" type="password" placeholder="请输入密码" />
+        <el-form-item :label="$t('MG_PP_FIELD_PASSWORD', '密码')" prop="password" v-if="!isEdit">
+          <el-input v-model="editForm.password" type="password" :placeholder="$t('MG_PP_PH_PASSWORD', '请输入密码')" />
         </el-form-item>
 
-        <el-form-item label="姓名" prop="realName">
-          <el-input v-model="editForm.realName" placeholder="请输入姓名" />
+        <el-form-item :label="$t('G2_FIELD_REAL_NAME', '姓名')" prop="realName">
+          <el-input v-model="editForm.realName" :placeholder="$t('G2_PH_REALNAME', '请输入姓名')" />
         </el-form-item>
 
-        <el-form-item label="性别" prop="sex">
-          <DictSelect v-model="editForm.sex" usage-code="SEX" :api-method="DictItemApi.select" placeholder="请选择性别" />
+        <el-form-item :label="$t('G2_FIELD_SEX', '性别')" prop="sex">
+          <DictSelect v-model="editForm.sex" usage-code="SEX" :api-method="DictItemApi.select" :placeholder="$t('G2_PH_SEX', '请选择性别')" />
         </el-form-item>
 
-        <el-form-item label="出生日期" prop="birthday">
-          <el-input v-model="editForm.birthday" placeholder="请输入出生日期" />
+        <el-form-item :label="$t('MG_PP_FIELD_BIRTHDAY', '出生日期')" prop="birthday">
+          <el-input v-model="editForm.birthday" :placeholder="$t('MG_PP_PH_BIRTHDAY', '请输入出生日期')" />
         </el-form-item>
 
-        <el-form-item label="身份证号" prop="idNo">
-          <el-input v-model="editForm.idNo" placeholder="请输入身份证号" />
+        <el-form-item :label="$t('G2_FIELD_ID_NO', '身份证号')" prop="idNo">
+          <el-input v-model="editForm.idNo" :placeholder="$t('G2_PH_IDNO', '请输入身份证号')" />
         </el-form-item>
 
-        <el-form-item label="手机号码" prop="mobile">
-          <el-input v-model="editForm.mobile" placeholder="请输入手机号码" />
+        <el-form-item :label="$t('G2_FIELD_MOBILE', '手机号码')" prop="mobile">
+          <el-input v-model="editForm.mobile" :placeholder="$t('G2_PH_MOBILE', '请输入手机号码')" />
         </el-form-item>
 
-        <el-form-item label="邮箱地址" prop="email">
-          <el-input v-model="editForm.email" placeholder="请输入邮箱地址" />
+        <el-form-item :label="$t('G2_FIELD_EMAIL', '邮箱地址')" prop="email">
+          <el-input v-model="editForm.email" :placeholder="$t('G2_PH_EMAIL', '请输入邮箱地址')" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitEdit">保 存</el-button>
+          <el-button @click="editDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="submitEdit">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
+    <el-dialog v-model="detailDialogVisible" :title="$t('MG_PP_DETAIL', '账号明细')" width="520px">
     <!-- 明细弹窗 -->
-    <el-dialog v-model="detailDialogVisible" title="账号明细" width="520px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="账号标识">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item label="用户名">{{ currentRow?.username }}</el-descriptions-item>
-        <el-descriptions-item label="姓名">{{ currentRow?.realName }}</el-descriptions-item>
-        <el-descriptions-item label="性别">
+        <el-descriptions-item :label="$t('MG_USER_PASSPORT_ID', '账号标识')">{{ currentRow?.id }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_USERNAME', '用户名')">{{ currentRow?.username }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_REAL_NAME', '姓名')">{{ currentRow?.realName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_SEX', '性别')">
           <el-tag>
             <DictText :value="currentRow?.sex" usage-code="SEX" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="出生日期">{{ currentRow?.birthday }}</el-descriptions-item>
-        <el-descriptions-item label="身份证号">{{ currentRow?.idNo }}</el-descriptions-item>
-        <el-descriptions-item label="手机号码">{{ currentRow?.mobile }}</el-descriptions-item>
-        <el-descriptions-item label="邮箱地址">{{ currentRow?.email }}</el-descriptions-item>
-        <el-descriptions-item label="账号状态">
+        <el-descriptions-item :label="$t('MG_PP_FIELD_BIRTHDAY', '出生日期')">{{ currentRow?.birthday }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_ID_NO', '身份证号')">{{ currentRow?.idNo }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_MOBILE', '手机号码')">{{ currentRow?.mobile }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_EMAIL', '邮箱地址')">{{ currentRow?.email }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_PP_FIELD_STATUS', '账号状态')">
           <el-tag :type="currentRow?.status === 'NORMAL' ? 'success' : 'info'">
             <DictText :value="currentRow?.status" usage-code="PASSPORT_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
         <span class="dialog-footer">
-          <el-button type="primary" @click="detailDialogVisible = false">关 闭</el-button>
+          <el-button type="primary" @click="detailDialogVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
+    <el-dialog v-model="userListDialogVisible" :title="$t('MG_PP_USER_LIST', '用户列表')" width="960px" destroy-on-close @closed="userListRows = []">
     <!-- 用户列表） -->
-    <el-dialog v-model="userListDialogVisible" title="用户列表" width="960px" destroy-on-close @closed="userListRows = []">
       <el-table :data="userListRows" border stripe max-height="420">
-        <el-table-column prop="id" label="用户序号" width="100" />
-        <el-table-column prop="passportId" label="账号序号" width="100" />
-        <el-table-column prop="organId" label="所属机构" width="100" />
-        <el-table-column prop="realName" label="姓名" width="120" />
-        <el-table-column prop="admin" label="管理员" width="90">
+        <el-table-column prop="id" :label="$t('MG_USER_COL_ID', '用户序号')" width="100" />
+        <el-table-column prop="passportId" :label="$t('MG_USER_COL_PASSPORT', '账号序号')" width="100" />
+        <el-table-column prop="organId" :label="$t('MG_FIELD_ORGAN', '所属机构')" width="100" />
+        <el-table-column prop="realName" :label="$t('G2_FIELD_REAL_NAME', '姓名')" width="120" />
+        <el-table-column prop="admin" :label="$t('G2_FIELD_ADMIN', '管理员')" width="90">
           <template #default="{ row: u }">
             <el-tag :type="u.admin ? 'success' : 'info'" effect="light" size="small">
-              {{ u.admin ? '是' : '否' }}
+              {{ u.admin ? $t('G2_OPT_YES', '是') : $t('G2_OPT_NO', '否') }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="email" label="邮箱地址" min-width="160" />
-        <el-table-column prop="mobile" label="手机号码" width="130" />
-        <el-table-column prop="createTime" label="创建时间" width="170" />
+        <el-table-column prop="email" :label="$t('G2_FIELD_EMAIL', '邮箱地址')" min-width="160" />
+        <el-table-column prop="mobile" :label="$t('G2_FIELD_MOBILE', '手机号码')" width="130" />
+        <el-table-column prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="170" />
       </el-table>
       <template #footer>
-        <el-button type="primary" @click="userListDialogVisible = false">关 闭</el-button>
+        <el-button type="primary" @click="userListDialogVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
       </template>
     </el-dialog>
 
     <!-- 第三方身份绑定列表 -->
     <el-drawer
       v-model="idpBindingListDrawerVisible"
-      :title="`第三方身份绑定（账号 ${currentPassportId ?? ''}）`"
+      :title="idpBindingDrawerTitle"
       direction="rtl"
       size="800px"
       destroy-on-close
       @closed="idpBindingListRows = []"
     >
       <el-table :data="idpBindingListRows" border stripe style="width: 100%">
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="idpType" label="身份源类型" width="120">
+        <el-table-column prop="id" :label="$t('G2_FIELD_ID', 'ID')" width="80" />
+        <el-table-column prop="idpType" :label="$t('MG_PP_IDP_FIELD_IDP_TYPE', '身份源类型')" width="120">
           <template #default="{ row: binding }">
             <el-tag effect="light" size="small">
               <DictText :value="binding?.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" />
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="idpSubject" label="IDP侧用户授权标识" min-width="160" />
-        <el-table-column prop="corpId" label="IDP侧企业ID" width="140" />
-        <el-table-column prop="idpUserId" label="IDP侧用户ID" width="120" />
-        <el-table-column prop="idpApplicationCode" label="IDP侧的应用ID" width="140" />
-        <el-table-column prop="bindMode" label="接入形态" width="100" />
-        <el-table-column prop="createTime" label="创建时间" width="170" />
+        <el-table-column prop="idpSubject" :label="$t('MG_PP_IDP_FIELD_IDP_SUBJECT', 'IDP侧用户授权标识')" min-width="160" />
+        <el-table-column prop="corpId" :label="$t('MG_PP_IDP_FIELD_CORP_ID', 'IDP侧企业ID')" width="140" />
+        <el-table-column prop="idpUserId" :label="$t('MG_PP_IDP_FIELD_IDP_USER_ID', 'IDP侧用户ID')" width="120" />
+        <el-table-column prop="idpApplicationCode" :label="$t('MG_PP_IDP_FIELD_IDP_APP_CODE', 'IDP侧的应用ID')" width="140" />
+        <el-table-column prop="bindMode" :label="$t('MG_PP_IDP_FIELD_BIND_MODE', '接入形态')" width="100" />
+        <el-table-column prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="170" />
       </el-table>
       <template #footer>
-        <el-button type="primary" @click="idpBindingListDrawerVisible = false">关 闭</el-button>
+        <el-button type="primary" @click="idpBindingListDrawerVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
       </template>
     </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import { t } from '@platform/i18n';
 import { PassportApi } from './api';
 import { UserApi } from '../user/api';
 import { PassportIdpBindingApi } from '../passport_idp_binding/api';
@@ -243,25 +244,6 @@ import type { User } from '../user/type';
 import type { PassportIdpBinding } from '../passport_idp_binding/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
-
-// 定义字典引用
-const statusOptions = ref<Array<{ label: string; value: string }>>([]);
-
-// 获取字典信息
-const loadDicts = async () => {
-  try {
-    const items = await DictItemApi.loadByUsageCode('PASSPORT_STATUS');
-    statusOptions.value = [...items]
-      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
-      .map((item) => ({
-        label: item.name || String(item.code),
-        value: String(item.code),
-      }));
-  } catch (error) {
-    console.error('加载账号状态字典失败:', error);
-    statusOptions.value = [];
-  }
-};
 
 // 定义组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
@@ -312,8 +294,9 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载列表失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
+    ElMessage.error(msg);
   }
 };
 
@@ -325,6 +308,7 @@ const handleSortChange = (params: Record<string, string>) => {
 
 // 查询数据列表
 const handleSearch = () => {
+  pagination.pageNum = 1; // 重置到第一页
   pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
@@ -343,12 +327,14 @@ const handleReset = () => {
   queryForm.email = '';
   queryForm.status = '';
   pagination.pageNum = 1; // 重置到第一页
+  pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
 
 // 分页大小变化
 const handleSizeChange = (size: number) => {
   pagination.pageSize = size;
+  pagination.pageNum = 1; // 重置到第一页
   pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
@@ -378,8 +364,9 @@ const openUserListDialog = async (row: Passport) => {
   userListRows.value = [];
   try {
     userListRows.value = await UserApi.list({ passportId: row.id });
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载用户列表失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('MG_PP_MSG_USER_LOAD_FAIL', '加载用户列表失败');
+    ElMessage.error(msg);
   }
 };
 
@@ -387,22 +374,30 @@ const openUserListDialog = async (row: Passport) => {
 const idpBindingListDrawerVisible = ref(false);
 const idpBindingListRows = ref<PassportIdpBinding[]>([]);
 const currentPassportId = ref<number | undefined>();
+
+const idpBindingDrawerTitle = computed(() =>
+  t('MG_PP_IDP_BINDING_DRAWER', `第三方身份绑定（账号 ${currentPassportId.value ?? ''}）`),
+);
+
 const openIdpBindingListDialog = async (row: Passport) => {
   currentPassportId.value = row.id;
   idpBindingListDrawerVisible.value = true;
   idpBindingListRows.value = [];
   try {
     idpBindingListRows.value = await PassportIdpBindingApi.list({ passportId: row.id });
-  } catch (error: any) {
-    ElMessage.error(error.message || '加载第三方绑定列表失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('MG_PP_MSG_IDP_LOAD_FAIL', '加载第三方绑定列表失败');
+    ElMessage.error(msg);
   }
 };
 
 // 删除数据记录
 const handleDelete = (row: Passport) => {
-  ElMessageBox.confirm(`确认删除账号「${row.id}」吗？`, '提示', {
-    type: 'warning',
-  })
+  ElMessageBox.confirm(
+    t('MG_PP_DEL_CONFIRM', `确认删除账号「${row.id}」吗？`),
+    t('G2_LBL_TIP', '提示'),
+    { type: 'warning' },
+  )
     .then(async () => {
       try {
         await PassportApi.remove(row.id);
@@ -411,9 +406,10 @@ const handleDelete = (row: Passport) => {
           pagination.pageNum--;
         }
         await loadData();
-        ElMessage.success('删除成功');
-      } catch (error: any) {
-        ElMessage.error(error.message || '删除失败');
+        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
+        ElMessage.error(msg);
       }
     })
     .catch(() => { });
@@ -421,10 +417,8 @@ const handleDelete = (row: Passport) => {
 
 // 保存弹窗引用
 const editDialogVisible = ref(false);
-
 // 修改标记状态
 const isEdit = ref(false);
-
 // 修改组件引用
 const editFormRef = ref<FormInstance | null>(null);
 
@@ -441,17 +435,21 @@ const editForm = reactive({
   email: '',
 });
 
+const editDialogTitle = computed(() =>
+  isEdit.value ? t('MG_PP_DLG_EDIT', '编辑账号') : t('MG_PP_DLG_ADD', '新增账号'),
+);
+
 // 表单校验规则
-const editRules: FormRules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: !isEdit.value, message: '请输入密码', trigger: 'blur' }],
-  realName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  sex: [{ required: false, message: '请输入性别', trigger: 'blur' }],
-  birthday: [{ required: false, message: '请输入出生日期', trigger: 'blur' }],
-  idNo: [{ required: false, message: '请输入身份证号', trigger: 'blur' }],
-  mobile: [{ required: false, message: '请输入手机号码', trigger: 'blur' }],
-  email: [{ required: false, message: '请输入邮箱地址', trigger: 'blur' }],
-};
+const editRules = computed<FormRules>(() => ({
+  username: [{ required: true, message: t('G2_VLD_REQ_USERNAME', '请输入用户名'), trigger: 'blur' }],
+  password: [{ required: !isEdit.value, message: t('MG_PP_VLD_PASSWORD', '请输入密码'), trigger: 'blur' }],
+  realName: [{ required: true, message: t('G2_VLD_REQ_REALNAME', '请输入姓名'), trigger: 'blur' }],
+  sex: [{ required: false, message: t('G2_PH_SEX', '请选择性别'), trigger: 'blur' }],
+  birthday: [{ required: false, message: t('MG_PP_PH_BIRTHDAY', '请输入出生日期'), trigger: 'blur' }],
+  idNo: [{ required: false, message: t('G2_PH_IDNO', '请输入身份证号'), trigger: 'blur' }],
+  mobile: [{ required: false, message: t('G2_PH_MOBILE', '请输入手机号码'), trigger: 'blur' }],
+  email: [{ required: false, message: t('G2_PH_EMAIL', '请输入邮箱地址'), trigger: 'blur' }],
+}));
 
 // 打开创建弹窗
 const handleCreate = () => {
@@ -515,24 +513,17 @@ const submitEdit = async () => {
       payload.id = editForm.id;
     }
     await PassportApi.save(payload);
-    ElMessage.success(isEdit.value ? '更新成功' : '新增成功');
+    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
     await loadData();
     editDialogVisible.value = false;
-  } catch (error: any) {
-    ElMessage.error(error.message || '保存失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
+    ElMessage.error(msg);
   }
 };
 
-
-
-
-
-
 // 挂载回调
 onMounted(async () => {
-  // 先准备字典
-  await loadDicts();
-  // 再查询列表
   await loadData();
 });
 </script>

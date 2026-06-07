@@ -1,77 +1,77 @@
 {
   "pages": [
     {
-      "pageName": "passport",
+      "pageName": "账号管理",
       "pageCode": "passport",
       "linkPath": "/passport"
     },
     {
-      "pageName": "user",
+      "pageName": "用户管理",
       "pageCode": "user",
       "linkPath": "/user"
     },
     {
-      "pageName": "organ",
+      "pageName": "机构管理",
       "pageCode": "organ",
       "linkPath": "/organ"
     },
     {
-      "pageName": "resource_menu",
+      "pageName": "菜单资源",
       "pageCode": "resource_menu",
       "linkPath": "/resource_menu"
     },
     {
-      "pageName": "resource_page",
+      "pageName": "页面资源",
       "pageCode": "resource_page",
       "linkPath": "/resource_page"
     },
     {
-      "pageName": "control_unit",
+      "pageName": "功能权限",
       "pageCode": "control_unit",
       "linkPath": "/control_unit"
     },
     {
-      "pageName": "role",
+      "pageName": "角色管理",
       "pageCode": "role",
       "linkPath": "/role"
     },
     {
-      "pageName": "control_domain",
+      "pageName": "业务能力",
       "pageCode": "control_domain",
       "linkPath": "/control_domain"
     },
     {
-      "pageName": "application",
+      "pageName": "应用管理",
       "pageCode": "application",
       "linkPath": "/application"
     },
     {
-      "pageName": "application_authorization",
+      "pageName": "应用授权",
       "pageCode": "application_authorization",
       "linkPath": "/application_authorization"
     },
     {
-      "pageName": "resource_settings",
+      "pageName": "资源设置",
       "pageCode": "resource_settings",
       "linkPath": "/resource_settings"
     },
     {
-      "pageName": "service_registry",
+      "pageName": "服务注册",
       "pageCode": "service_registry",
       "linkPath": "/service_registry"
     },
     {
-      "pageName": "resource_api",
+      "pageName": "资源接口",
       "pageCode": "resource_api",
       "linkPath": "/resource_api"
     },
     {
-      "pageName": "login_token",
+      "pageName": "登陆日志",
       "pageCode": "login_token",
       "linkPath": "/login_token"
     },
     {
-      "pageName": "audit_event",
+      "pageName": "审计日志",
       "pageCode": "audit_event",
       "linkPath": "/audit_event"
     },
@@ -81,12 +81,12 @@
       "linkPath": "/personal_static_access_token"
     },
     {
-      "pageName": "账号与外部身份源绑定表",
+      "pageName": "账号与外部身份源绑定",
       "pageCode": "passport_idp_binding",
       "linkPath": "/passport_idp_binding"
     },
     {
-      "pageName": "外部身份源应用与平台应用的绑定",
+      "pageName": "外部身份源应用绑定",
       "pageCode": "application_idp_provision",
       "linkPath": "/application_idp_provision"
     },
@@ -110,6 +110,14 @@
       "pageElementName": "manager_api_keys",
       "pageElementCode": "application_authorization:manager_api_keys",
       "pageElementType": "button",
+      "pageCode": "application_authorization",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "application_authorization:status_update",
+      "pageElementType": "switch",
       "pageCode": "application_authorization",
       "status": "ENABLED"
     },
@@ -187,6 +195,14 @@
     },
     {
       "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "application:status_update",
+      "pageElementType": "switch",
+      "pageCode": "application",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
       "pageElementName": "新增",
       "pageElementCode": "control_domain:add",
       "pageElementType": "button",
@@ -254,6 +270,14 @@
       "pageElementName": "resources_config",
       "pageElementCode": "control_unit:resources_config",
       "pageElementType": "button",
+      "pageCode": "control_unit",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "control_unit:status_update",
+      "pageElementType": "switch",
       "pageCode": "control_unit",
       "status": "ENABLED"
     },
@@ -331,6 +355,14 @@
     },
     {
       "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "organ:status_update",
+      "pageElementType": "switch",
+      "pageCode": "organ",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
       "pageElementName": "删除",
       "pageElementCode": "passport_idp_binding:delete",
       "pageElementType": "button",
@@ -363,6 +395,14 @@
     },
     {
       "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "passport:status_update",
+      "pageElementType": "switch",
+      "pageCode": "passport",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
       "pageElementName": "新增",
       "pageElementCode": "personal_static_access_token:add",
       "pageElementType": "button",
@@ -382,6 +422,14 @@
       "pageElementName": "编辑",
       "pageElementCode": "personal_static_access_token:edit",
       "pageElementType": "button",
+      "pageCode": "personal_static_access_token",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "personal_static_access_token:status_update",
+      "pageElementType": "switch",
       "pageCode": "personal_static_access_token",
       "status": "ENABLED"
     },

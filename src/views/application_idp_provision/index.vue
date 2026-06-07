@@ -5,11 +5,11 @@
     <el-card class="application_idp_provision-page__search" shadow="never">
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
+        <el-form-item :label="$t('MG_APP_IDP_FIELD_APPLICATION', '应用')">
         <!-- 业务特定查询字段 -->
-        <el-form-item label="应用">
           <el-select
             v-model="queryForm.applicationId"
-            placeholder="请选择应用"
+            :placeholder="$t('MG_APP_IDP_PH_APPLICATION', '请选择应用')"
             filterable
             clearable
             style="width: 200px"
@@ -17,21 +17,21 @@
             <el-option v-for="item in applicationOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="身份源类型">
-          <DictSelect v-model="queryForm.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" placeholder="请选择身份源类型" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_APP_IDP_FIELD_IDP_TYPE', '身份源类型')">
+          <DictSelect v-model="queryForm.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" :placeholder="$t('MG_APP_IDP_PH_IDP_TYPE', '请选择身份源类型')" clearable style="width: 200px" />
         </el-form-item>
-        <el-form-item label="IDP侧应用ID">
-          <el-input v-model="queryForm.idpApplicationCode" placeholder="请输入IDP侧应用ID" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')">
+          <el-input v-model="queryForm.idpApplicationCode" :placeholder="$t('MG_APP_IDP_PH_IDP_APP_CODE', '请输入IDP侧应用ID')" clearable style="width: 200px" />
         </el-form-item>
-        <el-form-item label="备注">
-          <el-input v-model="queryForm.remark" placeholder="请输入备注" clearable style="width: 200px" />
+        <el-form-item :label="$t('MG_APP_IDP_FIELD_REMARK', '备注')">
+          <el-input v-model="queryForm.remark" :placeholder="$t('MG_APP_IDP_PH_REMARK', '请输入备注')" clearable style="width: 200px" />
         </el-form-item>
 
         <!-- 操作按钮 -->
         <template #actions>
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">查询</el-button>
-            <el-button @click="handleReset">重置</el-button>
+            <el-button type="primary" @click="handleSearch">{{ $t('G2_BTN_QUERY', '查询') }}</el-button>
+            <el-button @click="handleReset">{{ $t('G2_BTN_RESET', '重置') }}</el-button>
           </el-form-item>
         </template>
       </QueryForm>
@@ -40,34 +40,34 @@
     <!-- 标题和操作按钮 -->
     <div class="application_idp_provision-page__header">
       <div class="application_idp_provision-page__title-group">
-        <h2>管理外部身份源应用与平台应用的绑定数据</h2>
+        <h2>{{ $t('MG_APP_IDP_TITLE', '管理外部身份源应用与平台应用的绑定数据') }}</h2>
       </div>
-      <el-button type="primary" v-permission="'application_idp_provision:add'" @click="handleCreate">配置应用IDP</el-button>
+      <el-button type="primary" v-permission="'application_idp_provision:add'" @click="handleCreate">{{ $t('MG_APP_IDP_BTN_ADD', '配置应用IDP') }}</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true" @sort-change="handleSortChange">
-      <el-table-column prop="id" label="ID" width="120" />
-      <el-table-column prop="applicationId" label="应用ID" width="140" />
-      <el-table-column prop="idpType" label="身份源类型" width="180">
+      <el-table-column prop="id" :label="$t('G2_FIELD_ID', 'ID')" width="120" />
+      <el-table-column prop="applicationId" :label="$t('MG_APP_IDP_COL_APP_ID', '应用ID')" width="140" />
+      <el-table-column prop="idpType" :label="$t('MG_APP_IDP_FIELD_IDP_TYPE', '身份源类型')" width="180">
         <template #default="{ row }">
           <el-tag effect="light">
             <DictText :value="row?.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="idpApplicationCode" label="IDP侧应用ID" width="180" />
-      <el-table-column prop="remark" label="备注" width="180" />
-      <TableColumn prop="createTime" label="创建时间" width="180" :sortable="true" />
-      <TableColumn prop="updateTime" label="更新时间" width="180" :sortable="true" />
-      <el-table-column label="操作" fixed="right" width="280">
+      <el-table-column prop="idpApplicationCode" :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')" width="180" />
+      <el-table-column prop="remark" :label="$t('MG_APP_IDP_FIELD_REMARK', '备注')" width="180" />
+      <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
+      <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
         <template #default="{ row }">
-          <el-button type="primary" link size="small" @click="handleView(row)">明细</el-button>
-          <el-button type="primary" v-permission="'application_idp_provision:edit'" link size="small" @click="handleEdit(row)">编辑</el-button>
-          <el-button type="danger" v-permission="'application_idp_provision:delete'" link size="small" @click="handleDelete(row)">删除</el-button>
+          <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
+          <el-button type="primary" v-permission="'application_idp_provision:edit'" link size="small" @click="handleEdit(row)">{{ $t('G2_BTN_EDIT', '编辑') }}</el-button>
+          <el-button type="danger" v-permission="'application_idp_provision:delete'" link size="small" @click="handleDelete(row)">{{ $t('G2_BTN_DELETE', '删除') }}</el-button>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span>操作</span>
+            <span>{{ $t('G2_FIELD_ACTION', '操作') }}</span>
             <SortManagerButton />
           </div>
         </template>
@@ -88,12 +88,12 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="isEdit ? '编辑应用IDP配置' : '配置应用IDP'" width="560px" append-to-body destroy-on-close>
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="560px" append-to-body destroy-on-close>
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="120px">
-        <el-form-item label="应用" prop="applicationId">
+        <el-form-item :label="$t('MG_APP_IDP_FIELD_APPLICATION', '应用')" prop="applicationId">
           <el-select
             v-model="editForm.applicationId"
-            placeholder="请选择应用"
+            :placeholder="$t('MG_APP_IDP_PH_APPLICATION', '请选择应用')"
             filterable
             :disabled="isEdit"
             style="width: 100%"
@@ -101,57 +101,58 @@
             <el-option v-for="item in applicationOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="身份源类型" prop="idpType">
+        <el-form-item :label="$t('MG_APP_IDP_FIELD_IDP_TYPE', '身份源类型')" prop="idpType">
           <DictSelect
             v-model="editForm.idpType"
             usage-code="PASSPORT_IDP_TYPE"
             :api-method="DictItemApi.select"
             :clearable="false"
             :disabled="isEdit"
-            placeholder="请选择身份源类型"
+            :placeholder="$t('MG_APP_IDP_PH_IDP_TYPE', '请选择身份源类型')"
           />
         </el-form-item>
-        <el-form-item label="IDP侧应用ID" prop="idpApplicationCode">
-          <el-input v-model="editForm.idpApplicationCode" placeholder="请输入IDP侧应用ID" />
+        <el-form-item :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')" prop="idpApplicationCode">
+          <el-input v-model="editForm.idpApplicationCode" :placeholder="$t('MG_APP_IDP_PH_IDP_APP_CODE', '请输入IDP侧应用ID')" />
         </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="editForm.remark" type="textarea" :rows="3" placeholder="请输入备注" />
+        <el-form-item :label="$t('MG_APP_IDP_FIELD_REMARK', '备注')" prop="remark">
+          <el-input v-model="editForm.remark" type="textarea" :rows="3" :placeholder="$t('MG_APP_IDP_PH_REMARK', '请输入备注')" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="editDialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitEdit">保 存</el-button>
+          <el-button @click="editDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
+          <el-button type="primary" @click="submitEdit">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
 
+    <el-drawer v-model="detailDialogVisible" :title="$t('MG_APP_IDP_DETAIL', '外部身份源应用与平台应用的绑定明细')" direction="rtl" size="520px" destroy-on-close>
     <!-- 明细抽屉 -->
-    <el-drawer v-model="detailDialogVisible" title="外部身份源应用与平台应用的绑定明细" direction="rtl" size="520px" destroy-on-close>
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="ID">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item label="应用ID">{{ currentRow?.applicationId }}</el-descriptions-item>
-        <el-descriptions-item label="身份源类型">
+        <el-descriptions-item :label="$t('G2_FIELD_ID', 'ID')">{{ currentRow?.id }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_APP_IDP_COL_APP_ID', '应用ID')">{{ currentRow?.applicationId }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_APP_IDP_FIELD_IDP_TYPE', '身份源类型')">
           <el-tag>
             <DictText :value="currentRow?.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="IDP侧应用ID">{{ currentRow?.idpApplicationCode }}</el-descriptions-item>
-        <el-descriptions-item label="备注">{{ currentRow?.remark }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ currentRow?.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ currentRow?.updateTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')">{{ currentRow?.idpApplicationCode }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_APP_IDP_FIELD_REMARK', '备注')">{{ currentRow?.remark }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
-        <el-button type="primary" @click="detailDialogVisible = false">关 闭</el-button>
+        <el-button type="primary" @click="detailDialogVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
       </template>
     </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import { t } from '@platform/i18n';
 import { ApplicationIdpProvisionApi } from './api';
 import { ApplicationApi } from '../application/api';
 import { DictItemApi } from '../dict/api';
@@ -172,6 +173,7 @@ const loadApplicationOptions = async () => {
     console.error('加载应用列表失败:', error);
     applicationOptions.value = [];
   }
+// 表单校验规则
 };
 
 // 组件引用
@@ -222,8 +224,9 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    showErrorMessage(error || '加载列表失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
+    showErrorMessage(msg);
   }
 };
 
@@ -235,6 +238,7 @@ const handleSortChange = (params: Record<string, string>) => {
 
 // 查询
 const handleSearch = () => {
+  pagination.pageNum = 1; // 重置到第一页
   pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
@@ -253,12 +257,14 @@ const handleReset = () => {
   queryForm.remark = '';
   
   pagination.pageNum = 1; // 重置到第一页
+  pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
 
 // 分页大小变化
 const handleSizeChange = (size: number) => {
   pagination.pageSize = size;
+  pagination.pageNum = 1; // 重置到第一页
   pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
@@ -282,9 +288,11 @@ const handleView = (row: ApplicationIdpProvision) => {
 
 // 删除数据记录
 const handleDelete = (row: ApplicationIdpProvision) => {
-  ElMessageBox.confirm(`确认删除外部身份源应用与平台应用的绑定「${row.id}」吗？`, '提示', {
-    type: 'warning',
-  })
+  ElMessageBox.confirm(
+    t('MG_APP_IDP_DEL_CONFIRM', `确认删除外部身份源应用与平台应用的绑定「${row.id}」吗？`),
+    t('G2_LBL_TIP', '提示'),
+    { type: 'warning' },
+  )
     .then(async () => {
       try {
         await ApplicationIdpProvisionApi.remove(row.id);
@@ -293,9 +301,10 @@ const handleDelete = (row: ApplicationIdpProvision) => {
           pagination.pageNum--;
         }
         await loadData();
-        ElMessage.success('删除成功');
-      } catch (error: any) {
-        showErrorMessage(error || '删除失败');
+        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
+        showErrorMessage(msg);
       }
     })
     .catch(() => {});
@@ -303,10 +312,8 @@ const handleDelete = (row: ApplicationIdpProvision) => {
 
 // 保存弹窗引用
 const editDialogVisible = ref(false);
-
 // 修改标记状态
 const isEdit = ref(false);
-
 // 修改组件引用
 const editFormRef = ref<FormInstance | null>(null);
 
@@ -319,12 +326,15 @@ const editForm = reactive({
   remark: '',
 });
 
-// 表单校验规则
-const editRules: FormRules = {
-  applicationId: [{ required: true, message: '请选择应用', trigger: 'change' }],
-  idpType: [{ required: true, message: '请选择身份源类型', trigger: 'change' }],
-  idpApplicationCode: [{ required: true, message: '请输入IDP侧应用ID', trigger: 'blur' }],
-};
+const editDialogTitle = computed(() =>
+  isEdit.value ? t('MG_APP_IDP_DLG_EDIT', '编辑应用IDP配置') : t('MG_APP_IDP_DLG_ADD', '配置应用IDP'),
+);
+
+const editRules = computed<FormRules>(() => ({
+  applicationId: [{ required: true, message: t('MG_APP_IDP_VLD_APPLICATION', '请选择应用'), trigger: 'change' }],
+  idpType: [{ required: true, message: t('MG_APP_IDP_VLD_IDP_TYPE', '请选择身份源类型'), trigger: 'change' }],
+  idpApplicationCode: [{ required: true, message: t('MG_APP_IDP_VLD_IDP_APP_CODE', '请输入IDP侧应用ID'), trigger: 'blur' }],
+}));
 
 // 打开创建弹窗
 const handleCreate = () => {
@@ -370,11 +380,12 @@ const submitEdit = async () => {
       payload.id = editForm.id;
     }
     await ApplicationIdpProvisionApi.save(payload);
-    ElMessage.success(isEdit.value ? '更新成功' : '新增成功');
+    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
     await loadData();
     editDialogVisible.value = false;
-  } catch (error: any) {
-    showErrorMessage(error || '保存失败');
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
+    showErrorMessage(msg);
   }
 };
 
@@ -435,4 +446,3 @@ onMounted(async () => {
   margin-top: 16px;
 }
 </style>
-

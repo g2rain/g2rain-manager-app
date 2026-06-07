@@ -5,7 +5,7 @@
     :prefetch-on-open="prefetchOnOpen"
     :value-key="valueKey"
     :label-key="labelKey"
-    :placeholder="placeholder"
+    :placeholder="resolvedPlaceholder"
     :clearable="resolvedClearable"
     :auto-select-first-when-empty="autoSelectFirstWhenEmpty"
     :disabled="disabled"
@@ -19,6 +19,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
 import { useAccessTokenStore } from '@platform/stores';
+import { t } from '@platform/i18n';
 import { RemoteSelect } from './index';
 import type { FetchDataFunction, RemoteSelectOption } from './types';
 
@@ -45,7 +46,7 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   valueKey: 'organId',
   labelKey: 'organName',
-  placeholder: '请选择所属机构',
+  placeholder: undefined,
   disabled: false,
   width: '200px',
   debounceDelay: 300,
@@ -54,6 +55,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 const tokenStore = useAccessTokenStore();
+
+const resolvedPlaceholder = computed(() => props.placeholder ?? t('MG_PH_ORGAN', '请选择所属机构'));
 
 const isEmptyModelValue = (value: number | null | undefined) => value === null || value === undefined;
 

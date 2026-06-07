@@ -4,10 +4,10 @@
     link
     size="small"
     @click="handleClick"
-    title="管理排序"
+    :title="$t('G2_SORT_MANAGE', '管理排序')"
   >
     <el-icon><Sort /></el-icon>
-    <span v-if="showLabel">排序</span>
+    <span v-if="showLabel">{{ $t('G2_LBL_SORT', '排序') }}</span>
   </el-button>
 </template>
 

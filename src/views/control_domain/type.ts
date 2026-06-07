@@ -8,6 +8,7 @@ import type { BaseSelectListDto, BaseVo } from '@platform/types/api.type';
  */
 export interface ControlDomain extends BaseVo {
   applicationId: number;
+  applicationName: string;
   controlDomainName: string;
   controlDomainType: string;
   controlDomainScope: string;

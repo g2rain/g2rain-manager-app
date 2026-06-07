@@ -1,26 +1,25 @@
 <template>
-  <el-config-provider :locale="locale">
-    <el-form :model="model" :inline="true" class="query-form">
+  <el-form :model="model" :inline="true" class="query-form">
 
       <!-- ID -->
-      <el-form-item label="ID">
+      <el-form-item :label="$t('G2_FIELD_ID', 'ID')">
         <el-input
           :model-value="model?.id"
           @update:model-value="onIdChange"
-          placeholder="请输入ID"
+          :placeholder="$t('G2_PH_ID', '请输入ID')"
           clearable
           style="width:200px"
         />
       </el-form-item>
 
       <!-- 创建时间 -->
-      <el-form-item label="创建时间">
+      <el-form-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">
         <el-date-picker
           v-model="createTimeRange"
           type="datetimerange"
-          range-separator="至"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
+          :range-separator="$t('G2_LBL_RANGE_TO', '至')"
+          :start-placeholder="$t('G2_PH_TIME_START', '开始时间')"
+          :end-placeholder="$t('G2_PH_TIME_END', '结束时间')"
           format="YYYY-MM-DD HH:mm:ss"
           value-format="YYYY-MM-DD HH:mm:ss"
           style="width:400px"
@@ -29,13 +28,13 @@
       </el-form-item>
 
       <!-- 更新时间 -->
-      <el-form-item label="更新时间">
+      <el-form-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">
         <el-date-picker
           v-model="updateTimeRange"
           type="datetimerange"
-          range-separator="至"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
+          :range-separator="$t('G2_LBL_RANGE_TO', '至')"
+          :start-placeholder="$t('G2_PH_TIME_START', '开始时间')"
+          :end-placeholder="$t('G2_PH_TIME_END', '结束时间')"
           format="YYYY-MM-DD HH:mm:ss"
           value-format="YYYY-MM-DD HH:mm:ss"
           style="width:400px"
@@ -55,25 +54,19 @@
       <slot name="actions">
         <el-form-item>
           <el-button type="primary" @click="$emit('search')">
-            查询
+            {{ $t('G2_BTN_QUERY', '查询') }}
           </el-button>
           <el-button @click="handleReset">
-            重置
+            {{ $t('G2_BTN_RESET', '重置') }}
           </el-button>
         </el-form-item>
       </slot>
 
     </el-form>
-  </el-config-provider>
 </template>
 
 <script setup lang="ts">
 import { computed, isReactive } from 'vue'
-import { ElConfigProvider } from 'element-plus'
-
-import zhCn from 'element-plus/es/locale/lang/zh-cn'
-import zhTw from 'element-plus/es/locale/lang/zh-tw'
-import en from 'element-plus/es/locale/lang/en'
 
 /**
  * Query 数据结构
@@ -93,34 +86,6 @@ interface Emits {
 
 const model = defineModel<QueryFormData>({ required: true })
 const emit = defineEmits<Emits>()
-
-/**
- * 浏览器语言
- */
-function getBrowserLocale() {
-  const browserLang =
-    navigator.language ||
-    navigator.languages?.[0] ||
-    'zh-CN'
-
-  const [lang, region] =
-    browserLang.toLowerCase().split('-')
-
-  if (lang === 'zh') {
-    if (['tw', 'hk', 'mo'].includes(region)) {
-      return zhTw
-    }
-    return zhCn
-  }
-
-  if (lang === 'en') {
-    return en
-  }
-
-  return zhCn
-}
-
-const locale = getBrowserLocale()
 
 /**
  * 更新字段（兼容父级 reactive：就地修改，避免 v-model 整对象替换导致失活）
