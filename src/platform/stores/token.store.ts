@@ -3,8 +3,7 @@ import type { Token, ApplicationScope } from '@platform/types/http.types';
 import type { Client } from '@/components/http';
 import { jwtVerify } from 'jose';
 import { publicKeyStringToJwk } from '@shared/utils/jwt.util';
-import { isIntegrateMode } from '@platform/apps';
-import { isQianKunMode } from '@shared/utils/mode.util'
+import { isQiankunRuntime } from '@shared/utils/mode.util';
 
 const STORAGE_KEY = 'g2rain_token';
 
@@ -24,14 +23,13 @@ export const useAccessTokenStore = defineStore('token', {
         return (this.logged = false);
       }
       // mock 模式下，now 设置为 0，token 永不过期
-      const now =  new Date();
+      const now = new Date();
 
       // 2. 检查 token 的过期时间
       try {
         const refreshExpireAt = new Date(this.token?.refreshExpireAt * 1000);
 
         // 刷新未到期即认为已登录
-
         return (this.logged = refreshExpireAt > now);
       } catch (error) {
         // 如果日期解析失败，也认为未登录
@@ -40,14 +38,19 @@ export const useAccessTokenStore = defineStore('token', {
       }
     },
     // 检查 access token 是否有效
+    isAdminCompany(): boolean {
+      return this.token?.adminCompany === true;
+    },
+    organId(): number | undefined {
+      return this.token?.organId;
+    },
     isAccessTokenValid(): boolean {
-
       if (!this.token?.expireAt) return false;
 
       try {
         const expireAt = new Date(this.token.expireAt * 1000);
         // mock 模式下，now 设置为 0，token 永不过期
-        const now =  new Date();
+        const now = new Date();
         return expireAt > now;
       } catch (error) {
         console.log(error);
@@ -68,12 +71,17 @@ export const useAccessTokenStore = defineStore('token', {
         const { payload } = await jwtVerify(tokenString, publicKeyJwk);
 
         this.tokenString = tokenString;
+        const rawOrganId = payload.organId;
+        const organId = rawOrganId != null && rawOrganId !== '' ? Number(rawOrganId) : undefined;
+
         this.token = {
           clientId: (payload.clientId as string) || '',
           clientPublicKey: (payload.clientPublicKey as string) || '',
           applicationScopes: (payload.applicationScopes as ApplicationScope[]) || [],
           expireAt: (payload.expireAt as number) || 0,
           refreshExpireAt: (payload.refreshExpireAt as number) || 0,
+          adminCompany: payload.adminCompany === true,
+          organId: organId != null && !Number.isNaN(organId) ? organId : undefined,
         };
 
         this.logged = true;
@@ -98,12 +106,12 @@ export const useAccessTokenStore = defineStore('token', {
     },
   },
   // 持久化配置：子应用不进行 token 持久化（token 由主应用管理）
-  persist: isIntegrateMode()
+  persist: isQiankunRuntime()
     ? false
     : {
-        key: STORAGE_KEY,
-        storage: localStorage,
-        pick: ['client', 'token', 'tokenString', 'logged', 'tokenExpired'],
-      },
+      key: STORAGE_KEY,
+      storage: localStorage,
+      pick: ['client', 'token', 'tokenString', 'logged', 'tokenExpired'],
+    },
 });
 

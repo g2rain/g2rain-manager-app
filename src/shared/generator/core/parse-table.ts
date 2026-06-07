@@ -5,27 +5,58 @@ export function parseTable(sql: string, tableName: string): TableInfo {
 
     const columns: TableColumn[] = [];
     let inColumns = false;
+    let tableComment = '';
+    const normalized = tableName.toLowerCase();
 
     for (const line of lines) {
-        if (line.startsWith('CREATE TABLE') && line.includes(`\`${tableName}\``)) {
+        // 支持两种 DDL 风格：
+        // 1) CREATE TABLE `space` (...)
+        // 2) CREATE TABLE space (...)
+        // 以及可选 IF NOT EXISTS
+        const createMatch = line.match(/^CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?/i);
+        if (createMatch && createMatch[1]?.toLowerCase() === normalized) {
             inColumns = true;
             continue;
         }
 
         if (inColumns) {
-            if (line.startsWith('PRIMARY KEY') || line.startsWith(') ENGINE')) {
+            if (/^\)\s*ENGINE\b/i.test(line)) {
+                const tc = line.match(/COMMENT\s*=\s*(['"])(.*?)\1/i);
+                tableComment = (tc && tc[2]) || '';
+                break;
+            }
+
+            // 索引 / 约束行：不是列定义，跳过直到 ) ENGINE
+            if (
+                line.startsWith('PRIMARY KEY') ||
+                line.startsWith('UNIQUE KEY') ||
+                line.startsWith('UNIQUE INDEX') ||
+                line.startsWith('KEY') ||
+                line.startsWith('INDEX') ||
+                line.startsWith('CONSTRAINT') ||
+                line.startsWith('FOREIGN KEY')
+            ) {
+                continue;
+            }
+
+            // 无 ENGINE 子句的结束括号（少见）
+            if (line === ')' || line.startsWith(');')) {
                 break;
             }
 
             const match = line.match(
-                /`(\w+)`\s+(\w+(?:\([^)]+\))?)\s*(.*?)(?:COMMENT\s+['"](.*?)['"])?/i,
+                /^`(\w+)`\s+(\w+(?:\([^)]+\))?)\s+((?:(?!\s+COMMENT\b).)*?)(?:\s+COMMENT\s+(["'])(.*?)\4)?\s*,?\s*$/i,
             );
 
             if (!match) continue;
 
-            const [, name, sqlType, rest, comment] = match;
+            const [, name, sqlType, rest, , comment] = match;
             const camelName = snakeToCamel(name);
-            const nullable = rest.includes('NULL') || rest.includes('DEFAULT');
+            // 允许 DEFAULT NULL 的列被识别为可空；NOT NULL 明确为不可空
+            const upperRest = rest.toUpperCase();
+            const nullable =
+                (!upperRest.includes('NOT NULL') && upperRest.includes('NULL')) ||
+                upperRest.includes('DEFAULT NULL');
 
             const isBaseField = ['id', 'create_time', 'update_time', 'version'].includes(
                 name.toLowerCase(),
@@ -65,8 +96,9 @@ export function parseTable(sql: string, tableName: string): TableInfo {
         camelName,
         routePath: `/${normalizedTableName}`,
         routeName: camelName,
+        tableComment,
         title: getTitleFromComment(
-            columns.find(c => c.name === 'name')?.comment || normalizedTableName,
+            tableComment || columns.find(c => c.name === 'name')?.comment || normalizedTableName,
         ),
         columns,
         baseColumns,

@@ -1,32 +1,97 @@
 [
   {
-    "pageName": "g2rain_raindrop",
-    "pageCode": "g2rain_raindrop",
-    "linkPath": "/g2rain_raindrop"
+    "pageName": "账号管理",
+    "pageCode": "passport",
+    "linkPath": "/passport"
   },
   {
-    "pageName": "dictionary_usage",
-    "pageCode": "dictionary_usage",
-    "linkPath": "/dictionary_usage"
+    "pageName": "用户管理",
+    "pageCode": "user",
+    "linkPath": "/user"
   },
   {
-    "pageName": "route_definition",
-    "pageCode": "route_definition",
-    "linkPath": "/route_definition"
+    "pageName": "机构管理",
+    "pageCode": "organ",
+    "linkPath": "/organ"
   },
   {
-    "pageName": "locale_setting",
-    "pageCode": "locale_setting",
-    "linkPath": "/locale_setting"
+    "pageName": "菜单资源",
+    "pageCode": "resource_menu",
+    "linkPath": "/resource_menu"
   },
   {
-    "pageName": "i18n_message_usage",
-    "pageCode": "i18n_message_usage",
-    "linkPath": "/i18n_message_usage"
+    "pageName": "页面资源",
+    "pageCode": "resource_page",
+    "linkPath": "/resource_page"
   },
   {
-    "pageName": "i18n_message",
-    "pageCode": "i18n_message",
-    "linkPath": "/i18n_message"
+    "pageName": "功能权限",
+    "pageCode": "control_unit",
+    "linkPath": "/control_unit"
+  },
+  {
+    "pageName": "角色管理",
+    "pageCode": "role",
+    "linkPath": "/role"
+  },
+  {
+    "pageName": "业务能力",
+    "pageCode": "control_domain",
+    "linkPath": "/control_domain"
+  },
+  {
+    "pageName": "应用管理",
+    "pageCode": "application",
+    "linkPath": "/application"
+  },
+  {
+    "pageName": "应用授权",
+    "pageCode": "application_authorization",
+    "linkPath": "/application_authorization"
+  },
+  {
+    "pageName": "资源设置",
+    "pageCode": "resource_settings",
+    "linkPath": "/resource_settings"
+  },
+  {
+    "pageName": "服务注册",
+    "pageCode": "service_registry",
+    "linkPath": "/service_registry"
+  },
+  {
+    "pageName": "资源接口",
+    "pageCode": "resource_api",
+    "linkPath": "/resource_api"
+  },
+  {
+    "pageName": "登陆日志",
+    "pageCode": "login_token",
+    "linkPath": "/login_token"
+  },
+  {
+    "pageName": "审计日志",
+    "pageCode": "audit_event",
+    "linkPath": "/audit_event"
+  },
+  {
+    "pageName": "个人静态访问令牌",
+    "pageCode": "personal_static_access_token",
+    "linkPath": "/personal_static_access_token"
+  },
+  {
+    "pageName": "账号与外部身份源绑定",
+    "pageCode": "passport_idp_binding",
+    "linkPath": "/passport_idp_binding"
+  },
+  {
+    "pageName": "外部身份源应用绑定",
+    "pageCode": "application_idp_provision",
+    "linkPath": "/application_idp_provision"
+  },
+  {
+    "pageName": "外部企业",
+    "pageCode": "idp_enterprise_organ",
+    "linkPath": "/idp_enterprise_organ"
   }
 ]

@@ -8,9 +8,11 @@ import type { BaseSelectListDto, BaseVo } from '@platform/types/api.type';
  */
 export interface Application extends BaseVo {
   organId: number;
+  organName: string;
   applicationName: string;
   applicationCode: string;
   canIntegrate: boolean;
+  apiKeySupported: boolean;
   landing: boolean;
   applicationType: string;
   accessTokenExpiresIn: number;
@@ -31,6 +33,7 @@ export interface ApplicationPayload {
   applicationName?: string;
   applicationCode?: string;
   canIntegrate?: boolean;
+  apiKeySupported?: boolean;
   accessTokenExpiresIn?: number;
   refreshTokenExpiresIn?: number;
   endpointUrl?: string;

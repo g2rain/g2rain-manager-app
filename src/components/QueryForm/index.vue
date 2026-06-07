@@ -1,26 +1,25 @@
 <template>
-  <el-config-provider :locale="locale">
-    <el-form :model="modelValue" :inline="true" class="query-form">
+  <el-form :model="model" :inline="true" class="query-form">
 
       <!-- ID -->
-      <el-form-item label="ID">
+      <el-form-item :label="$t('G2_FIELD_ID', 'ID')">
         <el-input
-          :model-value="modelValue.id"
+          :model-value="model?.id"
           @update:model-value="onIdChange"
-          placeholder="请输入ID"
+          :placeholder="$t('G2_PH_ID', '请输入ID')"
           clearable
           style="width:200px"
         />
       </el-form-item>
 
       <!-- 创建时间 -->
-      <el-form-item label="创建时间">
+      <el-form-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">
         <el-date-picker
           v-model="createTimeRange"
           type="datetimerange"
-          range-separator="至"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
+          :range-separator="$t('G2_LBL_RANGE_TO', '至')"
+          :start-placeholder="$t('G2_PH_TIME_START', '开始时间')"
+          :end-placeholder="$t('G2_PH_TIME_END', '结束时间')"
           format="YYYY-MM-DD HH:mm:ss"
           value-format="YYYY-MM-DD HH:mm:ss"
           style="width:400px"
@@ -29,13 +28,13 @@
       </el-form-item>
 
       <!-- 更新时间 -->
-      <el-form-item label="更新时间">
+      <el-form-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">
         <el-date-picker
           v-model="updateTimeRange"
           type="datetimerange"
-          range-separator="至"
-          start-placeholder="开始时间"
-          end-placeholder="结束时间"
+          :range-separator="$t('G2_LBL_RANGE_TO', '至')"
+          :start-placeholder="$t('G2_PH_TIME_START', '开始时间')"
+          :end-placeholder="$t('G2_PH_TIME_END', '结束时间')"
           format="YYYY-MM-DD HH:mm:ss"
           value-format="YYYY-MM-DD HH:mm:ss"
           style="width:400px"
@@ -45,7 +44,7 @@
 
       <!-- 隐藏的 sorts 字段（调试用，可保留/删除） -->
       <el-form-item v-show="false">
-        <el-input v-model="sortsString" />
+        <el-input :model-value="sortsString" readonly />
       </el-form-item>
 
       <!-- 业务扩展 -->
@@ -55,25 +54,19 @@
       <slot name="actions">
         <el-form-item>
           <el-button type="primary" @click="$emit('search')">
-            查询
+            {{ $t('G2_BTN_QUERY', '查询') }}
           </el-button>
           <el-button @click="handleReset">
-            重置
+            {{ $t('G2_BTN_RESET', '重置') }}
           </el-button>
         </el-form-item>
       </slot>
 
     </el-form>
-  </el-config-provider>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { ElConfigProvider } from 'element-plus'
-
-import zhCn from 'element-plus/es/locale/lang/zh-cn'
-import zhTw from 'element-plus/es/locale/lang/zh-tw'
-import en from 'element-plus/es/locale/lang/en'
+import { computed, isReactive } from 'vue'
 
 /**
  * Query 数据结构
@@ -87,89 +80,72 @@ export interface QueryFormData {
   [key: string]: any
 }
 
-interface Props {
-  modelValue: QueryFormData
-}
-
 interface Emits {
-  (e: 'update:modelValue', value: QueryFormData): void
   (e: 'search'): void
 }
 
-const props = defineProps<Props>()
+const model = defineModel<QueryFormData>({ required: true })
 const emit = defineEmits<Emits>()
 
 /**
- * 浏览器语言
+ * 更新字段（兼容父级 reactive：就地修改，避免 v-model 整对象替换导致失活）
  */
-function getBrowserLocale() {
-  const browserLang =
-    navigator.language ||
-    navigator.languages?.[0] ||
-    'zh-CN'
-
-  const [lang, region] =
-    browserLang.toLowerCase().split('-')
-
-  if (lang === 'zh') {
-    if (['tw', 'hk', 'mo'].includes(region)) {
-      return zhTw
-    }
-    return zhCn
+function updateField<K extends keyof QueryFormData>(key: K, value: QueryFormData[K]) {
+  const current = model.value ?? {}
+  if (isReactive(current)) {
+    ;(current as QueryFormData)[key] = value
+    return
   }
-
-  if (lang === 'en') {
-    return en
+  model.value = {
+    ...current,
+    [key]: value,
   }
-
-  return zhCn
 }
 
-const locale = getBrowserLocale()
-
-/**
- * 更新字段
- */
-function updateField<K extends keyof QueryFormData>(
-  key: K,
-  value: QueryFormData[K]
-) {
-  emit('update:modelValue', {
-    ...props.modelValue,
-    [key]: value
-  })
+function clearBaseFields() {
+  const current = model.value
+  if (current && isReactive(current)) {
+    current.id = undefined
+    current.createTime = undefined
+    current.updateTime = undefined
+    current.sorts = undefined
+    return
+  }
+  model.value = {}
 }
 
 /**
  * ID 变化
  */
 function onIdChange(v: string | number) {
-  const value =
-    v === '' || v === null || v === undefined
-      ? undefined
-      : Number(v)
-
-  updateField('id', value)
+  if (v === null || v === undefined) {
+    updateField('id', undefined)
+    return
+  }
+  const raw = typeof v === 'string' ? v.trim() : v
+  if (raw === '') {
+    updateField('id', undefined)
+    return
+  }
+  const num = Number(raw)
+  updateField('id', Number.isNaN(num) ? undefined : num)
 }
 
 /**
  * 时间范围 Hook
  */
-function useTimeRange(
-  field: 'createTime' | 'updateTime'
-) {
+function useTimeRange(field: 'createTime' | 'updateTime') {
   return computed<[string, string] | null>({
     get() {
-      const value = props.modelValue[field]
-
-      if (!value) {
+      const value = model.value?.[field]
+      if (!value || value.length !== 2) {
         return null
       }
 
-      // 返回拷贝，避免直接改 props
-      return [...value]
+      // 返回拷贝，避免直接改 props；保持 [string, string] 元组类型
+      return [value[0], value[1]] as [string, string]
     },
-    set(v) {
+    set(v: [string, string] | null) {
       if (!v) {
         updateField(field, undefined as any)
         return
@@ -186,16 +162,13 @@ const updateTimeRange = useTimeRange('updateTime')
 /**
  * sorts 字符串（用于隐藏 input，便于调试）
  */
-const sortsString = computed({
-  get: () => {
-    if (!props.modelValue.sorts || props.modelValue.sorts.length === 0) {
-      return ''
-    }
-    return props.modelValue.sorts.join('; ')
-  },
-  set: () => {
-    // 只读，不处理设置
+const sortsString = computed(() => {
+  const sorts = model.value?.sorts
+  if (!sorts || sorts.length === 0) {
+    return ''
   }
+
+  return sorts.join('; ')
 })
 
 /**
@@ -249,8 +222,7 @@ function updateSortFromTable(sort: any) {
  * 重置
  */
 function handleReset() {
-  // 按你采纳的版本，这里重置为 {}，保留扩展字段的灵活性
-  emit('update:modelValue', {})
+  clearBaseFields()
   emit('search')
 }
 

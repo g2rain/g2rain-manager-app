@@ -2,6 +2,17 @@ import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { JWK, JWTHeaderParameters, JWTPayload } from 'jose';
 
 /**
+ * {@link HttpClientOptions.ensureAccessToken} / 拦截器注入的刷新入参
+ */
+export type EnsureAccessTokenOptions = {
+  /**
+   * 为 true 时：不因本地 JWT 仍显示未过期而跳过刷新。
+   * 用于网关 `gateway.40002` 或 HTTP 401，但 `isAccessTokenValid` 可能仍为 true 的场景。
+   */
+  force?: boolean;
+};
+
+/**
  * API 响应类型定义
  */
 export interface Result<T = any> {
@@ -141,16 +152,16 @@ export interface HttpClientOptions<ResponseType = Result<any>> {
    * 统一的认证异常处理回调
    * - 例如：NO_LOGIN / TOKEN_REFRESH_FAILED 时触发 SSO 跳转
    */
-  authErrorHandler?: (
-    reason: 'NO_LOGIN' | 'TOKEN_REFRESH_FAILED',
-    error: unknown,
-  ) => Promise<void> | void;
+  authErrorHandler?: (reason: 'NO_LOGIN' | 'TOKEN_REFRESH_FAILED', error: unknown) => Promise<void> | void;
+
+  /** 由 initHttp 注入；`force` 见 {@link EnsureAccessTokenOptions} */
+  ensureAccessToken?: (opts?: EnsureAccessTokenOptions) => Promise<void>;
 }
 
 /**
  * 预置的 HttpClient 类型
  */
-export type HttpClientType = 'default' | 'auth';
+export type HttpClientType = 'default' | 'auth' | 'docs';
 
 /**
  * 响应类型映射
@@ -159,4 +170,5 @@ export type HttpClientType = 'default' | 'auth';
 export type ResponseTypeMap = {
   default: Result<any>;
   auth: any; // auth 类型直接返回数据，不包装 Result
+  docs: any; // docs 类型直接返回数据，不包装 Result
 };
