@@ -1,104 +1,92 @@
-# g2rain-manager-app
+﻿# g2rain-manager-app
+
+## 1. 徽标与状态标识
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/Node-22+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Vue](https://img.shields.io/badge/Vue-3-42b883?logo=vue.js&logoColor=white)](https://vuejs.org/)
+[![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![qiankun](https://img.shields.io/badge/qiankun-2.x-1f6feb)](https://qiankun.umijs.org/)
 
-谷雨开源 SaaS 平台 - **管理端** qiankun 子应用，支持独立运行与由主壳加载。
+## 2. 项目简介
 
-**生态**：主壳 [g2rain-main-shell](https://github.com/g2rain/g2rain-main-shell)；通用子应用模板 [g2rain-app-template](https://github.com/g2rain/g2rain-app-template) 与脚手架 [create-g2rain-app](https://github.com/g2rain/g2rain-app-cli)；基建向子应用 [g2rain-infra-app](https://github.com/g2rain/g2rain-infra-app)。**本仓库**侧重管理控制台能力与权限、配置生成等。
+`g2rain-manager-app` 是 G2rain 平台的管理端 qiankun 子应用，负责承载平台控制台中的管理型业务页面，同时提供资源配置生成、CRUD 页面代码生成与前端安全协同能力。
 
-## 📋 目录
+## 3. 平台定位
 
-- [项目目录结构](#-项目目录结构)
-- [快速开始](#-快速开始)
-- [环境变量配置](#-环境变量配置)
-- [Docker 部署](#-docker-部署)
-- [开发指南](#-开发指南)
-- [权限控制](#-权限控制)
-- [更多文档](#-更多文档)
-- [贡献指南](#-贡献指南)
-- [许可证](#-许可证)
-- [联系我们](#-联系我们)
-- [致谢](#-致谢)
+在 G2rain“企业级 AI 原生开源 SaaS 平台”体系中，`g2rain-manager-app` 位于交互接入层，是平台管理端业务能力的重要前端承载仓库。
 
-## 📁 项目目录结构
+它主要承担以下角色：
+- 作为 `g2rain-main-shell` 的管理类子应用，承载平台治理相关页面
+- 作为开发阶段可独立运行的前端工程，方便页面调试与局部联调
+- 作为平台资源配置生成入口，把页面、按钮、接口资源快速整理为可导入配置
+- 作为 CRUD 页面工程化入口，根据表名快速生成页面、接口、类型与 Mock 基础代码
+- 作为前端与 IAM / 网关安全链路协同节点，通过 OpenResty + Lua 提供签名与密钥协同能力
 
-```
-g2rain-manager-app/
-├── src/                          # 源代码目录
-│   ├── App.vue                   # 根组件
-│   ├── main.ts                   # 应用入口文件
-│   ├── env.d.ts                  # 环境变量类型定义
-│   │
-│   ├── platform/                 # 平台层（核心功能）
-│   │   ├── boot/                 # 应用启动模块
-│   │   │   ├── index.ts          # 启动入口
-│   │   │   ├── resource.ts       # 资源管理
-│   │   │   ├── router.ts        # 路由生成
-│   │   │   ├── permission.ts     # 权限控制
-│   │   │   ├── plugin.ts         # Vue 插件
-│   │   │   └── types.ts          # 资源类型定义
-│   │   ├── event/                # 事件系统
-│   │   ├── stores/               # Pinia 状态管理
-│   │   │   ├── token.store.ts    # Token 存储
-│   │   │   ├── setup.ts          # Store 初始化
-│   │   │   └── index.ts          # Store 导出
-│   │   └── types/                 # 类型定义
-│   │
-│   ├── router/                    # 路由配置
-│   │   ├── index.ts              # 路由主文件
-│   │   └── auth/                 # 认证相关路由
-│   │
-│   ├── runtime/                  # 运行时模块
-│   │   ├── auth/                 # 认证服务（SSO）
-│   │   ├── env/                  # 环境变量管理
-│   │   ├── http/                 # HTTP 客户端
-│   │   │   ├── axios.ts          # HTTP 客户端实现
-│   │   │   ├── interceptors.ts  # 请求/响应拦截器
-│   │   │   └── mock/             # Mock 数据
-│   │   ├── qiankun/              # qiankun 集成
-│   │   └── sign/                 # DPoP 签名
-│   │
-│   ├── shared/                    # 共享工具
-│   │   ├── config-util/           # 配置生成工具
-│   │   │   ├── cli.ts            # CLI 入口
-│   │   │   ├── parser/           # 解析器（路由、Vue、API）
-│   │   │   ├── generator/        # 生成器（JSON）
-│   │   │   └── config/          # 生成的配置文件
-│   │   ├── generator/             # 代码生成器
-│   │   │   ├── cli.ts            # CLI 入口
-│   │   │   ├── command/          # 生成命令
-│   │   │   ├── core/             # 核心逻辑
-│   │   │   ├── template/         # EJS 模板
-│   │   │   └── util/             # 工具函数
-│   │   └── utils/                # 工具函数
-│   │
-│   └── views/                    # 视图层（主要开发空间）
-│       ├── auth/                 # 认证相关页面
-│       ├── Home.vue              # 首页
-│       └── route-map.ts          # 路由映射配置
-│
-├── lua/                          # Lua 脚本（用于应用签名）
-│   ├── sign.lua                  # 签名脚本
-│   └── keys/                     # 密钥文件目录
-│
-├── nginx/                        # Nginx 配置
-│   ├── default.conf.template     # Nginx 配置模板
-│   └── docker-entrypoint.sh     # Docker 启动脚本
-│
-├── vite-plugin-env-config.ts     # 环境变量配置插件
-├── vite.config.ts                # Vite 配置
-├── tsconfig.json                 # TypeScript 配置
-├── Dockerfile                    # Docker 构建文件
-└── package.json                  # 项目依赖
+它与 `g2rain-main-shell`、`g2rain-basis`、`g2rain-iam`、`g2rain-gateway-webmvc`、`g2rain-gateway-webflux` 等仓库协同，共同构成平台统一交互、统一身份与统一资源治理链路。
 
-```
+## 4. 核心能力
 
-## 🚀 快速开始
+本章回答“这个仓库在平台里提供什么能力、解决什么问题”。
+
+- 管理端页面承载能力：解决平台治理类页面如何统一承载在子应用中的问题，通过 `src/views` 与平台运行时装配层承载应用、角色、资源、服务注册、审计等管理页面。
+- 独立运行与主壳集成双模式能力：解决开发阶段单独调试与联调阶段接入主壳之间的切换问题，通过 `VITE_RUN_MODE`、qiankun 适配层与主壳跳转工具支持两种运行模式。
+- 资源配置生成能力：解决页面、按钮、接口资源如何快速整理成平台可导入配置的问题，通过 `shared/config-util` 从 `route-map.ts` 扫描并生成资源配置。
+- CRUD 页面生成能力：解决管理端大量表单型页面重复开发的问题，通过 `shared/generator` 根据表名生成 `index.vue`、`api.ts`、`type.ts`，按需生成 `mock.ts`。
+- 前端签名与安全协同能力：解决前端如何进入平台既定身份与安全链路的问题，通过 `components/http/sign.ts`、`nginx`、`lua` 协同获取 IAM 公钥并生成签名结果。
+- 平台运行时装配能力：解决子应用资源加载、认证、路由、权限、HTTP 环境如何统一初始化的问题，通过 `platform`、`runtime` 两层抽象沉淀稳定运行基座。
+
+## 5. 技术栈
+
+- 前端框架：`Vue 3`
+- 语言：`TypeScript`
+- 构建工具：`Vite 7`
+- 微前端：`qiankun`、`vite-plugin-qiankun`
+- UI 与状态：`Element Plus`、`Pinia`
+- 网络与认证：`axios`、`jose`、`elliptic`、`crypto-js`
+- Mock：`vite-plugin-mock`、`mockjs`
+- 国际化：`vue-i18n`
+- 运行环境：`OpenResty`、`Lua`、`Nginx`
+
+## 6. 快速开始
 
 ### 环境要求
 
-- Node.js >= 18
-- npm >= 9
+- `Node.js >= 22`
+- `npm >= 9`
+- `Docker`（可选，用于容器化交付）
+
+### 环境变量
+
+当前仓库同时使用构建时环境变量与运行时环境变量。
+
+| 变量名 | 说明 | 典型用途 |
+| --- | --- | --- |
+| `VITE_APPLICATION_CODE` | 应用编码 | 子应用身份标识 |
+| `VITE_CONTEXT_PATH` | 上下文路径 | 默认 `/manager` |
+| `VITE_BACKEND_ORIGIN` | 后端服务地址 | 开发代理目标 |
+| `VITE_TOKEN_END_POINT` | Token 接口路径 | 令牌获取 |
+| `VITE_AUTH_END_POINT` | 认证路径 | SSO 跳转 |
+| `VITE_MOCK_ENABLED` | 是否启用 Mock | 本地联调开关 |
+| `VITE_SERVER_PORT` | 本地开发端口 | 默认 `3001` |
+| `VITE_SSO_BASE_URL` | SSO 根地址 | 认证跳转与回调 |
+| `VITE_REDIRECT_URI` | SSO 回调路径 | 登录回跳 |
+| `VITE_RUN_MODE` | 运行模式 | `alone` 为独立运行 |
+| `VITE_MAIN_SHELL_REDIRECT_PREFIX` | 主壳重定向前缀 | 集成意图直链跳转 |
+| `VITE_MAIN_SHELL_ORIGIN` | 主壳来源地址 | 跨端口联调 |
+| `VITE_I18N_TAGS` | 国际化文案包标签 | 拉取平台文案包 |
+
+运行时部署还会使用：
+- `SSO_BASE_URL`
+- `CONTEXT_PATH`
+- `SERVER_PORT`
+- `GATEWAY_HOST` / `GATEWAY_PORT`
+- `IAM_HOST` / `IAM_PORT`
+
+建议：
+- 开发阶段可使用 `VITE_RUN_MODE=alone` 独立运行，方便页面调试。
+- 联调阶段应部署到测试环境，并接入 `g2rain-main-shell` 验证完整流程。
+- 生产环境通过运行时注入方式管理易变地址与接入参数。
 
 ### 安装依赖
 
@@ -112,15 +100,13 @@ npm install
 npm run dev
 ```
 
-应用将在 `http://localhost:3001` 启动（端口可通过 `VITE_SERVER_PORT` 环境变量配置）。
+默认可通过 `http://localhost:3001` 访问。
 
-### 构建生产版本
+### 生产构建
 
 ```bash
 npm run build
 ```
-
-构建产物将输出到 `dist` 目录。
 
 ### 预览构建结果
 
@@ -130,561 +116,171 @@ npm run preview
 
 ### 代码生成
 
-根据数据库表生成代码（View、API、Mock、Type）：
-
 ```bash
 npm run build:generate -- --tables=dict
 ```
 
-### 配置生成
-
-根据现有代码生成资源配置（页面、页面元素、API端点）：
+### 资源配置生成
 
 ```bash
 npm run build:config
 ```
 
-## ⚙️ 环境变量配置
-
-### 本地开发配置
-
-在项目根目录创建 `.env` 文件（或 `.env.local`），配置以下变量：
-
-```env
-# 应用配置
-VITE_APPLICATION_CODE=g2rain-test-app
-VITE_CONTEXT_PATH=/test
-
-# 后端服务地址
-VITE_BACKEND_ORIGIN=http://localhost:8080
-VITE_IAM_BACKEND_ORIGIN=http://localhost:8080
-
-# SSO 配置
-VITE_SSO_BASE_URL=http://localhost:8080
-VITE_AUTH_END_POINT=/auth/authorize
-VITE_REDIRECT_URI=/sso_callback
-VITE_TOKEN_END_POINT=/auth/token
-
-# Mock 配置
-VITE_MOCK_ENABLED=true
-
-# 开发服务器端口
-VITE_SERVER_PORT=3001
-```
-
-### 环境变量说明
-
-| 变量名 | 说明 | 示例 | 必填 |
-|--------|------|------|------|
-| `VITE_APPLICATION_CODE` | 应用代码 | `g2rain-test-app` | ✅ |
-| `VITE_CONTEXT_PATH` | 上下文路径 | `/test` | ✅ |
-| `VITE_BACKEND_ORIGIN` | 后端服务地址 | `http://localhost:8080` | ✅ |
-| `VITE_IAM_BACKEND_ORIGIN` | IAM 后端地址 | `http://localhost:8080` | ✅ |
-| `VITE_SSO_BASE_URL` | SSO 跳转基础地址（不包含路径） | `http://localhost:8080` | ✅ |
-| `VITE_AUTH_END_POINT` | 认证端点路径 | `/auth/authorize` | ✅ |
-| `VITE_REDIRECT_URI` | SSO 回调路径 | `/sso_callback` | ✅ |
-| `VITE_TOKEN_END_POINT` | Token 端点路径 | `/auth/token` | ✅ |
-| `VITE_MOCK_ENABLED` | 是否启用 Mock | `true` 或 `false` | ❌ |
-| `VITE_SERVER_PORT` | 开发服务器端口 | `3001` | ❌ |
-
-**注意**：`VITE_APPLICATION_CODE` 用于从资源接口动态加载路由和权限配置。如果未配置，将使用静态路由配置。
-
-### 生产环境配置
-
-生产环境使用 `.env.production` 文件，配置方式与 `.env` 相同。注意：
-
-- `VITE_CONTEXT_PATH` 在构建时确定，使用固定值
-- `VITE_SSO_BASE_URL` 使用占位符 `__SSO_BASE_URL__`，在 Docker 容器启动时替换
-
-## 🐳 Docker 部署
-
-### 构建镜像
+### 镜像构建
 
 ```bash
-docker build -t g2rain/g2rain-manager-app:latest .
+./build.sh
+./build.sh --image g2rain/g2rain-manager-app --tag latest --build-mode production
 ```
 
-### 运行容器
+## 7. 项目结构
 
-```bash
-docker run -d \
-  -p 8080:80 \
-  -e CONTEXT_PATH=/test \
-  -e SSO_BASE_URL=https://sso.example.com \
-  -e GATEWAY_HOST=gateway.example.com \
-  -e GATEWAY_PORT=80 \
-  -e IAM_HOST=iam.example.com \
-  -e IAM_PORT=80 \
-  g2rain-app:latest
+本章回答“代码与模块是如何组织的、排查和扩展时应该先看哪里”。
+
+```text
+g2rain-manager-app/
+├── src/
+├── lua/
+├── nginx/
+├── build.sh
+├── Dockerfile
+├── vite.config.ts
+└── package.json
 ```
 
-### 环境变量说明
+### `src` 分层说明
 
-| 变量名 | 说明 | 示例 |
-|--------|------|------|
-| `CONTEXT_PATH` | 上下文路径 | `/test` |
-| `SSO_BASE_URL` | SSO 基础地址 | `https://sso.example.com` |
-| `GATEWAY_HOST` | 网关主机 | `gateway.example.com` |
-| `GATEWAY_PORT` | 网关端口 | `80` |
-| `IAM_HOST` | IAM 主机 | `iam.example.com` |
-| `IAM_PORT` | IAM 端口 | `80` |
+- `src/platform`：平台抽象、qiankun 适配、i18n、状态与类型定义。
+- `src/runtime`：启动装配、认证、路由、HTTP、环境变量与运行时接口。
+- `src/components`：HTTP、权限、微前端、查询、远程选择、表格等基础组件。
+- `src/shared`：生成器、配置工具与共享工具函数。
+- `src/views`：业务页面目录，当前明显按表名/模块组织。
 
-## 💻 开发指南
+### `src/views` 目录规范
 
-### 代码生成器
+- 默认每个表或页面模块对应一个目录，如 `application`、`role`、`service_registry`。
+- 每个目录默认包含 `index.vue`、`api.ts`、`type.ts`。
+- 按需补充 `mock.ts` 或其他页面文件。
+- 允许手工新增业务页面，但仍建议遵循“目录即模块、页面/接口/类型/Mock 配套齐全”的规范。
 
-项目提供了强大的代码生成器，可以根据数据库表自动生成完整的 CRUD 代码。
+### 运行环境目录
 
-#### 生成代码
+- `nginx`：默认运行环境模板与启动脚本，基于 OpenResty。
+- `lua`：IAM 公钥获取、应用私钥签名等安全协同脚本。
+- `build.sh` 与 `Dockerfile`：默认容器化交付入口。
+
+### 代码查阅指引
+
+- 查看运行模式与 qiankun 挂载时，优先看 `src/main.ts`、`src/platform/apps/adapter.qiankun.ts`。
+- 查看认证、回调与 Token 流程时，优先看 `src/runtime/auth`、`src/runtime/boot`。
+- 查看 HTTP、签名与 Mock 时，优先看 `src/components/http`。
+- 查看页面生成器时，优先看 `src/shared/generator`。
+- 查看资源配置生成时，优先看 `src/shared/config-util`。
+- 查看主壳直链跳转时，优先看 `src/shared/utils/mode.util.ts` 与 `src/shared/utils/shell-gateway.util.ts`。
+
+## 8. 核心业务流程
+
+本章回答“这些能力在运行时是如何串起来工作的”。
+
+#### 1. 独立运行与主壳接入主线
+
+- 开发阶段可通过 `VITE_RUN_MODE=alone` 让子应用独立运行。
+- 如果是集成意图但当前未被 qiankun 挂载，子应用会优先跳转到 `g2rain-main-shell` 网关入口。
+- 联调阶段应把子应用部署到测试环境，并由主壳统一装载验证完整流程。
+- 这一主线解决的是“单页调试”和“平台集成验证”两种场景之间的切换问题。
+
+#### 2. 子应用挂载与启动装配主线
+
+- `main.ts` 负责判断运行场景并创建挂载容器。
+- `platform/apps/adapter.qiankun.ts` 统一注册 qiankun 的 `bootstrap / mount / unmount` 生命周期。
+- `runtime/boot` 初始化路由、资源、权限与 HTTP 环境。
+- 这一主线保证了子应用在独立运行和主壳运行两种模式下都能稳定启动。
+
+#### 3. CRUD 页面生成主线
+
+- 开发者执行 `npm run build:generate -- --tables=<table>`。
+- 生成器根据模板输出 `src/views/<table>/index.vue`、`api.ts`、`type.ts`，按需生成 `mock.ts`。
+- 同时更新 `src/views/route-map.ts`。
+- 这一主线解决的是管理端大量标准化页面的快速交付问题。
+
+#### 4. 资源配置生成主线
+
+- 开发完成后执行 `npm run build:config`。
+- `shared/config-util` 解析 `src/views/route-map.ts`。
+- 生成页面资源、页面元素与接口资源配置文件。
+- 这些配置可进一步导入平台，快速完成应用资源登记。
+
+#### 5. 前端安全协同主线
+
+- 前端通过 `components/http/sign.ts` 请求 `/keys/iam-key-id` 与 `/keys/iam-public-key` 获取 IAM 公钥信息。
+- 请求 `/lua/sign_code` 时，由 OpenResty + Lua 协同完成签名能力输出。
+- `nginx/default.conf.template` 负责把 `/api`、`/auth`、`/keys`、`/lua` 等路径串入统一安全链路。
+- 这一主线解决的是前端如何与平台身份、网关和 IAM 协同，而不是单纯直接调接口。
+
+## 9. 常用命令
 
 ```bash
+npm run dev
+npm run build
+npm run preview
 npm run build:generate -- --tables=dict
-```
-
-#### 生成的文件
-
-对于每个表（如 `dict`），会生成以下文件：
-
-- `src/views/{table}/index.vue` - 页面组件（包含查询、分页、新增、编辑、删除）
-- `src/views/{table}/api.ts` - API 服务类
-- `src/views/{table}/type.ts` - TypeScript 类型定义
-- `src/views/{table}/mock.ts` - Mock 数据
-
-#### 自动更新
-
-生成器会自动更新以下文件：
-
-- `src/views/route-map.ts` - 添加路由映射
-- `src/views/api/index.ts` - 导出 API（如果存在）
-- `src/views/index.ts` - 导出类型（如果存在）
-
-#### 生成器选项
-
-```bash
-# 生成多个表
-npm run build:generate -- --tables=dict,role,menu
-
-# 生成时包含 Mock 数据
-npm run build:generate -- --tables=dict --mock
-
-# 不生成 View 组件
-npm run build:generate -- --tables=dict --no-view
-```
-
-### 配置生成工具
-
-配置生成工具用于从现有代码中提取资源配置信息，生成 JSON 配置文件供后端使用。
-
-#### 生成配置
-
-```bash
 npm run build:config
+./build.sh
+./build.sh --image g2rain/g2rain-manager-app --tag latest --build-mode production
 ```
 
-#### 生成的配置文件
+## 10. 质量与测试
 
-配置会生成到 `src/shared/config-util/config/` 目录：
+- 当前扫描未识别到独立测试目录。
+- 当前质量保障主要依赖 TypeScript 编译、页面联调、主壳集成验证与生成器输出验证。
+- 后续建议优先补充运行模式切换、生成器输出、配置生成、认证回调与签名链路相关测试或校验脚本。
 
-- `pages.json` - 页面资源配置
-- `page-elements.json` - 页面元素配置（按钮权限等）
-- `api-endpoints.json` - API 端点配置
-- `resources.json` - 完整资源配置（包含以上所有）
+## 11. 相关仓库
 
-#### 配置来源
+- `g2rain-main-shell`：主壳与统一交互入口
+- `g2rain-basis`：平台治理与资源权限底座
+- `g2rain-iam`：统一身份认证与令牌服务
+- `g2rain-gateway-webmvc`：网关与接入安全协同实现之一
+- `g2rain-gateway-webflux`：网关与接入安全协同实现之一
+- `g2rain-app-template`：子应用模板仓库
+- `g2rain-app-cli`：子应用初始化 CLI
 
-- **页面资源**：从 `src/views/route-map.ts` 解析
-- **页面元素**：从 Vue 文件中解析 `v-permission` 指令
-- **API 端点**：从 API 服务文件中解析接口调用
+## 12. 使用建议
 
-### 动态路由加载
+- 适合作为平台管理端子应用长期承载治理类页面，而不是把所有前端能力继续堆入主壳。
+- 开发阶段可独立运行，联调阶段应接入主壳验证完整流程。
+- 新增页面时优先保持 `src/views` 的目录规范与生成器兼容性。
+- 生产环境应把运行时地址、签名相关参数与密钥材料统一纳入安全配置体系。
 
-项目支持从后端资源接口动态加载路由，实现基于权限的路由管理。
+## 13. 贡献指南
 
-#### 启用动态路由
+欢迎通过文档改进、Issue 反馈、测试补充、代码优化、功能增强等形式参与贡献。
 
-在 `.env` 文件中配置应用编码：
+建议流程：
+1. Fork 本仓库
+2. 创建特性分支
+3. 提交修改
+4. 推送分支
+5. 提交 Pull Request
 
-```env
-VITE_APPLICATION_CODE=g2rain-manager-app
-```
+提交前请尽量确保：
+- 遵循现有技术栈与代码规范
+- 更新相关文档
+- 如涉及生成器、运行模式或安全链路，补充必要验证
 
-应用启动时会自动从 `/basis/auth/resource` 接口加载路由配置。
-
-#### 路由优先级
-
-1. **资源路由**：如果配置了 `VITE_APPLICATION_CODE`，优先使用资源接口的路由
-2. **静态路由**：如果资源加载失败或未配置，使用 `route-map.ts` 中的静态路由
-
-### 权限控制系统
-
-项目实现了完整的权限控制系统，支持页面元素权限和 API 权限。
-
-#### 页面元素权限
-
-使用 `v-permission` 指令控制按钮显示：
-
-```vue
-<template>
-  <el-button v-permission="'dict:add'" @click="handleCreate">新增</el-button>
-  <el-button v-permission="'dict:edit'" @click="handleEdit">编辑</el-button>
-  <el-button v-permission="'dict:delete'" @click="handleDelete">删除</el-button>
-</template>
-```
-
-#### 权限状态
-
-页面元素支持两种状态：
-
-- `enabled`：显示且可点击（默认）
-- `visible`：显示但不可点击（禁用状态）
-
-#### API 权限
-
-API 权限检查已集成到 HTTP 拦截器中，会自动检查每个请求的权限。如果权限不足，会抛出 `API_PERMISSION_DENIED` 错误。
-
-### views 目录 - 主要开发空间
-
-`src/views` 目录是主要的开发空间，包含所有业务页面和 API 定义。
-
-#### 目录结构
-
-```
-views/
-├── auth/              # 认证相关页面
-├── Home.vue           # 首页
-└── route-map.ts       # 路由映射配置
-```
-
-### 新增功能模块
-
-#### 使用代码生成器（推荐）
-
-使用代码生成器可以快速生成完整的模块代码：
-
-```bash
-# 1. 生成代码
-npm run build:generate -- --tables=dict
-
-# 2. 检查生成的文件
-# - src/views/dict/index.vue
-# - src/views/dict/api.ts
-# - src/views/dict/type.ts
-# - src/views/dict/mock.ts
-
-# 3. 根据需要调整生成的代码
-```
-
-#### 手动新增模块步骤
-
-1. **创建 API 文件**
-
-在 `src/views/` 目录下创建模块目录和 API 文件，例如 `src/views/dict/api.ts`：
-
-```typescript
-import { http } from '@runtime/http';
-import type { Dict, DictPayload, DictQuery } from './type';
-import type { PageData, PageSelectListDto } from '@platform/types/api.type';
-
-export class DictApi {
-  static async page(
-    params: DictQuery & PageSelectListDto,
-  ): Promise<PageData<Dict>> {
-    const res = await http.get<PageData<Dict>>('/dict/page', params);
-    return res.data;
-  }
-
-  static async save(payload: DictPayload): Promise<Dict> {
-    const res = await http.post<Dict>('/dict/save', payload);
-    return res.data;
-  }
-
-  static async remove(id: number): Promise<void> {
-    await http.delete(`/dict/${id}`);
-  }
-}
-```
-
-2. **创建类型定义文件**
-
-在 `src/views/dict/` 目录下创建类型文件，例如 `src/views/dict/type.ts`：
-
-```typescript
-import type { BaseSelectListDto, BaseVo } from '@platform/types/api.type';
-
-export interface Dict extends BaseVo {
-  type: string;
-  name: string;
-  code: string | null;
-}
-
-export interface DictPayload {
-  id?: number;
-  type: string;
-  name: string;
-  code?: string | null;
-}
-
-export interface DictQuery extends BaseSelectListDto {
-  type?: string;
-  name?: string;
-  code?: string;
-}
-```
-
-3. **创建页面组件**
-
-在 `src/views/dict/` 目录下创建页面组件，例如 `src/views/dict/index.vue`：
-
-```vue
-<template>
-  <div class="dict-page">
-    <!-- 参考其他页面的实现 -->
-  </div>
-</template>
-
-<script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
-import { DictApi } from './api';
-import type { Dict, DictPayload, DictQuery } from './type';
-
-// 参考其他页面的实现逻辑
-</script>
-```
-
-4. **添加路由配置**
-
-在 `src/views/route-map.ts` 中添加路由映射：
-
-```typescript
-export const routeMap: Record<string, ViewRouteConfig> = {
-  '/': {
-    component: () => import('@/views/Home.vue'),
-    name: 'Root',
-    meta: { title: '首页', requiresAuth: true },
-  },
-  '/home': {
-    component: () => import('@/views/Home.vue'),
-    name: 'Home',
-    meta: { title: '首页', requiresAuth: true },
-  },
-  '/dict': {
-    component: () => import('@/views/dict/index.vue'), // 新增
-    name: 'Dict',
-    meta: { title: '字典配置', requiresAuth: true },
-  },
-};
-```
-
-### 路由添加说明
-
-路由配置统一在 `src/views/route-map.ts` 文件中管理，使用统一的 `routeMap`：
-
-```typescript
-export interface ViewRouteConfig {
-  component: () => Promise<unknown>;
-  name?: string;
-  meta: {
-    title: string;
-    requiresAuth: boolean;
-    showInHome?: boolean;
-  };
-}
-
-export const routeMap: Record<string, ViewRouteConfig> = {
-  '/path': {
-    component: () => import('@/views/Component.vue'),
-    name: 'RouteName',
-    meta: { title: '页面标题', requiresAuth: true, showInHome: true },
-  },
-};
-```
-
-#### 添加新路由
-
-1. 在 `routeMap` 中添加一条完整的 `ViewRouteConfig` 配置
-
-路由会自动注册到 Vue Router，无需额外配置。
-
-### Mock 数据更新
-
-Mock 数据用于本地开发时模拟后端接口响应。
-
-#### Mock 数据位置
-
-Mock 数据定义在 `src/runtime/http/mock/data.ts` 文件中。
-
-#### Mock 数据格式
-
-Mock 数据使用 URL 路径作为 key，支持精确匹配和通配符匹配：
-
-```typescript
-export const mockDataMap: MockDataMap = {
-  // 精确匹配
-  '/api/dict': { data: [...] },
-  
-  // 通配符匹配（支持 *）
-  '/api/dict/*': { data: [...] },
-  
-  // 函数形式（支持动态生成）
-  '/api/dict/page': (config: AxiosRequestConfig) => {
-    const params = config.params || {};
-    return { data: { records: [...], total: 100 } };
-  },
-};
-```
-
-#### 添加 Mock 数据
-
-1. **静态数据**
-
-```typescript
-'/api/example': {
-  requestId: '@guid',
-  status: 200,
-  data: { id: 1, name: '示例' },
-}
-```
-
-2. **动态数据（使用函数）**
-
-```typescript
-'/api/example/page': (config: AxiosRequestConfig) => {
-  const params = config.params || {};
-  const pageNum = params.pageNum || 1;
-  const pageSize = params.pageSize || 10;
-  
-  return {
-    requestId: '@guid',
-    status: 200,
-    data: {
-      pageNum,
-      pageSize,
-      total: 100,
-      records: [...],
-    },
-  };
-},
-```
-
-3. **使用 Mock.js 生成随机数据**
-
-```typescript
-import Mock from 'mockjs';
-
-'/api/example': () => {
-  return Mock.mock({
-    requestId: '@guid',
-    status: 200,
-    data: {
-      'list|10': [{
-        'id|+1': 1,
-        'name': '@cword(3,8)',
-        'email': '@email',
-      }],
-    },
-  });
-},
-```
-
-#### 启用 Mock
-
-在 `.env` 文件中设置：
-
-```env
-VITE_MOCK_ENABLED=true
-```
-
-或者在请求头中添加：
-
-```typescript
-http.get('/api/example', params, {
-  headers: {
-    'x-g2rain-mock': 'true',
-  },
-});
-```
-
-#### Mock 数据优先级
-
-1. 如果请求头中包含 `x-g2rain-mock: true`，强制使用 Mock
-2. 如果 `VITE_MOCK_ENABLED=true`，自动使用 Mock（如果存在）
-3. 否则使用真实接口
-
-## 🔐 权限控制
-
-### 页面元素权限
-
-页面元素权限通过 `v-permission` 指令实现，支持两种状态：
-
-- **enabled**：显示且可点击（默认）
-- **visible**：显示但不可点击（禁用状态）
-
-```vue
-<template>
-  <!-- enabled 状态：显示且可点击 -->
-  <el-button v-permission="'dict:add'">新增</el-button>
-  
-  <!-- visible 状态：显示但不可点击（需要在后端配置 pageElementStatus='visible'） -->
-  <el-button v-permission="'dict:edit'">编辑</el-button>
-</template>
-```
-
-### API 权限
-
-API 权限检查已集成到 HTTP 拦截器中，会自动检查每个请求的权限。权限配置从后端资源接口 `/basis/auth/resource` 获取。
-
-### 权限配置
-
-权限配置通过配置生成工具生成，然后同步到后端数据库：
-
-```bash
-# 1. 生成配置
-npm run build:config
-
-# 2. 将生成的 JSON 文件同步到后端
-# - pages.json → resource_page 表
-# - page-elements.json → resource_page_element 表
-# - api-endpoints.json → resource_api_endpoint 表
-```
-
-## 📚 更多文档
-
-- [架构文档](./architecture.md) - 了解项目架构和设计原理
-- [API 文档](./docs/api.md) - API 接口文档（如有）
-
-## 🤝 贡献指南
-
-我们欢迎所有形式的贡献！
-
-**Issue 与讨论**请统一到主仓库 [g2rain/g2rain](https://github.com/g2rain/g2rain/issues) 提交，便于集中跟踪；请在标题或正文中注明与 **g2rain-manager-app** 相关。
-
-### 贡献流程
-
-1. **Fork** 本仓库
-2. **创建特性分支**：`git checkout -b feature/your-feature-name`
-3. 本地修改后执行 `npm run build`，确保可正常编译
-4. **提交更改**：`git commit -m "Add some feature"`
-5. **推送分支**：`git push origin feature/your-feature-name`
-6. **提交 Pull Request**
-
-维护者信息与 `package.json` 中 `contributors` 字段一致（与 [g2rain-spring-boot-starter](https://github.com/g2rain/g2rain-spring-boot-starter) 开发者信息对齐）。
-
-安全相关问题请见 [SECURITY.md](SECURITY.md)。
-
-## 📄 许可证
+## 14. 许可证
 
 本项目基于 [Apache 2.0许可证](LICENSE) 开源。
 
-## 📞 联系我们
+## 15. 联系我们
 
+- **站点**: https://www.g2rain.com/
 - **Issues**: [GitHub Issues](https://github.com/g2rain/g2rain/issues)
 - **讨论**: [GitHub Discussions](https://github.com/g2rain/g2rain/discussions)
 - **邮箱**: g2rain_developer@163.com
 
-## 🙏 致谢
+## 16. 致谢
 
-感谢所有为这个项目做出贡献的开发者们！
+感谢所有为这个项目做出贡献的开发者们。
 
----
-
-⭐ 如果这个项目对您有帮助，请给我们一个Star！
+如果这个项目对您有帮助，欢迎 Star 支持。
