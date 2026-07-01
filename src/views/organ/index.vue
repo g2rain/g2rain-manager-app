@@ -71,7 +71,7 @@
           <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
           <el-button type="primary" v-permission="'organ:edit'" link size="small"
             @click="handleEdit(row)">{{ $t('G2_BTN_EDIT', '编辑') }}</el-button>
-          <el-button type="warning" v-permission="'organ:invite_generate'" link size="small" v-if="!row.admin"
+          <el-button type="warning" v-permission="'organ:invite_generate'" link size="small"
             @click="openInviteDialog(row)">{{ $t('MG_ORGAN_BTN_INVITE', '邀请码') }}</el-button>
           <el-button type="success" v-permission="'organ:reassign'" link size="small" v-if="!row.admin"
             @click="handleReassign(row)">{{ $t('MG_ORGAN_BTN_REASSIGN', '调整归属') }}</el-button>
