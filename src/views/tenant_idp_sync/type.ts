@@ -7,7 +7,6 @@ export interface TenantIdpSyncPayload {
   idpType?: string;
   bindMode?: string;
   syncMode?: 'FULL' | 'INCREMENTAL';
-  roleId: number;
 }
 
 export interface TenantIdpSyncResult {
@@ -22,6 +21,5 @@ export interface TenantIdpSyncResult {
   bindingsDeleted: number;
   departmentsDisabled: number;
   departmentRelationsRemoved: number;
-  rolesAssigned?: number;
   elapsedMs: number;
 }
