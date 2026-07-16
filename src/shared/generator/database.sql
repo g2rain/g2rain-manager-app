@@ -102,6 +102,7 @@ CREATE TABLE `idp_enterprise_organ` (
   `id` bigint NOT NULL COMMENT '主键标识',
   `idp_type` varchar(32) NOT NULL COMMENT '身份源类型',
   `enterprise_id` varchar(64) NOT NULL COMMENT '外部企业/租户标识',
+  `bind_mode` varchar(32) NOT NULL DEFAULT 'INTERNAL' COMMENT '接入形态[IdpBindMode: INTERNAL|THIRD_PARTY]',
   `organ_id` bigint NOT NULL COMMENT '机构标识，关联 organ.id',
   `status` varchar(32) NOT NULL DEFAULT 'ACTIVE' COMMENT '状态[ACTIVE:有效, INACTIVE:停用]',
   `remark` varchar(512) DEFAULT NULL COMMENT '备注',
