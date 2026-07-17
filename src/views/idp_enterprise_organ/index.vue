@@ -90,8 +90,26 @@
       <el-table-column prop="remark" :label="$t('MG_IDP_ENT_FIELD_REMARK', '备注')" width="180" />
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="360">
         <template #default="{ row }">
+          <el-tooltip
+            :disabled="row.bindMode === 'INTERNAL'"
+            :content="$t('MG_IDP_ENT_SYNC_INTERNAL_ONLY', '首期仅支持企业内部应用（INTERNAL）同步')"
+          >
+            <span>
+              <el-button
+                type="warning"
+                v-permission="'idp_enterprise_organ:sync'"
+                link
+                size="small"
+                :disabled="row.bindMode !== 'INTERNAL'"
+                :loading="syncLoadingId === row.id"
+                @click="handleSync(row)"
+              >
+                {{ $t('MG_IDP_ENT_BTN_SYNC', '同步') }}
+              </el-button>
+            </span>
+          </el-tooltip>
           <el-button type="primary" link size="small" @click="handleView(row)">
             {{ $t('G2_BTN_DETAIL', '明细') }}
           </el-button>
@@ -179,22 +197,6 @@
         <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
-        <el-tooltip
-          :disabled="canSyncCurrentRow"
-          :content="$t('MG_IDP_ENT_SYNC_INTERNAL_ONLY', '首期仅支持企业内部应用（INTERNAL）同步')"
-        >
-          <span>
-            <el-button
-              type="warning"
-              v-permission="'idp_enterprise_organ:sync'"
-              :loading="syncLoading"
-              :disabled="!canSyncCurrentRow"
-              @click="handleSync"
-            >
-              {{ $t('MG_IDP_ENT_BTN_SYNC', '同步部门与员工') }}
-            </el-button>
-          </span>
-        </el-tooltip>
         <el-button type="primary" @click="detailDialogVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
       </template>
     </el-drawer>
@@ -319,18 +321,15 @@ const handlePageChange = (page: number) => {
 const currentRow = ref<IdpEnterpriseOrgan | null>(null);
 // 明细弹窗引用
 const detailDialogVisible = ref(false);
-const syncLoading = ref(false);
+const syncLoadingId = ref<number | null>(null);
 
-const canSyncCurrentRow = computed(() => currentRow.value?.bindMode === 'INTERNAL');
-
-// 查询数据明细  
+// 查询数据明细
 const handleView = (row: IdpEnterpriseOrgan) => {
   currentRow.value = { ...row };
   detailDialogVisible.value = true;
 };
 
-const handleSync = async () => {
-  const row = currentRow.value;
+const handleSync = async (row: IdpEnterpriseOrgan) => {
   if (!row?.organId || row.bindMode !== 'INTERNAL') {
     return;
   }
@@ -345,7 +344,7 @@ const handleSync = async () => {
     return;
   }
 
-  syncLoading.value = true;
+  syncLoadingId.value = row.id;
   try {
     const result: TenantIdpSyncResult = await TenantIdpSyncApi.sync({
       organId: row.organId,
@@ -362,7 +361,7 @@ const handleSync = async () => {
   } catch (error: any) {
     showErrorMessage(error || t('MG_IDP_ENT_SYNC_FAIL', '同步失败'));
   } finally {
-    syncLoading.value = false;
+    syncLoadingId.value = null;
   }
 };
 
