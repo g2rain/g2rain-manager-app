@@ -90,47 +90,24 @@
       <el-table-column prop="remark" :label="$t('MG_IDP_ENT_FIELD_REMARK', '备注')" width="180" />
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="400">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="360">
         <template #default="{ row }">
           <el-tooltip
-            :disabled="isSyncSupported(row)"
-            :content="resolveSyncTooltipContent(row)"
+            :disabled="row.bindMode === 'INTERNAL'"
+            :content="$t('MG_IDP_ENT_SYNC_INTERNAL_ONLY', '首期仅支持企业内部应用（INTERNAL）同步')"
           >
             <span>
-              <el-dropdown
+              <el-button
+                type="warning"
                 v-permission="'idp_enterprise_organ:sync'"
-                trigger="click"
-                :disabled="!isSyncSupported(row) || syncLoadingId === row.id"
-                @visible-change="(visible: boolean) => handleSyncDropdownVisible(visible, row)"
-                @command="(roleId: number) => handleSync(row, roleId)"
+                link
+                size="small"
+                :disabled="row.bindMode !== 'INTERNAL'"
+                :loading="syncLoadingId === row.id"
+                @click="handleSync(row)"
               >
-                <el-button
-                  type="warning"
-                  link
-                  size="small"
-                  :loading="syncLoadingId === row.id"
-                >
-                  {{ $t('MG_IDP_ENT_BTN_SYNC', '同步') }}
-                  <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-                </el-button>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item v-if="syncRolesLoadingOrganId === row.organId" disabled>
-                      {{ $t('G2_MSG_LOADING', '加载中...') }}
-                    </el-dropdown-item>
-                    <el-dropdown-item v-else-if="getSyncRoles(row.organId).length === 0" disabled>
-                      {{ $t('MG_IDP_ENT_SYNC_NO_ROLES', '该机构暂无角色') }}
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      v-for="role in getSyncRoles(row.organId)"
-                      :key="role.id"
-                      :command="role.id"
-                    >
-                      {{ role.roleName }} ({{ role.roleType }})
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
+                {{ $t('MG_IDP_ENT_BTN_SYNC', '同步') }}
+              </el-button>
             </span>
           </el-tooltip>
           <el-button type="primary" link size="small" @click="handleView(row)">
@@ -210,6 +187,7 @@
         <el-descriptions-item :label="$t('G2_FIELD_ID', 'ID')">{{ currentRow?.id }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_IDP_ENT_FIELD_IDP_TYPE', '身份源类型')">{{ currentRow?.idpType }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_IDP_ENT_COL_ENTERPRISE_ID', '外部企业/租户ID')">{{ currentRow?.enterpriseId }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_IDP_ENT_FIELD_BIND_MODE', '接入形态')">{{ currentRow?.bindMode }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_IDP_ENT_COL_ORGAN_ID', '机构标识，关联 organ.id')">{{ currentRow?.organId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_STATUS', '状态')">
           <DictText :value="currentRow?.status" usage-code="STATUS" :api-method="DictItemApi.select" />
@@ -219,22 +197,6 @@
         <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
       <template #footer>
-        <el-tooltip
-          :disabled="canSyncCurrentRow"
-          :content="$t('MG_IDP_ENT_SYNC_INTERNAL_ONLY', '首期仅支持企业内部应用（INTERNAL）同步')"
-        >
-          <span>
-            <el-button
-              type="warning"
-              v-permission="'idp_enterprise_organ:sync'"
-              :loading="syncLoading"
-              :disabled="!canSyncCurrentRow"
-              @click="handleSync"
-            >
-              {{ $t('MG_IDP_ENT_BTN_SYNC', '同步部门与员工') }}
-            </el-button>
-          </span>
-        </el-tooltip>
         <el-button type="primary" @click="detailDialogVisible = false">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
       </template>
     </el-drawer>
@@ -245,10 +207,10 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
-import { ArrowDown } from '@element-plus/icons-vue';
 import { t } from '@platform/i18n';
 import { IdpEnterpriseOrganApi } from './api';
-import { useTenantIdpSync } from '../tenant_idp_sync/useTenantIdpSync';
+import { TenantIdpSyncApi } from '../tenant_idp_sync/api';
+import type { TenantIdpSyncResult } from '../tenant_idp_sync/type';
 import { DictItemApi } from '../dict/api';
 import type { IdpEnterpriseOrgan, IdpEnterpriseOrganPayload, IdpEnterpriseOrganQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
@@ -359,11 +321,48 @@ const handlePageChange = (page: number) => {
 const currentRow = ref<IdpEnterpriseOrgan | null>(null);
 // 明细弹窗引用
 const detailDialogVisible = ref(false);
+const syncLoadingId = ref<number | null>(null);
 
-// 查询数据明细  
+// 查询数据明细
 const handleView = (row: IdpEnterpriseOrgan) => {
   currentRow.value = { ...row };
   detailDialogVisible.value = true;
+};
+
+const handleSync = async (row: IdpEnterpriseOrgan) => {
+  if (!row?.organId || row.bindMode !== 'INTERNAL') {
+    return;
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      t('MG_IDP_ENT_SYNC_CONFIRM', '将从 IdP 拉取通讯录并初始化部门与员工；FULL 模式会对快照外数据做对账处理，是否继续？'),
+      t('G2_LBL_TIP', '提示'),
+      { type: 'warning' },
+    );
+  } catch {
+    return;
+  }
+
+  syncLoadingId.value = row.id;
+  try {
+    const result: TenantIdpSyncResult = await TenantIdpSyncApi.sync({
+      organId: row.organId,
+      idpType: row.idpType,
+      bindMode: row.bindMode,
+      syncMode: 'FULL',
+    });
+    ElMessage.success(
+      t(
+        'MG_IDP_ENT_SYNC_OK',
+        `同步完成：部门新增 ${result.departmentsCreated}、更新 ${result.departmentsUpdated}；成员新增 ${result.membersCreated}、更新 ${result.membersUpdated}；耗时 ${result.elapsedMs}ms`,
+      ),
+    );
+  } catch (error: any) {
+    showErrorMessage(error || t('MG_IDP_ENT_SYNC_FAIL', '同步失败'));
+  } finally {
+    syncLoadingId.value = null;
+  }
 };
 
 // 删除数据记录
@@ -401,6 +400,7 @@ const editForm = reactive({
   id: undefined as number | undefined,
   idpType: '',
   enterpriseId: '',
+  bindMode: 'INTERNAL',
   organId: undefined as number | undefined,
   status: '',
   remark: '',
@@ -414,6 +414,7 @@ const editDialogTitle = computed(() =>
 const editRules = computed<FormRules>(() => ({
   idpType: [{ required: true, message: t('MG_IDP_ENT_PH_IDP_TYPE', '请输入身份源类型'), trigger: 'blur' }],
   enterpriseId: [{ required: true, message: t('MG_IDP_ENT_VLD_ENTERPRISE_ID', '请输入外部企业/租户标识'), trigger: 'blur' }],
+  bindMode: [{ required: true, message: t('MG_IDP_ENT_PH_BIND_MODE', '请选择接入形态'), trigger: 'change' }],
   organId: [{ required: true, message: t('MG_IDP_ENT_PH_ORGAN_ID_FULL', '请输入机构标识，关联 organ.id'), trigger: 'blur' }],
   status: [{ required: true, message: t('MG_IDP_ENT_PH_STATUS', '请选择状态'), trigger: 'change' }],
 }));
@@ -425,6 +426,7 @@ const handleCreate = () => {
 
   editForm.idpType = '';
   editForm.enterpriseId = '';
+  editForm.bindMode = 'INTERNAL';
   editForm.organId = undefined;
   editForm.status = '';
   editForm.remark = '';
@@ -439,6 +441,7 @@ const handleEdit = (row: IdpEnterpriseOrgan) => {
   editForm.id = row.id;
   editForm.idpType = row.idpType;
   editForm.enterpriseId = row.enterpriseId;
+  editForm.bindMode = row.bindMode || 'INTERNAL';
   editForm.organId = row.organId;
   editForm.status = row.status;
   editForm.remark = row.remark;
@@ -454,6 +457,7 @@ const submitEdit = async () => {
   const payload: IdpEnterpriseOrganPayload = {
     idpType: editForm.idpType,
     enterpriseId: editForm.enterpriseId,
+    bindMode: editForm.bindMode,
     organId: editForm.organId,
     status: editForm.status,
     remark: editForm.remark,
