@@ -186,7 +186,7 @@
           <span>
             <el-button
               type="warning"
-              v-permission="'idp_enterprise_organ:edit'"
+              v-permission="'idp_enterprise_organ:sync'"
               :loading="syncLoading"
               :disabled="!canSyncCurrentRow"
               @click="handleSync"
