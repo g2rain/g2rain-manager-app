@@ -127,6 +127,7 @@
       <el-select-v2 
         v-model="selectedUsers" 
         :options="allUsers" 
+        filterable
         multiple :placeholder="$t('MG_ROLE_PH_USERS', '请选择用户')" 
       />
 
