@@ -10,6 +10,8 @@ export interface RoleControlUnitRelation extends BaseVo {
   roleId: number;
   controlUnitId: number;
   controlUnitName: string;
+  /** 控制单元业务说明 */
+  description?: string;
 }
 
 /**
@@ -29,4 +31,5 @@ export interface RoleControlUnitRelationPayload {
 export interface RoleControlUnitRelationQuery extends BaseSelectListDto {
   // 业务查询字段
   roleId?: number;
+  roleIds?: number[];
 }

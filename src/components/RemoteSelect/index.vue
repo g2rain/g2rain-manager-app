@@ -1,5 +1,6 @@
 <template>
   <el-select
+    ref="selectRef"
     v-model="selectedValue"
     :placeholder="resolvedPlaceholder"
     :clearable="clearable"
@@ -29,6 +30,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, nextTick, computed } from 'vue';
 import { ArrowDown } from '@element-plus/icons-vue';
+import type { SelectInstance } from 'element-plus';
 import { useLocaleStore } from '@platform/stores/locale.store';
 import { t } from '@platform/i18n';
 import type { FetchDataFunction, RemoteSelectOption } from './types';
@@ -83,6 +85,26 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits<Emits>();
+
+const selectRef = ref<SelectInstance>();
+
+const openDropdown = async () => {
+  await nextTick();
+  selectRef.value?.focus?.();
+  // Element Plus Select 暴露 toggleMenu；部分版本也可直接 focus 打开
+  const select = selectRef.value as SelectInstance & { toggleMenu?: () => void };
+  select?.toggleMenu?.();
+};
+
+const focus = async () => {
+  await nextTick();
+  selectRef.value?.focus?.();
+};
+
+defineExpose({
+  openDropdown,
+  focus,
+});
 
 const resolvedPlaceholder = computed(() => props.placeholder ?? t('G2_PH_SELECT', '请选择'));
 
@@ -318,17 +340,19 @@ const prefetchDefaultOptions = async () => {
  * 加载初始值对应的选项
  */
 const loadInitialOption = async () => {
-  if (selectedValue.value === null || selectedValue.value === undefined) {
+  const current = selectedValue.value;
+  if (current === null || current === undefined) {
     return;
   }
 
   loading.value = true;
   try {
     // 初始值通常是数字 ID，使用 value 参数
-    const params = typeof selectedValue.value === 'number'
-      ? { value: selectedValue.value }
-      : { key: String(selectedValue.value) };
-    
+    const params =
+      typeof current !== 'string'
+        ? { value: Number(current) }
+        : { key: current };
+
     const data = await props.fetchData(params);
     const list = data || [];
     rememberOptions(list);

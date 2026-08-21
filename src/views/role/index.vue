@@ -2,9 +2,7 @@
   <div class="role-page">
     <!-- 查询表单 -->
     <el-card class="role-page__search" shadow="never">
-      <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
-        <!-- 业务特定查询字段 -->
         <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')">
           <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
         </el-form-item>
@@ -17,7 +15,6 @@
           <el-input v-model="queryForm.roleName" :placeholder="$t('MG_ROLE_PH_NAME', '请输入角色名称')" clearable style="width: 200px" />
         </el-form-item>
 
-        <!-- 操作按钮 -->
         <template #actions>
           <el-form-item>
             <el-button type="primary" @click="handleSearch">{{ $t('G2_BTN_QUERY', '查询') }}</el-button>
@@ -27,7 +24,6 @@
       </QueryForm>
     </el-card>
 
-    <!-- 标题和操作按钮 -->
     <div class="role-page__header">
       <div class="role-page__title-group">
         <h2>{{ $t('MG_ROLE_TITLE', '管理角色数据') }}</h2>
@@ -41,7 +37,7 @@
 
       <el-table-column prop="organName" :label="$t('MG_FIELD_ORGAN', '所属机构')" width="140" />
 
-      <el-table-column prop="roleType" :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')" width="180">
+      <el-table-column prop="roleType" :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')" width="140">
         <template #default="{ row }">
           <el-tag effect="light">
             <DictText :value="row?.roleType" usage-code="ROLE_TYPE" :api-method="DictItemApi.select" />
@@ -49,7 +45,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="roleName" :label="$t('MG_ROLE_FIELD_NAME', '角色名称')" width="180" />
+      <el-table-column prop="roleName" :label="$t('MG_ROLE_FIELD_NAME', '角色名称')" width="160" />
+
+      <el-table-column :label="$t('MG_ROLE_FIELD_PERMS', '功能权限')" min-width="220">
+        <template #default="{ row }">
+          <RolePermissionTags :items="rolePermsMap[row.id] || []" />
+        </template>
+      </el-table-column>
 
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
 
@@ -75,33 +77,22 @@
       </el-table-column>
     </SortableTable>
 
-    <!-- 分页组件 -->
     <div class="role-page__pagination">
       <el-pagination v-model:current-page="pagination.pageNum" v-model:page-size="pagination.pageSize"
         :page-sizes="[10, 20, 50, 100]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
         @size-change="handleSizeChange" @current-change="handlePageChange" />
     </div>
 
-    <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
-        <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')" prop="organId">
-          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :api-method="OrganApi.searchOrgans" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
-        </el-form-item>
+    <RoleEditDialog
+      v-model="editDialogVisible"
+      mode="manage"
+      :role-id="editTarget.roleId"
+      :role-name="editTarget.roleName"
+      :organ-id="editTarget.organId"
+      :organ-name="editTarget.organName"
+      @success="handleRoleEditSuccess"
+    />
 
-        <el-form-item :label="$t('MG_ROLE_FIELD_NAME', '角色名称')" prop="roleName">
-          <el-input v-model="editForm.roleName" :placeholder="$t('MG_ROLE_PH_NAME', '请输入角色名称')" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="editDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
-          <el-button type="primary" @click="submitEdit">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
-        </span>
-      </template>
-    </el-dialog>
-
-    <!-- 明细弹窗 -->
     <el-dialog v-model="detailDialogVisible" :title="$t('MG_ROLE_DETAIL', '角色明细')" width="520px">
       <el-descriptions :column="1" border>
         <el-descriptions-item :label="$t('MG_ROLE_COL_ID', '角色序号')">{{ currentRow?.id }}</el-descriptions-item>
@@ -122,15 +113,14 @@
       </template>
     </el-dialog>
 
-    <!-- 分配用户 -->
     <el-dialog v-model="assignUsersDialog.visible" :title="$t('MG_ROLE_DLG_ASSIGN_USERS', '分配用户')" width="520px">
-      <el-select-v2 
-        v-model="selectedUsers" 
-        :options="allUsers" 
+      <el-select-v2
+        v-model="selectedUsers"
+        :options="allUsers"
         filterable
-        multiple :placeholder="$t('MG_ROLE_PH_USERS', '请选择用户')" 
+        multiple
+        :placeholder="$t('MG_ROLE_PH_USERS', '请选择用户')"
       />
-
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="resetAssignUsersDialog">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
@@ -139,15 +129,23 @@
       </template>
     </el-dialog>
 
-    <!-- 分配功能权限 -->
     <el-dialog v-model="assignControlUtilsDialog.visible" :title="$t('MG_ROLE_DLG_ASSIGN_CTRL', '分配功能权限')" width="600px">
-      <el-transfer 
-        v-model="selectedControlUtils" 
-        :data="allControlUtils" 
-        filterable :filter-placeholder="$t('MG_ROLE_TRANSFER_FILTER', '搜索功能权限')" 
+      <el-transfer
+        v-model="selectedControlUtils"
+        :data="allControlUtils"
+        filterable
+        :filter-placeholder="$t('MG_ROLE_TRANSFER_FILTER', '搜索功能权限')"
         :titles="transferTitles"
-      />
-
+      >
+        <template #default="{ option }">
+          <PermissionTooltip
+            :name="option.label"
+            :description="option.description"
+          >
+            <span>{{ option.label }}</span>
+          </PermissionTooltip>
+        </template>
+      </el-transfer>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="resetAssignControlUtilsDialog">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
@@ -160,23 +158,24 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
-import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { t } from '@platform/i18n';
 import { RoleApi } from './api';
-import { UserApi } from '../user/api'
-import { UserRoleRelationApi } from '../user_role_relation/api'
+import { UserApi } from '../user/api';
+import { UserRoleRelationApi } from '../user_role_relation/api';
 import { OrganApi } from '../organ/api';
 import { DictItemApi } from '../dict/api';
-import { RoleControlUnitRelationApi } from '../role_control_unit_relation/api'
-import type { Role, RolePayload, RoleQuery } from './type';
+import { RoleControlUnitRelationApi } from '../role_control_unit_relation/api';
+import type { RoleControlUnitRelation } from '../role_control_unit_relation/type';
+import type { Role, RoleQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText } from '@/components';
+import RoleEditDialog from './RoleEditDialog.vue';
+import RolePermissionTags from './RolePermissionTags.vue';
+import PermissionTooltip from './PermissionTooltip.vue';
 
-// 定义组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
-// 基础查询状态（使用 reactive v-model 替换整个对象时保持响应式）
 let baseQueryForm = reactive<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
@@ -184,101 +183,117 @@ let baseQueryForm = reactive<BaseSelectListDto>({
   sorts: undefined,
 });
 
-// 业务查询状态
 const queryForm = reactive({
-  organId: undefined,
+  organId: undefined as number | undefined,
   roleType: '',
   roleName: '',
 });
 
-// 分页相关状态
 const pagination = reactive({
   pageNum: 1,
   pageSize: 10,
   total: 0,
 });
 
-// 定义列表引用  
 const tableData = ref<Role[]>([]);
+const rolePermsMap = reactive<Record<number, RoleControlUnitRelation[]>>({});
 
-// 加载列表数据
+const loadRolePermissions = async (roles: Role[]) => {
+  Object.keys(rolePermsMap).forEach((key) => {
+    delete rolePermsMap[Number(key)];
+  });
+  if (!roles.length) return;
+
+  for (const role of roles) {
+    rolePermsMap[role.id] = [];
+  }
+
+  try {
+    const relations = await RoleControlUnitRelationApi.list({
+      roleIds: roles.map((role) => role.id),
+    });
+    for (const relation of relations) {
+      if (!rolePermsMap[relation.roleId]) {
+        rolePermsMap[relation.roleId] = [];
+      }
+      rolePermsMap[relation.roleId].push(relation);
+    }
+  } catch {
+    // 后端尚未支持 roleIds 时降级为按角色并行查询
+    await Promise.all(
+      roles.map(async (role) => {
+        try {
+          rolePermsMap[role.id] = await RoleControlUnitRelationApi.list({ roleId: role.id });
+        } catch {
+          rolePermsMap[role.id] = [];
+        }
+      }),
+    );
+  }
+};
+
 const loadData = async () => {
   try {
-    // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
       Object.entries({ ...baseQueryForm, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as RoleQuery;
 
-    // 请求分页数据
     const pageData = await RoleApi.page({
       pageNum: pagination.pageNum,
       pageSize: pagination.pageSize,
       ...query,
     } as PageSelectListDto & RoleQuery);
-    
-    // 设置响应结果
+
     tableData.value = pageData.records;
     pagination.total = pageData.total;
+    await loadRolePermissions(pageData.records);
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
     ElMessage.error(msg);
   }
-// 表单校验规则
 };
 
-// 处理排序字段
 const handleSortChange = (params: Record<string, string>) => {
-  // 更新 QueryForm 的 sorts 字段
   queryFormRef.value?.updateSorts(params);
 };
 
-// 查询数据列表
 const handleSearch = () => {
-  pagination.pageNum = 1; // 重置到第一页
+  pagination.pageNum = 1;
   loadData();
 };
 
-// 重置查询条件
 const handleReset = () => {
-  // 重置基础查询表单
   baseQueryForm.id = undefined;
   baseQueryForm.createTime = undefined;
   baseQueryForm.updateTime = undefined;
   baseQueryForm.sorts = undefined;
-  // 重置业务特定查询表单
   queryForm.organId = undefined;
   queryForm.roleType = '';
   queryForm.roleName = '';
-  pagination.pageNum = 1; // 重置到第一页
+  pagination.pageNum = 1;
   loadData();
 };
 
-// 分页大小变化
 const handleSizeChange = (size: number) => {
   pagination.pageSize = size;
-  pagination.pageNum = 1; // 重置到第一页
+  pagination.pageNum = 1;
   loadData();
 };
 
-// 调整页码变化
 const handlePageChange = (page: number) => {
   pagination.pageNum = page;
   loadData();
 };
 
-// 当前记录引用
 const currentRow = ref<Role | null>(null);
-// 明细弹窗引用
 const detailDialogVisible = ref(false);
 
-// 查询数据明细
 const handleView = (row: Role) => {
   currentRow.value = { ...row };
   detailDialogVisible.value = true;
 };
 
-// 删除数据记录
 const handleDelete = (row: Role) => {
   ElMessageBox.confirm(
     t('MG_ROLE_DEL_CONFIRM', `确认删除角色「${row.id}」吗？`),
@@ -288,7 +303,6 @@ const handleDelete = (row: Role) => {
     .then(async () => {
       try {
         await RoleApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
         if (tableData.value.length === 1 && pagination.pageNum > 1) {
           pagination.pageNum--;
         }
@@ -302,215 +316,150 @@ const handleDelete = (row: Role) => {
     .catch(() => { });
 };
 
-// 保存弹窗引用
 const editDialogVisible = ref(false);
-
-// 修改标记状态
-const isEdit = ref(false);
-
-// 修改组件引用
-const editFormRef = ref<FormInstance | null>(null);
-
-// 保存表单状态
-const editForm = reactive({
-  id: undefined as number | undefined,
-  organId: undefined as number | undefined,
-  roleName: '',
+const editTarget = reactive({
+  roleId: null as number | null,
+  roleName: null as string | null,
+  organId: null as number | null,
+  organName: null as string | null,
 });
-
-const editDialogTitle = computed(() =>
-  isEdit.value ? t('MG_ROLE_DLG_EDIT', '编辑角色') : t('MG_ROLE_DLG_ADD', '新增角色'),
-);
-
-const editRules = computed<FormRules>(() => ({
-  organId: [{ required: true, message: t('MG_ROLE_VLD_ORGAN', '请选择所属机构'), trigger: 'blur' }],
-  roleName: [{ required: true, message: t('MG_ROLE_VLD_NAME', '请输入角色名称'), trigger: 'blur' }],
-}));
 
 const transferTitles = computed(() => [
   t('MG_ROLE_TRANSFER_AVAILABLE', '可选功能权限'),
   t('MG_ROLE_TRANSFER_SELECTED', '已选功能权限'),
 ]);
 
-// 打开创建弹窗
 const handleCreate = () => {
-  isEdit.value = false;
-  editFormRef.value?.clearValidate();
-
-  editForm.id = undefined;
-  editForm.organId = undefined;
-  editForm.roleName = '';
+  editTarget.roleId = null;
+  editTarget.roleName = null;
+  editTarget.organId = null;
+  editTarget.organName = null;
   editDialogVisible.value = true;
 };
 
-// 打开修改弹窗
 const handleEdit = (row: Role) => {
-  isEdit.value = true;
-  editFormRef.value?.clearValidate();
-
-  editForm.id = row.id;
-  editForm.organId = row.organId;
-  editForm.roleName = row.roleName;
+  editTarget.roleId = row.id;
+  editTarget.roleName = row.roleName;
+  editTarget.organId = row.organId;
+  editTarget.organName = row.organName;
   editDialogVisible.value = true;
 };
 
-// 提交数据表单
-const submitEdit = async () => {
-  if (!editFormRef.value) return;
-  const valid = await editFormRef.value.validate();
-  if (!valid) return;
-
-  const payload: RolePayload = {
-    organId: editForm.organId,
-    roleName: editForm.roleName,
-  };
-
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await RoleApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    ElMessage.error(msg);
-  }
+const handleRoleEditSuccess = async () => {
+  await loadData();
 };
 
-// 分配用户弹窗引用
 const assignUsersDialog = reactive({
   visible: false,
-  roleId: null as number | null
-})
+  roleId: null as number | null,
+});
 
-// 分配用户组件引用
-const allUsers = ref<{ value: number; label: string }[]>([])
-const selectedUsers = ref<number[]>([])
-// 原始已关联用户列表（用于比较删除项）
-let originalUsers: Set<number> = new Set()
+const allUsers = ref<{ value: number; label: string }[]>([]);
+const selectedUsers = ref<number[]>([]);
+let originalUsers: Set<number> = new Set();
 
-// 重置分配用户弹窗引用
 const resetAssignUsersDialog = () => {
-  // 统一重置弹窗状态，清空数据
-  assignUsersDialog.visible = false
-  assignUsersDialog.roleId = null
-  allUsers.value = []
-  selectedUsers.value = []
-  originalUsers.clear()
-}
-
-// 打开分配用户弹窗
-const handleAssignUsers = async (row: Role) => {
-  const currentRoleId = row.id
-  assignUsersDialog.roleId = currentRoleId
-  assignUsersDialog.visible = true
-
-  // 查询待选用户列表, 角色归属的机构下的所有用户集合
-  allUsers.value = (await UserApi.listByRole(currentRoleId)).map(u => ({
-    value: u.id,
-    label: u.realName || `${u.id}`
-  }));
-
-  // 查询角色关联用户
-  const associatedUsers = (await UserRoleRelationApi.list({
-    roleId: currentRoleId
-  })).map(u => u.userId);
-  selectedUsers.value = [...associatedUsers]
-
-  // 保存原始关联用户集合，用于删除对比
-  originalUsers = new Set(associatedUsers)
+  assignUsersDialog.visible = false;
+  assignUsersDialog.roleId = null;
+  allUsers.value = [];
+  selectedUsers.value = [];
+  originalUsers.clear();
 };
 
-// 提交分配用户数据
-const assignUsers = async () => {
-  if (!assignUsersDialog.roleId) return
+const handleAssignUsers = async (row: Role) => {
+  const currentRoleId = row.id;
+  assignUsersDialog.roleId = currentRoleId;
+  assignUsersDialog.visible = true;
 
-  // 计算删除的用户 ID：在 originalUsers 里但不在 selectedUsers.value 中
-  const userIds = selectedUsers.value.filter(id => !originalUsers.has(id))
-  const deleteUserIds = [...originalUsers].filter(id => !selectedUsers.value.includes(id))
+  allUsers.value = (await UserApi.listByRole(currentRoleId)).map((u) => ({
+    value: u.id,
+    label: u.realName || `${u.id}`,
+  }));
+
+  const associatedUsers = (await UserRoleRelationApi.list({
+    roleId: currentRoleId,
+  })).map((u) => u.userId);
+  selectedUsers.value = [...associatedUsers];
+  originalUsers = new Set(associatedUsers);
+};
+
+const assignUsers = async () => {
+  if (!assignUsersDialog.roleId) return;
+
+  const userIds = selectedUsers.value.filter((id) => !originalUsers.has(id));
+  const deleteUserIds = [...originalUsers].filter((id) => !selectedUsers.value.includes(id));
 
   await UserRoleRelationApi.assignUsers({
     roleId: assignUsersDialog.roleId,
-    userIds,        // 新增用户集合
-    deleteUserIds   // 待删用户集合
-  })
+    userIds,
+    deleteUserIds,
+  });
 
-  ElMessage.success(t('MG_ROLE_MSG_ASSIGN_OK', '分配成功'))
-  resetAssignUsersDialog()
+  ElMessage.success(t('MG_ROLE_MSG_ASSIGN_OK', '分配成功'));
+  resetAssignUsersDialog();
 };
 
-// 分配功能权限弹窗引用
 const assignControlUtilsDialog = reactive({
   visible: false,
   roleId: null as number | null,
-  isDisabled: true
-})
+  organId: null as number | null,
+  isDisabled: true,
+});
 
-// 分配功能权限组件引用  
-const allControlUtils = ref<{ key: number; label: string, disabled: boolean }[]>([])
-const selectedControlUtils = ref<number[]>([])
-// 原始已关联功能权限列表（用于比较删除项）
-let originalControlUtils: Set<number> = new Set()
+const allControlUtils = ref<{ key: number; label: string; disabled: boolean; description?: string }[]>([]);
+const selectedControlUtils = ref<number[]>([]);
+let originalControlUtils: Set<number> = new Set();
 
-// 重置分配功能权限弹窗引用  
 const resetAssignControlUtilsDialog = () => {
-  // 统一重置弹窗状态，清空数据
-  assignControlUtilsDialog.visible = false
-  assignControlUtilsDialog.roleId = null
-  assignControlUtilsDialog.isDisabled = true
-  allControlUtils.value = []
-  selectedControlUtils.value = []
-  originalControlUtils.clear()
-}
-
-// 打开分配功能权限弹窗
-const handleAssignControlUtils = async (row: Role) => {
-  const currentRoleId = row.id
-  assignControlUtilsDialog.roleId = currentRoleId
-  assignControlUtilsDialog.visible = true
-
-  const _disabled_ = row.roleType === 'ADMIN';
-  assignControlUtilsDialog.isDisabled = _disabled_;
-
-  // 查询待选功能权限列表, 角色归属的机构下的超管角色拥有的功能权限集合
-  allControlUtils.value = (await RoleControlUnitRelationApi.listByRole(currentRoleId)).map(u => ({
-    key: u.controlUnitId,
-    label: u.controlUnitName || `${u.controlUnitId}`,
-    disabled: _disabled_
-  }));
-
-  // 查询角色关联功能权限
-  const associatedControlUtils = (await RoleControlUnitRelationApi.list({
-    roleId: currentRoleId
-  })).map(u => u.controlUnitId);
-  selectedControlUtils.value = [...associatedControlUtils]
-
-  // 保存原始关联功能权限集合，用于删除对比
-  originalControlUtils = new Set(associatedControlUtils)
+  assignControlUtilsDialog.visible = false;
+  assignControlUtilsDialog.roleId = null;
+  assignControlUtilsDialog.organId = null;
+  assignControlUtilsDialog.isDisabled = true;
+  allControlUtils.value = [];
+  selectedControlUtils.value = [];
+  originalControlUtils.clear();
 };
 
-// 提交分配功能权限数据
-const assignControlUtils = async () => {
-  if (!assignControlUtilsDialog.roleId) return
+const handleAssignControlUtils = async (row: Role) => {
+  const currentRoleId = row.id;
+  assignControlUtilsDialog.roleId = currentRoleId;
+  assignControlUtilsDialog.organId = row.organId;
+  assignControlUtilsDialog.visible = true;
 
-  // 计算删除的用户 ID：在 originalPermissions 里但不在 assignedKeys.value 中
-  const controlUnitIds = selectedControlUtils.value.filter(id => !originalControlUtils.has(id))
-  const deleteControlUnitIds = [...originalControlUtils].filter(id => !selectedControlUtils.value.includes(id))
+  const disabled = row.roleType === 'ADMIN';
+  assignControlUtilsDialog.isDisabled = disabled;
+
+  allControlUtils.value = (await RoleControlUnitRelationApi.listAssignable(row.organId)).map((u) => ({
+    key: u.controlUnitId,
+    label: u.controlUnitName || `${u.controlUnitId}`,
+    disabled,
+    description: u.description,
+  }));
+
+  const associatedControlUtils = (await RoleControlUnitRelationApi.list({
+    roleId: currentRoleId,
+  })).map((u) => u.controlUnitId);
+  selectedControlUtils.value = [...associatedControlUtils];
+  originalControlUtils = new Set(associatedControlUtils);
+};
+
+const assignControlUtils = async () => {
+  if (!assignControlUtilsDialog.roleId) return;
+
+  const controlUnitIds = selectedControlUtils.value.filter((id) => !originalControlUtils.has(id));
+  const deleteControlUnitIds = [...originalControlUtils].filter((id) => !selectedControlUtils.value.includes(id));
 
   await RoleControlUnitRelationApi.save({
     roleId: assignControlUtilsDialog.roleId,
-    controlUnitIds,       // 新增功能权限集合
-    deleteControlUnitIds  // 待删功能权限集合
-  })
+    controlUnitIds,
+    deleteControlUnitIds,
+  });
 
-  ElMessage.success(t('MG_ROLE_MSG_CONFIG_OK', '配置成功'))
-  resetAssignControlUtilsDialog()
+  ElMessage.success(t('MG_ROLE_MSG_CONFIG_OK', '配置成功'));
+  resetAssignControlUtilsDialog();
+  await loadData();
 };
 
-// 挂载回调
 onMounted(async () => {
   await loadData();
 });
