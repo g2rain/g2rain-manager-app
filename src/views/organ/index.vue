@@ -192,6 +192,7 @@
             filterable
             style="width: 100%"
             :loading="inviteDialog.rolesLoading"
+            @change="handleInviteRoleChange"
           >
             <el-option
               v-for="role in inviteDialog.roles"
@@ -199,9 +200,18 @@
               :label="`${role.roleName} (${role.roleType})`"
               :value="role.id"
             />
+            <el-option
+              :value="CREATE_ROLE_OPTION_VALUE"
+              :label="$t('MG_ORGAN_INVITE_CREATE_ROLE', '+ 创建新角色')"
+              divided
+              class="invite-create-role-option"
+            />
           </el-select>
           <div v-if="!inviteDialog.rolesLoading && inviteDialog.roles.length === 0" class="invite-hint">
-            {{ $t('MG_ORGAN_INVITE_NO_ROLES', '该机构暂无角色，请先在角色管理中创建。') }}
+            {{ $t('MG_ORGAN_INVITE_NO_ROLES', '该机构暂无角色，可点击「+ 创建新角色」立即创建。') }}
+            <el-button type="primary" link @click="openCreateRoleFromInvite">
+              {{ $t('MG_ORGAN_INVITE_CREATE_ROLE', '+ 创建新角色') }}
+            </el-button>
           </div>
         </el-form-item>
         <el-form-item :label="$t('MG_ORGAN_INVITE_VALIDITY', '有效期')">
@@ -236,13 +246,21 @@
         <el-button
           type="primary"
           :loading="inviteDialog.generating"
-          :disabled="!inviteDialog.roleId"
+          :disabled="!inviteRoleReady"
           @click="generateInvite"
         >
           {{ $t('MG_ORGAN_BTN_GEN_INVITE', '生成邀请码') }}
         </el-button>
       </template>
     </el-dialog>
+
+    <RoleEditDialog
+      v-model="createRoleDialogVisible"
+      mode="invite"
+      :organ-id="inviteDialog.organId"
+      :organ-name="inviteDialog.organName"
+      @success="handleInviteRoleCreated"
+    />
 
     <!-- 企业三方授权绑定列表 -->
     <el-drawer
@@ -290,6 +308,7 @@ import { OrganInviteApi } from './invite.api';
 import type { OrganInviteVo } from './invite.api';
 import { RoleApi } from '../role/api';
 import type { Role } from '../role/type';
+import RoleEditDialog from '../role/RoleEditDialog.vue';
 import { DictItemApi } from '../dict/api';
 import { IdpEnterpriseOrganApi } from '../idp_enterprise_organ/api';
 import type { Organ, OrganPayload, OrganQuery, OrganHierarchicalRelation } from './type';
@@ -568,8 +587,7 @@ const openIdpEnterpriseOrganListDialog = async (row: Organ) => {
 const handleReassign = async (row: Organ) => {
   reassignFormRef.value?.clearValidate();
 
-  const currentOrganId = row.id;
-  reassignDialog.organId = currentOrganId;
+  reassignDialog.organId = row.id;
   reassignDialog.visible = true;
   // 赋值给树组件
   treeData.value = (await OrganApi.getHierarchicalRelations());
@@ -594,6 +612,8 @@ const reassign = async () => {
 };
 
 // 邀请码弹窗
+const CREATE_ROLE_OPTION_VALUE = -1;
+
 const inviteDialog = reactive({
   visible: false,
   organId: null as number | null,
@@ -605,6 +625,14 @@ const inviteDialog = reactive({
   generating: false,
   result: null as OrganInviteVo | null,
 });
+
+const createRoleDialogVisible = ref(false);
+/** 打开「创建新角色」前保留的角色选中值，用于取消占位选项后回退 */
+const inviteRoleIdBeforeCreate = ref<number | null>(null);
+
+const inviteRoleReady = computed(
+  () => inviteDialog.roleId != null && inviteDialog.roleId !== CREATE_ROLE_OPTION_VALUE,
+);
 
 const inviteDialogTitle = computed(() =>
   t('MG_ORGAN_DLG_INVITE_TITLE', `机构邀请码 — ${inviteDialog.organName ?? ''}`),
@@ -621,6 +649,18 @@ const resetInviteDialog = () => {
   inviteDialog.validDays = 7;
   inviteDialog.roles = [];
   inviteDialog.result = null;
+  createRoleDialogVisible.value = false;
+  inviteRoleIdBeforeCreate.value = null;
+};
+
+const syncInviteRoleSelection = () => {
+  if (
+    inviteDialog.roleId != null
+    && inviteDialog.roleId !== CREATE_ROLE_OPTION_VALUE
+    && !inviteDialog.roles.some((role) => role.id === inviteDialog.roleId)
+  ) {
+    inviteDialog.roleId = null;
+  }
 };
 
 const openInviteDialog = async (row: Organ) => {
@@ -633,6 +673,7 @@ const openInviteDialog = async (row: Organ) => {
   inviteDialog.rolesLoading = true;
   try {
     inviteDialog.roles = await RoleApi.list({ organId: row.id });
+    syncInviteRoleSelection();
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : t('MG_ORGAN_MSG_ROLES_FAIL', '加载角色列表失败');
     ElMessage.error(msg);
@@ -642,8 +683,31 @@ const openInviteDialog = async (row: Organ) => {
   }
 };
 
+const openCreateRoleFromInvite = () => {
+  if (!inviteDialog.organId) return;
+  createRoleDialogVisible.value = true;
+};
+
+const handleInviteRoleChange = (value: number | null) => {
+  if (value === CREATE_ROLE_OPTION_VALUE) {
+    inviteDialog.roleId = inviteRoleIdBeforeCreate.value;
+    openCreateRoleFromInvite();
+    return;
+  }
+  inviteRoleIdBeforeCreate.value = value;
+};
+
+const handleInviteRoleCreated = (role: Role) => {
+  const exists = inviteDialog.roles.some((item) => item.id === role.id);
+  if (!exists) {
+    inviteDialog.roles = [...inviteDialog.roles, role];
+  }
+  inviteDialog.roleId = role.id;
+  inviteRoleIdBeforeCreate.value = role.id;
+};
+
 const generateInvite = async () => {
-  if (!inviteDialog.organId || !inviteDialog.roleId) return;
+  if (!inviteDialog.organId || !inviteDialog.roleId || inviteDialog.roleId === CREATE_ROLE_OPTION_VALUE) return;
   inviteDialog.generating = true;
   try {
     inviteDialog.result = await OrganInviteApi.generate({
@@ -741,5 +805,13 @@ onMounted(async () => {
   font-family: monospace;
   font-size: 14px;
   word-break: break-all;
+}
+</style>
+
+<style>
+/* el-option 渲染在 teleport 下，需非 scoped */
+.invite-create-role-option {
+  color: var(--el-color-primary) !important;
+  font-weight: 500;
 }
 </style>
