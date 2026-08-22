@@ -1,4 +1,4 @@
-﻿<p align="center">
+<p align="center">
   <img src="https://github.com/g2rain.png" alt="G2Rain" width="180" />
 </p>
 
@@ -22,6 +22,8 @@
 - 平台定位
 - 应用角色
 - 功能概览
+- 使用场景
+- 核心流程
 - 技术栈
 - 环境要求
 - 快速开始
@@ -32,6 +34,7 @@
 - 与关联仓库的关系
 - 模块说明
 - 职责边界
+- 常见问题
 - 关联仓库
 - 参与贡献
 - 许可证
@@ -66,6 +69,22 @@
 | 资源与能力治理 | 维护菜单、页面、页面元素、API 资源及业务能力与功能权限关系。 |
 | 应用与授权管理 | 维护应用、应用套件、应用授权和身份提供方接入配置。 |
 | 审计与服务治理 | 提供审计事件、服务注册和租户身份同步等平台管理界面。 |
+| 前端业务代码生成 | 读取 src/shared/generator/database.sql 中的表结构，按表生成页面、API、类型与 Mock 文件，并可更新 src/views/route-map.ts。 |
+| 平台资源配置生成 | 扫描路由和页面中的静态权限指令，生成页面、页面元素及汇总资源 JSON；当前执行流程未启用 API 端点扫描。 |
+
+## 使用场景
+
+| 场景 | 说明 |
+| --- | --- |
+| 按数据库表创建业务页面骨架 | 新增后端业务表或管理页面时，使用代码生成器一次生成视图、API、类型、Mock 和路由基础文件。 |
+| 生成平台资源登记配置 | 页面或按钮权限调整完成后，自动生成平台所需的页面、页面元素和汇总资源配置。 |
+
+## 核心流程
+
+| 流程 | 关键步骤 | 代码线索 |
+| --- | --- | --- |
+| 业务代码生成流程 | 更新 database.sql → 执行 build:generate 并指定 --tables → 解析表字段与注释 → 渲染页面/API/类型/Mock 模板 → 按需更新 route-map.ts → 执行 npm run build 校验 | src/shared/generator、src/shared/generator/database.sql、src/views/route-map.ts |
+| 资源配置文件生成流程 | 维护 route-map.ts 与页面静态 v-permission → 执行 build:config → 扫描路由和 Vue 页面 → 去重并生成 pages.json 与 page-elements.json → 汇总为 resources.json | src/shared/config-util、src/views/route-map.ts、src/views/**/*.vue |
 
 ## 技术栈
 
@@ -91,6 +110,8 @@
 | 安装依赖 | `npm install` | 根据 package.json 安装前端依赖。 |
 | 本地开发 | `npm run dev` | 启动本地开发服务。 |
 | 构建产物 | `npm run build` | 执行类型检查与前端构建，生成可发布产物。 |
+| 生成业务代码 | `npm run build:generate -- --tables=<table_name>` | 从 database.sql 中选择表，生成页面、API、类型、Mock 与路由骨架；同名文件可能被覆盖。 |
+| 生成资源配置 | `npm run build:config` | 开发完成后扫描路由和静态权限指令，生成平台页面与页面元素资源配置 JSON。 |
 | 预览产物 | `npm run preview` | 在本地预览构建后的前端产物。 |
 | 容器化 | `docker build .` | 仓库提供 Dockerfile，可按组织镜像规范封装前端运行镜像。 |
 
@@ -116,12 +137,26 @@
 | --- | --- |
 | `nginx/default.conf.template` | 容器运行时 Nginx 配置模板，用于静态资源访问和请求转发。 |
 
+### 代码生成
+
+| 配置项 | 说明 |
+| --- | --- |
+| `src/shared/generator/database.sql` | 前端业务代码生成器的表结构输入；--tables 指定的表必须存在于该文件中。 |
+
+### 资源配置生成
+
+| 配置项 | 说明 |
+| --- | --- |
+| `src/shared/config-util/config/*.json` | 由路由和静态 v-permission 生成 pages.json、page-elements.json 与 resources.json；当前 API 端点生成逻辑未启用。 |
+
 ## 构建与镜像
 
 | 目标 | 命令 | 产物 | 说明 |
 | --- | --- | --- | --- |
 | 本地开发 | `npm run dev` | 本地开发服务 | 启动前端本地开发服务。 |
 | 前端产物 | `npm run build` | `dist` | 执行类型检查与 Vite/TypeScript 构建，生成可发布产物。 |
+| 业务代码骨架 | `npm run build:generate -- --tables=<table_name>` | `src/views/<table_name> 与 src/views/route-map.ts` | 按数据库表生成页面、API、类型和 Mock，可用 --no-view、--no-api、--no-mock、--no-route 关闭部分生成项。 |
+| 平台资源配置 | `npm run build:config` | `src/shared/config-util/config/*.json` | 生成 resources.json、pages.json 和 page-elements.json，供平台资源登记或导入使用。 |
 | 产物预览 | `npm run preview` | 本地预览服务 | 在本地预览构建后的前端静态产物。 |
 | 容器镜像 | `docker build .` | 前端运行镜像 | 基于 Dockerfile 封装静态前端运行镜像。 |
 | 构建脚本 | `./build.sh` | 脚本定义的构建结果 | 执行仓库提供的构建脚本，承载组织内镜像或发布流程。 |
@@ -139,6 +174,9 @@
 | 平台前端应用本地开发 | npm | `npm run dev` | 启动前端本地开发服务，便于联调页面、路由和平台运行时能力。 | `npm run dev` |
 | 平台前端应用构建 | npm | `npm run build` | 执行类型检查和前端构建，生成可部署的静态产物。 | `npm run build` |
 | 平台前端应用预览 | npm | `npm run preview` | 在本地预览构建后的前端产物。 | `npm run preview` |
+| 按表生成业务代码 | npm | `npm run build:generate -- --tables=<table_name>` | --tables 为必填参数，多个表使用逗号分隔；该命令不会交互询问，缺少参数会直接失败。生成器会覆盖同名文件，执行前应提交或备份已有改动。 | `npm run build:generate -- --tables=<table_name>` |
+| 选择性生成业务代码 | npm | `npm run build:generate -- --tables=<table_name> --no-mock --no-route` | 可通过 --no-view、--no-api、--no-mock、--no-route 跳过对应生成项。 | `npm run build:generate -- --tables=<table_name> --no-mock --no-route` |
+| 生成平台资源配置 | npm | `npm run build:config` | 输出 resources.json、pages.json 和 page-elements.json；动态权限表达式无法被扫描，应使用静态 v-permission 编码。当前执行流程未生成 API 端点文件。 | `npm run build:config` |
 
 ## 与关联仓库的关系
 
@@ -152,6 +190,11 @@
 | 资源与权限管理 | 管理菜单、页面、元素、API、角色、功能权限与业务能力。 | src/views/resource_*、role、control_unit、control_domain |
 | 应用与身份提供方 | 管理应用、授权、应用套件及企业身份提供方配置。 | src/views/application*、idp_*、tenant_idp_sync |
 | 平台治理 | 提供审计事件、服务注册和运行时资源管理。 | src/views/audit_event、service_registry、src/runtime |
+| 组件（src/components） | 沉淀可复用的界面与基础设施组件，包括 HTTP、微前端、权限、选择器、查询表单、表格排序、加载与错误反馈等能力。 | src/components |
+| 平台适配（src/platform） | 封装平台应用模型、状态、国际化、地区语言、错误处理和微前端适配契约，隔离业务页面与平台实现细节。 | src/platform |
+| 运行时（src/runtime） | 组织应用启动、路由、认证、HTTP/API、环境配置和微前端 Shell 协同，负责应用进入可运行状态。 | src/runtime |
+| 共享工具（src/shared） | 提供代码生成器、资源配置生成器以及环境、HTTP、URL 等跨模块通用工具。 | src/shared/generator、src/shared/config-util、src/shared/utils |
+| 业务视图（src/views） | 承载领域页面及页面内聚的 API、类型、Mock、子组件与路由映射，是主要业务功能实现目录。 | src/views、src/views/route-map.ts |
 
 ## 职责边界
 
@@ -164,6 +207,13 @@
 - 不负责子应用内部的具体业务逻辑
 - 不替代后端认证或平台服务职责
 - 不负责后端服务逻辑
+
+## 常见问题
+
+| 问题 | 可能原因 | 处理建议 |
+| --- | --- | --- |
+| 代码生成找不到表或覆盖已有页面 | --tables 指定的表不在 database.sql 中，或目标目录已有同名文件。 | 先同步 database.sql 并检查表名；执行前提交或备份改动，必要时通过 --no-* 关闭不需要的生成项。 |
+| 资源配置缺少页面或按钮 | 权限使用动态表达式，或页面未进入 route-map.ts。 | 使用静态 v-permission 字符串并检查路由映射，再重新执行 build:config。 |
 
 ## 关联仓库
 
@@ -187,7 +237,7 @@
 
 ## 许可证
 
-本项目基于 [Apache 2.0许可证](https://github.com/g2rain/g2rain-common/blob/main/LICENSE) 开源。
+本项目基于 [Apache 2.0许可证](https://github.com/g2rain/g2rain-manager-app/blob/main/LICENSE) 开源。
 
 ## 联系我们
 
@@ -198,4 +248,3 @@
 ## 致谢
 
 感谢所有为 g2rain 项目提交 Issue、代码、文档、建议和使用反馈的开发者们！
-
