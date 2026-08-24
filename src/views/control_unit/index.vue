@@ -46,6 +46,7 @@
         </template>
       </el-table-column>
       <el-table-column prop="controlUnitName" :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')" width="180" />
+      <el-table-column prop="description" :label="$t('MG_FIELD_DESC', '描述')" min-width="200" show-overflow-tooltip />
       <el-table-column prop="controlUnitScope" :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')" width="180">
         <template #default="{ row }">
           <el-tag effect="light">

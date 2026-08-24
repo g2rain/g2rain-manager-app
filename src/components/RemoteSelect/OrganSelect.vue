@@ -1,5 +1,6 @@
 <template>
   <RemoteSelect
+    ref="remoteSelectRef"
     v-model="innerValue"
     :fetch-data="fetchData"
     :prefetch-on-open="prefetchOnOpen"
@@ -17,10 +18,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useAccessTokenStore } from '@platform/stores';
 import { t } from '@platform/i18n';
-import { RemoteSelect } from './index';
+import RemoteSelect from './index.vue';
 import type { FetchDataFunction, RemoteSelectOption } from './types';
 
 interface Props {
@@ -35,6 +36,11 @@ interface Props {
   width?: string;
   debounceDelay?: number;
   prefetchOnOpen?: boolean;
+  /**
+   * 非管理公司时是否用 token.organId 自动回填。
+   * 角色「新增」等场景传 false，避免预设机构。
+   */
+  useTokenDefault?: boolean;
 }
 
 interface Emits {
@@ -51,10 +57,12 @@ const props = withDefaults(defineProps<Props>(), {
   width: '200px',
   debounceDelay: 300,
   prefetchOnOpen: true,
+  useTokenDefault: true,
 });
 
 const emit = defineEmits<Emits>();
 const tokenStore = useAccessTokenStore();
+const remoteSelectRef = ref<InstanceType<typeof RemoteSelect> | null>(null);
 
 const resolvedPlaceholder = computed(() => props.placeholder ?? t('MG_PH_ORGAN', '请选择所属机构'));
 
@@ -62,7 +70,7 @@ const isEmptyModelValue = (value: number | null | undefined) => value === null |
 
 /** 非管理公司且未选中时，用 token.organId 同步回填 v-model（早于父页 onMounted / loadData） */
 const applyTokenOrganDefault = () => {
-  if (tokenStore.isAdminCompany || !isEmptyModelValue(props.modelValue)) {
+  if (!props.useTokenDefault || tokenStore.isAdminCompany || !isEmptyModelValue(props.modelValue)) {
     return;
   }
   const organId = tokenStore.organId;
@@ -74,12 +82,14 @@ const applyTokenOrganDefault = () => {
 };
 
 watch(
-  () => [props.modelValue, tokenStore.organId] as const,
+  () => [props.modelValue, tokenStore.organId, props.useTokenDefault] as const,
   () => applyTokenOrganDefault(),
   { immediate: true },
 );
 
-const autoSelectFirstWhenEmpty = computed(() => !tokenStore.isAdminCompany && tokenStore.organId == null);
+const autoSelectFirstWhenEmpty = computed(
+  () => props.useTokenDefault && !tokenStore.isAdminCompany && tokenStore.organId == null,
+);
 
 const resolvedClearable = computed(() => {
   if (props.clearable !== undefined) {
@@ -108,4 +118,9 @@ const fetchData: FetchDataFunction<RemoteSelectOption> = async (params) => {
     return [];
   }
 };
+
+defineExpose({
+  openDropdown: () => remoteSelectRef.value?.openDropdown?.(),
+  focus: () => remoteSelectRef.value?.focus?.(),
+});
 </script>
