@@ -1,0 +1,175 @@
+schemaVersion: 1
+name: g2rain-manager-app
+family: frontend-app
+role: g2rain 平台管理控制台微前端应用
+version: 0.1.0
+license: Apache-2.0
+
+architectureBaseline:
+  repository: https://github.com/g2rain/g2rain
+  ref: architecture-v1.1.0
+  profile: docs/architecture/profiles/frontend-app
+  version: 1.0.0
+  status: adopted
+  releasedAt: "2026-08-25"
+  deviations: docs/architecture/deviations.md
+
+ownership:
+  owns:
+    - 平台账号、用户、机构、角色与权限的管理端页面和交互用例
+    - 菜单、页面、页面元素、API 资源和控制域的管理端页面
+    - 应用、应用套件、授权、身份提供方、服务注册和审计的管理端页面
+    - 本应用的路由注册、资源加载、权限呈现、国际化和微前端生命周期
+  excludes:
+    - IAM 的认证、Token 签发、会话和身份提供方后端规则
+    - Gateway 的鉴权、路由与请求转发
+    - Basis、Infra、Department 等服务的数据所有权和业务校验
+    - main-shell 的全局菜单、Tab 和子应用注册治理
+
+businessDomains:
+  - account-and-user
+  - organization-and-role
+  - resource-and-permission
+  - application-and-authorization
+  - identity-provider
+  - service-registry-and-audit
+
+toolchain:
+  node: ">=22"
+  packageManager: npm
+  lockfileVersion: 3
+  framework: Vue 3.5.26
+  language: TypeScript 5.9.3
+  bundler: Vite 7.3.0
+  microFrontend: qiankun 2.10.16
+  ui: Element Plus 2.13
+  state: Pinia 3
+
+layers:
+  order:
+    - shared
+    - components
+    - platform
+    - runtime
+    - views
+  targetDependencyDirection: views -> runtime -> platform -> components -> shared
+  compositionRoots:
+    - src/main.ts
+    - src/App.vue
+  rules:
+    - 下层不得反向引用上层
+    - 公共模块通过 index.ts 暴露稳定 API
+    - 业务页面、页面 API 和业务类型保留在 views
+    - 当前反向依赖登记在 docs/architecture/deviations.md，不作为新增代码范例
+
+runtime:
+  applicationCode: g2rain-manager-app
+  contextPath: /manager
+  modes:
+    alone:
+      selector: mode=alone 或 VITE_RUN_MODE=alone
+      auth: 应用自行执行 IAM SSO、Token 管理和资源加载
+    integrated:
+      selector: 默认空模式
+      auth: main-shell 通过 qiankun props 注入 Token、Client、Locale、初始路由和 appKey
+  resourceEndpoint: /basis/authority/resources
+  devServer:
+    portSource: process.env.VITE_SERVER_PORT
+    fallbackPort: 3001
+  container:
+    exposedPort: 8080
+    defaultServerPort: 80
+    recommendedServerPort: 8080
+
+commands:
+  install: npm ci
+  dev: npm run dev
+  verify: npm run build
+  preview: npm run preview
+  codegen: npm run build:generate -- --tables=<table>
+  resourceConfig: npm run build:config
+  image: docker build --build-arg VITE_BUILD_MODE=production -t g2rain/g2rain-manager-app:<tag> .
+
+generators:
+  code:
+    input: src/shared/generator/database.sql
+    output: src/views/<table>
+    updatesRouteMap: true
+    overwritesExistingFiles: true
+  resource:
+    routeInput: src/views/route-map.ts
+    viewInput: src/views
+    output: src/shared/config-util/config
+    generated:
+      - resources.json
+      - pages.json
+      - page-elements.json
+    apiEndpointGeneration: false
+
+collaborators:
+  - repository: g2rain/g2rain-main-shell
+    role: 统一入口、菜单、Tab 和 qiankun 装载
+  - repository: g2rain/g2rain-iam
+    role: SSO、Token、客户端和身份提供方后端能力
+  - repository: g2rain/g2rain-gateway-webflux
+    role: 后端业务 API 的统一入口和鉴权转发
+  - repository: g2rain/g2rain-basis
+    role: 应用资源、机构和平台基础数据
+  - repository: g2rain/g2rain-infra
+    role: 服务、资源与平台基础设施管理能力
+
+community:
+  website: https://www.g2rain.com
+  issues: https://github.com/g2rain/g2rain/issues
+  discussions: https://github.com/g2rain/g2rain/discussions
+  security: https://github.com/g2rain/g2rain/security/advisories/new
+  email: g2rain_developer@163.com
+
+gitWorkflow:
+  primaryBranch: main
+  developmentBranch: develop
+  featurePattern: feature/<name>
+  fixPattern: fix/<name>
+  mergeFlow:
+    - feature/* 或 fix/* 合并到 develop
+    - develop 部署到测试环境并完成验证
+    - 验证通过后将 develop 合并到 main
+  commitFormat: "type(scope): summary"
+
+documentation:
+  entry: docs/index.md
+  agentEntry: AGENTS.md
+  required:
+    - docs/project.yaml
+    - docs/community.md
+    - docs/architecture/overview.md
+    - docs/architecture/layers.md
+    - docs/architecture/dependencies.md
+    - docs/architecture/runtime-flows.md
+    - docs/architecture/deviations.md
+    - docs/development/local-development.md
+    - docs/development/code-conventions.md
+    - docs/development/views-conventions.md
+    - docs/development/components-and-platform.md
+    - docs/development/code-generation.md
+    - docs/development/resource-generation.md
+    - docs/development/testing.md
+    - docs/development/definition-of-done.md
+    - docs/development/git-workflow.md
+    - docs/operations/configuration.md
+    - docs/operations/deployment.md
+    - docs/operations/troubleshooting.md
+    - docs/security/security-boundaries.md
+    - docs/requirements/README.md
+
+aiCoding:
+  instructionEntry: AGENTS.md
+  requirementTemplate: docs/requirements/README.md
+  testingPolicy: docs/development/testing.md
+  definitionOfDone: docs/development/definition-of-done.md
+  validation:
+    - 读取项目事实、中央 Profile、架构偏差、代码规范和当前需求
+    - 检查源码、package.json、环境文件、生成器和 Git Diff
+    - 执行 npm run build
+    - 动态检查文档链接、项目元数据和路由/资源一致性
+    - 报告未验证事项、生成覆盖风险和剩余架构偏差
