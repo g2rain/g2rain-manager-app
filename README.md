@@ -14,7 +14,7 @@
 
 平台管理控制台微前端子应用，提供账号、用户、机构、资源、角色、应用、授权与审计管理界面；承载 SaaS 平台管理侧的身份、权限与应用治理操作
 
-[官网](https://www.g2rain.com) · [Issues](https://github.com/g2rain/g2rain/issues) · [Discussions](https://github.com/g2rain/g2rain/discussions)
+[官网](https://www.g2rain.com) · [完整文档](docs/index.md) · [Frontend App Profile 1.0.0](https://github.com/g2rain/g2rain/tree/architecture-v1.1.0/docs/architecture/profiles/frontend-app) · [架构偏差](docs/architecture/deviations.md) · [Issues](https://github.com/g2rain/g2rain/issues) · [Discussions](https://github.com/g2rain/g2rain/discussions)
 
 ## 目录
 
@@ -47,7 +47,7 @@
 
 ## 平台定位
 
-该仓库位于 g2rain 前端应用层，承担“前端应用模块”的角色。
+该仓库位于 g2rain 前端应用层，正式采用 `frontend-app 1.0.0`，由 main-shell 统一装载，并通过 Gateway、IAM、Basis、Infra 等平台服务完成管理操作。
 
 ## 应用角色
 
@@ -107,7 +107,7 @@
 
 | 步骤 | 命令或位置 | 说明 |
 | --- | --- | --- |
-| 安装依赖 | `npm install` | 根据 package.json 安装前端依赖。 |
+| 安装依赖 | `npm ci` | 根据锁文件安装可复现依赖。 |
 | 本地开发 | `npm run dev` | 启动本地开发服务。 |
 | 构建产物 | `npm run build` | 执行类型检查与前端构建，生成可发布产物。 |
 | 生成业务代码 | `npm run build:generate -- --tables=<table_name>` | 从 database.sql 中选择表，生成页面、API、类型、Mock 与路由骨架；同名文件可能被覆盖。 |
@@ -199,14 +199,14 @@
 ## 职责边界
 
 该仓库主要负责：
-- 负责前端交互与应用流程
-- 负责 Shell 层布局、路由入口与子应用编排
-- 负责 Shell 到子应用之间的令牌与路由同步事件协调
+- 账号、用户、机构、角色、资源、应用授权、身份提供方、服务注册与审计的管理端页面和交互用例。
+- 本应用的静态组件注册、动态资源路由、权限呈现、国际化和错误反馈。
+- 独立 SSO 模式及 qiankun mount/update/unmount、多实例隔离和主应用上下文接入。
 
 该仓库默认不负责：
-- 不负责子应用内部的具体业务逻辑
-- 不替代后端认证或平台服务职责
-- 不负责后端服务逻辑
+- 不拥有 IAM、Basis、Infra、Department 等服务的数据和后端业务规则。
+- 不替代 Gateway 与后端服务的认证、租户隔离和权限校验。
+- 不负责 main-shell 的全局菜单、Tab 和子应用注册治理。
 
 ## 常见问题
 
@@ -219,7 +219,22 @@
 
 | 仓库 | 协作关系 |
 | --- | --- |
+| g2rain-main-shell | 提供统一入口、菜单、Tab、qiankun 装载和运行上下文。 |
 | g2rain-iam | 协同完成登录认证、令牌发放、SSO 回调或前端登录态衔接。 |
+| g2rain-gateway-webflux | 作为后端业务 API 的统一鉴权与转发入口。 |
+| g2rain-basis | 提供应用资源、机构与平台基础数据。 |
+| g2rain-infra | 提供服务注册、平台资源和基础设施管理能力。 |
+
+## 文档导航
+
+| 主题 | 文档 |
+| --- | --- |
+| 项目事实与 Agent 入口 | [docs/project.yaml](docs/project.yaml) · [AGENTS.md](AGENTS.md) |
+| 架构与依赖 | [架构概览](docs/architecture/overview.md) · [层次职责](docs/architecture/layers.md) · [依赖规则](docs/architecture/dependencies.md) |
+| 运行时与偏差 | [运行时流程](docs/architecture/runtime-flows.md) · [架构偏差](docs/architecture/deviations.md) |
+| 页面与生成器 | [Views 规范](docs/development/views-conventions.md) · [代码生成](docs/development/code-generation.md) · [资源生成](docs/development/resource-generation.md) |
+| 配置、部署与安全 | [配置](docs/operations/configuration.md) · [部署](docs/operations/deployment.md) · [安全边界](docs/security/security-boundaries.md) |
+| 测试与完成定义 | [测试策略](docs/development/testing.md) · [完成定义](docs/development/definition-of-done.md) |
 
 ## 参与贡献
 
