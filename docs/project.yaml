@@ -161,9 +161,12 @@ documentation:
     - docs/operations/troubleshooting.md
     - docs/security/security-boundaries.md
     - docs/requirements/README.md
+    - docs/design/control-unit-session-type.md
+    - docs/design/control-domain-self-type.md
 
 aiCoding:
   instructionEntry: AGENTS.md
+  activeRequirement: docs/design/control-domain-self-type.md
   requirementTemplate: docs/requirements/README.md
   testingPolicy: docs/development/testing.md
   definitionOfDone: docs/development/definition-of-done.md

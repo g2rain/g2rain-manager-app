@@ -54,7 +54,10 @@
               :description="item.description"
             >
               <el-checkbox :value="item.controlUnitId">
-                {{ item.controlUnitName || item.controlUnitId }}
+                <span>{{ item.controlUnitName || item.controlUnitId }}</span>
+                <el-tag v-if="item.sessionType" size="small" effect="plain" style="margin-left: 6px">
+                  {{ item.sessionType }}
+                </el-tag>
               </el-checkbox>
             </PermissionTooltip>
           </el-checkbox-group>
@@ -161,7 +164,9 @@ const resetForm = () => {
 const loadAssignable = async (organId: number) => {
   permsLoading.value = true;
   try {
-    assignablePerms.value = await RoleControlUnitRelationApi.listAssignable(organId);
+    const list = await RoleControlUnitRelationApi.listAssignable(organId);
+    // 后端已过滤 USER；前端再兜底，避免非 USER 进入员工角色分配
+    assignablePerms.value = list.filter((item) => !item.sessionType || item.sessionType === 'USER');
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : t('MG_ROLE_MSG_PERM_LOAD_FAIL', '加载功能权限失败');
     ElMessage.error(msg);

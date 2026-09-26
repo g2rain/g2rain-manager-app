@@ -10,6 +10,8 @@ export interface RoleControlUnitRelation extends BaseVo {
   roleId: number;
   controlUnitId: number;
   controlUnitName: string;
+  /** 会话主体类型 */
+  sessionType?: string;
   /** 控制单元业务说明 */
   description?: string;
 }

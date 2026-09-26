@@ -34,6 +34,8 @@
 ## 需求与决策
 
 - [Requirements 使用说明](requirements/README.md)
+- [控制单元 SessionType 管理端升级](design/control-unit-session-type.md)
+- [控制域 SELF 类型管理端接入](design/control-domain-self-type.md)
 - [项目级 ADR](decisions/README.md)
 - [社区与联系](community.md)
 
