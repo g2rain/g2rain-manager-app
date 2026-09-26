@@ -212,6 +212,7 @@ CREATE TABLE `resource_api` (
 CREATE TABLE `control_unit` (
   `id` bigint NOT NULL COMMENT '控制单元标识',
   `application_id` bigint NOT NULL COMMENT '应用标识',
+  `session_type` varchar(32) NOT NULL COMMENT '会话主体类型[USER, MEMBER, PASSPORT, ANONYMOUS]',
   `control_unit_name` varchar(128) NOT NULL COMMENT '控制单元名称',
   `control_unit_scope` varchar(32) NOT NULL COMMENT '控制单元类型[OPERATION, CUSTOMER, PERPETUAL]',
   `landing` tinyint NOT NULL DEFAULT '0' COMMENT '默认数据[0:否, 1:是]',
@@ -221,7 +222,8 @@ CREATE TABLE `control_unit` (
   `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `version` int NOT NULL DEFAULT '0' COMMENT '记录版本',
   `delete_flag` tinyint NOT NULL DEFAULT '0' COMMENT '删除标识[0:未删除, 1:已删除]',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_control_unit_session_status` (`session_type`, `status`, (IF(delete_flag = 0, 0, NULL)))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='控制单元表';
 
 CREATE TABLE `control_unit_resource_relation` (
@@ -281,7 +283,7 @@ CREATE TABLE `control_domain` (
   `id` bigint NOT NULL COMMENT '控制域标识',
   `application_id` bigint NOT NULL COMMENT '应用标识',
   `control_domain_name` varchar(128) NOT NULL COMMENT '控制域名称',
-  `control_domain_type` varchar(32) NOT NULL COMMENT '控制域类型[TRADE, APPLICATION]',
+  `control_domain_type` varchar(32) NOT NULL COMMENT '控制域类型[TRADE, APPLICATION, SELF]',
   `control_domain_scope` varchar(32) NOT NULL COMMENT '交付范围[CUSTOMER, OPERATION]',
   `description` text COMMENT '业务说明',
   `create_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

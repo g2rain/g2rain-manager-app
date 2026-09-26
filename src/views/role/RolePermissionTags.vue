@@ -9,6 +9,7 @@
     >
       <el-tag size="small" effect="light" class="role-perm-tags__tag">
         {{ item.controlUnitName || item.controlUnitId }}
+        <template v-if="item.sessionType"> · {{ item.sessionType }}</template>
       </el-tag>
     </PermissionTooltip>
     <el-tooltip
@@ -24,7 +25,10 @@
             :key="`all-${item.controlUnitId}`"
             class="role-perm-tags__more-item"
           >
-            <div class="role-perm-tags__more-name">{{ item.controlUnitName || item.controlUnitId }}</div>
+            <div class="role-perm-tags__more-name">
+              {{ item.controlUnitName || item.controlUnitId }}
+              <template v-if="item.sessionType"> · {{ item.sessionType }}</template>
+            </div>
             <div v-if="item.description" class="role-perm-tags__more-desc">{{ item.description }}</div>
           </div>
         </div>

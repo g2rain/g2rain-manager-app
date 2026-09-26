@@ -8,6 +8,7 @@ import type { BaseSelectListDto, BaseVo } from '@platform/types/api.type';
  */
 export interface ControlUnit extends BaseVo {
   applicationId: number;
+  sessionType: string;
   controlUnitName: string;
   controlUnitScope: string;
   landing: boolean;
@@ -21,6 +22,7 @@ export interface ControlUnit extends BaseVo {
 export interface ControlUnitPayload {
   id?: number; // 更新时传入 ID，新增时不传
   applicationId?: number;
+  sessionType?: string;
   controlUnitName?: string;
   controlUnitScope?: string;
   status?: string;
@@ -35,6 +37,7 @@ export interface ControlUnitPayload {
 export interface ControlUnitQuery extends BaseSelectListDto {
   // 业务查询字段
   applicationId?: number;
+  sessionType?: string;
   controlUnitName?: string;
   controlUnitScope?: string;
   status?: string;
