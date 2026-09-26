@@ -19,6 +19,10 @@
           <DictSelect v-model="queryForm.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" :placeholder="$t('MG_CTRL_UNIT_PH_SCOPE', '请选择功能权限范围')" />
         </el-form-item>
 
+        <el-form-item :label="$t('MG_CTRL_UNIT_FIELD_SESSION_TYPE', '会话类型')">
+          <DictSelect v-model="queryForm.sessionType" usage-code="SESSION_TYPE" :api-method="DictItemApi.select" :placeholder="$t('MG_CTRL_UNIT_PH_SESSION_TYPE', '请选择会话类型')" />
+        </el-form-item>
+
         <!-- 操作按钮 -->
         <template #actions>
           <el-form-item>
@@ -51,6 +55,13 @@
         <template #default="{ row }">
           <el-tag effect="light">
             <DictText :value="row?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="sessionType" :label="$t('MG_CTRL_UNIT_FIELD_SESSION_TYPE', '会话类型')" width="140">
+        <template #default="{ row }">
+          <el-tag effect="light">
+            <DictText :value="row?.sessionType" usage-code="SESSION_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </template>
       </el-table-column>
@@ -113,6 +124,10 @@
           <DictSelect v-model="editForm.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" :placeholder="$t('MG_CTRL_UNIT_PH_SCOPE', '请选择功能权限范围')" />
         </el-form-item>
 
+        <el-form-item :label="$t('MG_CTRL_UNIT_FIELD_SESSION_TYPE', '会话类型')" prop="sessionType">
+          <DictSelect v-model="editForm.sessionType" usage-code="SESSION_TYPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" :placeholder="$t('MG_CTRL_UNIT_PH_SESSION_TYPE', '请选择会话类型')" />
+        </el-form-item>
+
         <el-form-item :label="$t('MG_FIELD_DESC', '描述')" prop="description">
           <el-input v-model="editForm.description" type="textarea" :rows="4" :placeholder="$t('MG_PH_DESC', '请输入描述')" show-word-limit
             maxlength="200" />
@@ -138,6 +153,11 @@
         <el-descriptions-item :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')">
           <el-tag>
             <DictText :value="currentRow?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('MG_CTRL_UNIT_FIELD_SESSION_TYPE', '会话类型')">
+          <el-tag>
+            <DictText :value="currentRow?.sessionType" usage-code="SESSION_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item :label="$t('MG_CTRL_UNIT_FIELD_STATUS', '功能权限状态')">
@@ -342,6 +362,7 @@ const queryForm = reactive({
   applicationId: undefined,
   controlUnitName: '',
   controlUnitScope: '',
+  sessionType: '',
 });
 
 // 组件引用
@@ -405,6 +426,7 @@ const handleReset = () => {
   queryForm.applicationId = undefined;
   queryForm.controlUnitName = '';
   queryForm.controlUnitScope = '';
+  queryForm.sessionType = '';
   pagination.pageNum = 1; // 重置到第一页
   loadData();
 };
@@ -472,6 +494,7 @@ const editForm = reactive({
   applicationId: undefined as number | undefined,
   controlUnitName: '',
   controlUnitScope: '',
+  sessionType: '',
   description: '',
 });
 
@@ -484,6 +507,7 @@ const editRules = computed<FormRules>(() => ({
   applicationId: [{ required: true, message: t('MG_CTRL_UNIT_VLD_APP', '请选择归属应用'), trigger: 'blur' }],
   controlUnitName: [{ required: true, message: t('MG_CTRL_UNIT_VLD_NAME', '请输入功能权限名称'), trigger: 'blur' }],
   controlUnitScope: [{ required: true, message: t('MG_CTRL_UNIT_VLD_SCOPE', '请选择功能权限范围'), trigger: 'blur' }],
+  sessionType: [{ required: true, message: t('MG_CTRL_UNIT_VLD_SESSION_TYPE', '请选择会话类型'), trigger: 'change' }],
   description: [{ required: false, message: t('MG_PH_DESC', '请输入描述'), trigger: 'blur' }],
 }));
 
@@ -496,6 +520,7 @@ const handleCreate = () => {
   editForm.applicationId = undefined;
   editForm.controlUnitName = '';
   editForm.controlUnitScope = '';
+  editForm.sessionType = '';
   editForm.description = '';
   editDialogVisible.value = true;
 };
@@ -509,6 +534,7 @@ const handleEdit = (row: ControlUnit) => {
   editForm.applicationId = row.applicationId;
   editForm.controlUnitName = row.controlUnitName;
   editForm.controlUnitScope = row.controlUnitScope;
+  editForm.sessionType = row.sessionType;
   editForm.description = row.description;
   editDialogVisible.value = true;
 };
@@ -523,6 +549,7 @@ const submitEdit = async () => {
     applicationId: editForm.applicationId,
     controlUnitName: editForm.controlUnitName,
     controlUnitScope: editForm.controlUnitScope,
+    sessionType: editForm.sessionType,
     description: editForm.description,
   };
 
