@@ -31,21 +31,10 @@ export interface ResourceApiPayload {
 }
 
 /**
- * 批量导入时单条接口 DTO
- */
-export interface UploadApiDto {
-  apiTags: string;
-  name: string;
-  method: string;
-  path: string;
-  description?: string;
-}
-
-/**
- * 批量导入 DTO
+ * 批量导入 DTO（整份 OpenAPI / Swagger JSON）
  */
 export interface UploadResourceApiDto {
-  apis: UploadApiDto[];
+  document: string;
 }
 
 /**
