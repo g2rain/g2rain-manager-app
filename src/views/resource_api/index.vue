@@ -32,12 +32,14 @@
           />
         </el-form-item>
         <el-form-item :label="$t('MG_RES_API_FIELD_METHOD', '请求方法')">
-          <el-input
+          <el-select
             v-model="queryForm.method"
-            :placeholder="$t('MG_RES_API_PH_METHOD', '请输入请求方法')"
+            :placeholder="$t('MG_RES_API_PH_METHOD', '请选择请求方法')"
             clearable
             style="width: 200px"
-          />
+          >
+            <el-option v-for="item in HTTP_METHOD_OPTIONS" :key="item" :label="item" :value="item" />
+          </el-select>
         </el-form-item>
         <el-form-item :label="$t('MG_RES_API_FIELD_PATH', '请求路径')">
           <el-input
@@ -143,7 +145,13 @@
           <el-input v-model="editForm.name" :placeholder="$t('MG_RES_API_PH_NAME', '请输入接口名称')" />
         </el-form-item>
         <el-form-item :label="$t('MG_RES_API_FIELD_METHOD', '请求方法')" prop="method">
-          <el-input v-model="editForm.method" :placeholder="$t('MG_RES_API_PH_METHOD', '请输入请求方法')" />
+          <el-select
+            v-model="editForm.method"
+            :placeholder="$t('MG_RES_API_PH_METHOD', '请选择请求方法')"
+            style="width: 200px"
+          >
+            <el-option v-for="item in HTTP_METHOD_OPTIONS" :key="item" :label="item" :value="item" />
+          </el-select>
         </el-form-item>
         <el-form-item :label="$t('MG_RES_API_FIELD_PATH', '请求路径')" prop="path">
           <el-input v-model="editForm.path" :placeholder="$t('MG_RES_API_PH_PATH', '请输入请求路径')" />
@@ -203,11 +211,14 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item v-if="importApiCount > 0" :label="$t('MG_RES_API_FIELD_IMPORT_COUNT', '接口数')">
+          <span>{{ importApiCount }}</span>
+        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="importDialogVisible = false">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
-          <el-button type="primary" @click="submitImport">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
+          <el-button type="primary" :loading="docsLoading || importSaving" :disabled="docsLoading || importSaving" @click="submitImport">{{ $t('G2_BTN_SAVE', '保存') }}</el-button>
         </span>
       </template>
     </el-dialog>
@@ -221,7 +232,7 @@ import { ElMessageBox, ElMessage } from 'element-plus';
 import { t } from '@platform/i18n';
 import { ResourceApiApi } from './api';
 import { ServiceRegistryApi } from '../service_registry/api';
-import type { ResourceApi, ResourceApiPayload, ResourceApiQuery, UploadApiDto } from './type';
+import type { ResourceApi, ResourceApiPayload, ResourceApiQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMessage } from '@/components';
@@ -230,7 +241,14 @@ import { getHttpClient } from '@/components/http';
 // 定义字典引用
 const srvRegistryOptions = ref<Array<{ label: string; value: string }>>([]);
 const routeOptions = ref<Array<{ serviceCode: string; routePrefix: string; name: string }>>([]);
-const importApiDocs = ref<UploadApiDto[]>([]);
+/** 选中服务拉取到的整份 api-docs JSON 文本 */
+const importDocument = ref('');
+/** 预估可导入接口数（仅提示） */
+const importApiCount = ref(0);
+/** 切换服务拉取文档的序号，丢弃过期响应 */
+let docsSeq = 0;
+const docsLoading = ref(false);
+const importSaving = ref(false);
 
 // 获取字典信息
 const loadDicts = async () => {
@@ -410,7 +428,7 @@ const editRules = computed<FormRules>(() => ({
   serviceCode: [{ required: true, message: t('MG_RES_API_VLD_SERVICE', '请输入服务编码'), trigger: 'blur' }],
   apiTags: [{ required: true, message: t('MG_RES_API_VLD_TAGS', '请输入接口标签'), trigger: 'blur' }],
   name: [{ required: true, message: t('MG_RES_API_VLD_NAME', '请输入接口名称'), trigger: 'blur' }],
-  method: [{ required: true, message: t('MG_RES_API_VLD_METHOD', '请输入请求方法'), trigger: 'blur' }],
+  method: [{ required: true, message: t('MG_RES_API_VLD_METHOD', '请选择请求方法'), trigger: 'change' }],
   path: [{ required: true, message: t('MG_RES_API_VLD_PATH', '请输入请求路径'), trigger: 'blur' }],
 }));
 
@@ -491,73 +509,96 @@ const importRules = computed<FormRules>(() => ({
 // 打开导入弹窗
 const handleImport = () => {
   importFormRef.value?.clearValidate();
+  docsSeq += 1;
+  docsLoading.value = false;
+  importSaving.value = false;
   importForm.serviceCode = '';
-  importApiDocs.value = [];
+  importDocument.value = '';
+  importApiCount.value = 0;
   importDialogVisible.value = true;
 };
 
-interface ApiDocItem {
-  tags?: string[];
-  summary?: string;
-  description?: string;
-}
+const HTTP_METHOD_OPTIONS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD', 'TRACE'];
+const HTTP_METHODS = new Set(HTTP_METHOD_OPTIONS.map((item) => item.toLowerCase()));
 
 interface ApiDocResponse {
-  paths?: Record<string, Record<string, ApiDocItem>>;
+  paths?: Record<string, Record<string, unknown>>;
 }
 
 const normalizeRoutePrefix = (routePrefix: string) =>
   routePrefix.replace(/^\/+/, '').replace(/\/+$/, '');
 
+const countOperations = (paths: Record<string, Record<string, unknown>> | undefined): number => {
+  if (!paths) return 0;
+  let count = 0;
+  Object.values(paths).forEach(methods => {
+    Object.keys(methods || {}).forEach(method => {
+      if (HTTP_METHODS.has(method.toLowerCase())) {
+        count += 1;
+      }
+    });
+  });
+  return count;
+};
+
+const countOperationsFromText = (text: string): number => {
+  try {
+    const doc = JSON.parse(text) as ApiDocResponse;
+    return countOperations(doc?.paths);
+  } catch {
+    return 0;
+  }
+};
+
 const handleImportServiceChange = async (serviceCode: string) => {
+  const seq = ++docsSeq;
   const selected = routeOptions.value.find(item => item.serviceCode === serviceCode);
   if (!selected?.routePrefix) {
-    importApiDocs.value = [];
+    if (seq === docsSeq) {
+      importDocument.value = '';
+      importApiCount.value = 0;
+    }
     return;
   }
 
   const prefix = normalizeRoutePrefix(selected.routePrefix);
   const docsUrl = `/${prefix}/v3/api-docs`;
+  docsLoading.value = true;
 
   try {
     const http = getHttpClient('docs');
-    const res = await http.get<ApiDocResponse>(docsUrl);
-    const paths = (res as ApiDocResponse)?.paths || {};
-    const parsed: UploadApiDto[] = [];
-    Object.entries(paths).forEach(([path, methods]) => {
-      Object.entries(methods || {}).forEach(([method, api]) => {
-        parsed.push({
-          path,
-          method: method.toUpperCase(),
-          apiTags: (api.tags || []).join(','),
-          name: api.summary || '',
-          description: api.description || '',
-        });
-      });
-    });
-
-    importApiDocs.value = parsed;
+    const text = await http.get<string>(docsUrl, undefined, { responseType: 'text' });
+    if (seq !== docsSeq) return;
+    importDocument.value = typeof text === 'string' ? text : JSON.stringify(text);
+    importApiCount.value = countOperationsFromText(importDocument.value);
   } catch (error: unknown) {
-    importApiDocs.value = [];
+    if (seq !== docsSeq) return;
+    importDocument.value = '';
+    importApiCount.value = 0;
     const msg = error instanceof Error ? error.message : t('MG_RES_API_MSG_DOCS_FAIL', '加载 API 文档失败');
     showErrorMessage(msg);
+  } finally {
+    if (seq === docsSeq) {
+      docsLoading.value = false;
+    }
   }
 };
 
 // 导入数据表单
 const submitImport = async () => {
-  if (!importFormRef.value) return;
+  if (!importFormRef.value || docsLoading.value || importSaving.value) return;
   const valid = await importFormRef.value.validate();
   if (!valid) return;
 
   try {
-    if (!importApiDocs.value.length) {
+    if (!importDocument.value || importApiCount.value <= 0) {
       ElMessage.warning(t('MG_RES_API_WARN_NO_IMPORT', '未获取到可导入的接口，请先选择服务并确认 api-docs 可访问'));
       return;
     }
 
+    importSaving.value = true;
     const importCount = await ResourceApiApi.batchImport(importForm.serviceCode, {
-      apis: importApiDocs.value,
+      document: importDocument.value,
     });
 
     ElMessage.success(t('MG_RES_API_MSG_IMPORT_OK', `导入成功，共 ${importCount} 条`));
@@ -566,6 +607,8 @@ const submitImport = async () => {
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : t('MG_RES_API_MSG_IMPORT_FAIL', '导入失败');
     showErrorMessage(msg);
+  } finally {
+    importSaving.value = false;
   }
 };
 

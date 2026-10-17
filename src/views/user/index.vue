@@ -13,6 +13,15 @@
           />
         </el-form-item>
 
+        <el-form-item :label="$t('MG_USER_FLD_PASSPORT_ID', '账号标识')">
+          <el-input
+            v-model.number="queryForm.passportId"
+            :placeholder="$t('MG_USER_PH_PASSPORT_ID', '请输入账号标识')"
+            clearable
+            style="width: 200px"
+          />
+        </el-form-item>
+
         <el-form-item :label="$t('G2_FIELD_REAL_NAME', '姓名')">
           <el-input
             v-model="queryForm.realName"
