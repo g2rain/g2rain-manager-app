@@ -25,12 +25,26 @@ export class RoleControlUnitRelationApi {
    * 
    * 根据角色 ID 查询到这个角色归属机构的 超管角色的功能权限集合
    * 
-   * @param params 查询参数（可选）
+   * @param roleId 角色 ID
    * @returns role_control_unit_relation列表
    */
   static async listByRole(roleId: number): Promise<RoleControlUnitRelation[]> {
     const http = getHttpClient('default');
     const res = await http.get<RoleControlUnitRelation[]>(`/basis/role_control_unit_relation/role/${roleId}`);
+    return res.data || [];
+  }
+
+  /**
+   * 按机构查询可分配功能权限（该机构 ADMIN 超管角色的控制单元集合）
+   *
+   * @param organId 机构 ID
+   * @returns 可分配控制单元列表
+   */
+  static async listAssignable(organId: number): Promise<RoleControlUnitRelation[]> {
+    const http = getHttpClient('default');
+    const res = await http.get<RoleControlUnitRelation[]>('/basis/role_control_unit_relation/assignable', {
+      organId,
+    });
     return res.data || [];
   }
 

@@ -209,6 +209,14 @@
   },
   {
     "parentId": null,
+    "pageElementName": "sync",
+    "pageElementCode": "idp_enterprise_organ:sync",
+    "pageElementType": "button",
+    "pageCode": "idp_enterprise_organ",
+    "status": "ENABLED"
+  },
+  {
+    "parentId": null,
     "pageElementName": "新增",
     "pageElementCode": "organ:add",
     "pageElementType": "button",

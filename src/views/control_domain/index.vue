@@ -69,8 +69,14 @@
             @click="handleEdit(row)">{{ $t('G2_BTN_EDIT', '编辑') }}</el-button>
           <el-button type="success" v-permission="'control_domain:control_utils_associate'" link size="small"
             @click="handleAssociateControlUtils(row)">{{ $t('MG_CTRL_DOM_BTN_ASSOCIATE', '关联功能权限') }}</el-button>
-          <el-button type="warning" v-permission="'control_domain:features_activate'" link size="small"
-            @click="handleActivateFeatures(row)">{{ $t('MG_CTRL_DOM_BTN_ACTIVATE', '开通功能') }}</el-button>
+          <el-button
+            v-if="row.controlDomainType !== CONTROL_DOMAIN_TYPE_SELF"
+            type="warning"
+            v-permission="'control_domain:features_activate'"
+            link
+            size="small"
+            @click="handleActivateFeatures(row)"
+          >{{ $t('MG_CTRL_DOM_BTN_ACTIVATE', '开通功能') }}</el-button>
           <el-button type="danger" v-permission="'control_domain:delete'" link size="small"
             @click="handleDelete(row)">{{ $t('G2_BTN_DELETE', '删除') }}</el-button>
         </template>
@@ -108,6 +114,12 @@
             :clearable="false"
             :placeholder="$t('MG_CTRL_DOM_PH_TYPE', '请选择业务能力类型')"
           />
+          <div
+            v-if="editForm.controlDomainType === CONTROL_DOMAIN_TYPE_SELF"
+            class="control-domain-page__type-tip"
+          >
+            {{ $t('MG_CTRL_DOM_TIP_SELF', 'SELF：租户在应用授权确认时由系统自动开通该应用全部此类业务能力，无需在此手动开通。') }}
+          </div>
         </el-form-item>
 
         <el-form-item :label="$t('MG_CTRL_DOM_FIELD_NAME', '业务能力名称')" prop="controlDomainName">
@@ -148,6 +160,12 @@
           <el-tag>
             <DictText :value="currentRow?.controlDomainType" usage-code="CONTROL_DOMAIN_TYPE" :api-method="DictItemApi.select"/>
           </el-tag>
+          <div
+            v-if="currentRow?.controlDomainType === CONTROL_DOMAIN_TYPE_SELF"
+            class="control-domain-page__type-tip"
+          >
+            {{ $t('MG_CTRL_DOM_TIP_SELF', 'SELF：租户在应用授权确认时由系统自动开通该应用全部此类业务能力，无需在此手动开通。') }}
+          </div>
         </el-descriptions-item>
         <el-descriptions-item :label="$t('MG_CTRL_DOM_FIELD_NAME', '业务能力名称')">{{ currentRow?.controlDomainName }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_CTRL_DOM_FIELD_SCOPE', '业务能力范围')">
@@ -167,7 +185,7 @@
     </el-dialog>
 
     <!-- 关联功能权限 -->
-    <el-dialog v-model="associateControlUtilsDialog.visible" :title="$t('MG_CTRL_DOM_DLG_ASSOCIATE', '关联功能权限')" width="600px">
+    <el-dialog v-model="associateControlUtilsDialog.visible" :title="$t('MG_CTRL_DOM_DLG_ASSOCIATE', '关联功能权限')" width="720px">
       <el-table :data="associateControlUtilsDialog.tableData" border>
         <!-- 多选框列 -->
         <el-table-column width="100">
@@ -177,6 +195,11 @@
         </el-table-column>
         <!-- 业务展示列 -->
         <el-table-column prop="controlUnitName" :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')" />
+        <el-table-column prop="sessionType" :label="$t('MG_CTRL_UNIT_FIELD_SESSION_TYPE', '会话类型')" width="120">
+          <template #default="{ row }">
+            <DictText :value="row?.sessionType" usage-code="SESSION_TYPE" :api-method="DictItemApi.select" />
+          </template>
+        </el-table-column>
         <el-table-column prop="controlUnitScope" :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')">
           <template #default="{ row }">
             <DictText :value="row?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
@@ -217,6 +240,9 @@ import type { ControlDomain, ControlDomainPayload, ControlDomainQuery } from './
 import type { ControlUnit } from '../control_unit/type'
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText } from '@/components';
+
+/** Basis ControlDomainType.SELF：租户授权确认时自动开通 */
+const CONTROL_DOMAIN_TYPE_SELF = 'SELF';
 
 // 定义字典引用
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
@@ -405,11 +431,11 @@ const selectControlDomainScope = async (params: Parameters<typeof DictItemApi.se
   if (domainType === 'TRADE') {
     return options.filter((item) => String(item.code) === TRADE_SCOPE_CODE);
   }
-  // 未选类型或 APPLICATION 等：展示全部，由 watch 在选定 TRADE 时扶正 scope
+  // 未选类型或 APPLICATION / SELF：展示全部，由 watch 在选定 TRADE 时扶正 scope
   return options;
 };
 
-/** 类型变更时联动范围：TRADE 固定为 CUSTOMER；APPLICATION 等保留已选或重新选择 */
+/** 类型变更时联动范围：TRADE 固定为 CUSTOMER；APPLICATION / SELF 保留已选或重新选择 */
 watch(
   () => editForm.controlDomainType,
   (newType) => {
@@ -555,8 +581,12 @@ const resetActivateFeaturesDialogDialog = () => {
   activateFeaturesDialog.controlDomainId = null
 }
 
-// 打开开通功能弹窗弹窗
+// 打开开通功能弹窗
 const handleActivateFeatures = async (row: ControlDomain) => {
+  if (row.controlDomainType === CONTROL_DOMAIN_TYPE_SELF) {
+    ElMessage.info(t('MG_CTRL_DOM_MSG_SELF_NO_MANUAL_ACTIVATE', 'SELF 类型由租户应用授权确认时自动开通，无需手动开通'));
+    return;
+  }
   activateFeaturesDialog.controlDomainId = row.id
   activateFeaturesDialog.applicationId = row.applicationId
   activateFeaturesDialog.visible = true
@@ -633,6 +663,14 @@ onMounted(async () => {
 .control-domain-page__search {
   margin-bottom: 12px;
   background-color: #fff;
+}
+
+.control-domain-page__type-tip {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--el-text-color-secondary);
+  max-width: 320px;
 }
 
 .control-domain-page__pagination {

@@ -36,11 +36,11 @@ export class RoleApi {
    * 保存role（新增或更新）
    * 如果 payload 中包含 id，则为更新；否则为新增
    * @param payload role数据（包含 id 时为更新，不包含时为新增）
-   * @returns 保存后的role
+   * @returns 保存后的角色 ID
    */
-  static async save(payload: RolePayload): Promise<Role> {
+  static async save(payload: RolePayload): Promise<number> {
     const http = getHttpClient('default');
-    const res = await http.post<Role>('/basis/role/save', payload);
+    const res = await http.post<number>('/basis/role/save', payload);
     return res.data;
   }
 

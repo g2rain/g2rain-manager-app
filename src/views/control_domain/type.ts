@@ -1,5 +1,7 @@
 /**
  * control_domain相关类型定义
+ *
+ * controlDomainType 对齐 Basis ControlDomainType：TRADE | APPLICATION | SELF
  */
 import type { BaseSelectListDto, BaseVo } from '@platform/types/api.type';
 
@@ -10,6 +12,7 @@ export interface ControlDomain extends BaseVo {
   applicationId: number;
   applicationName: string;
   controlDomainName: string;
+  /** TRADE | APPLICATION | SELF */
   controlDomainType: string;
   controlDomainScope: string;
   description: string;
@@ -22,6 +25,7 @@ export interface ControlDomainPayload {
   id?: number; // 更新时传入 ID，新增时不传
   applicationId?: number;
   controlDomainName?: string;
+  /** TRADE | APPLICATION | SELF */
   controlDomainType?: string;
   controlDomainScope?: string;
   description?: string;
@@ -36,6 +40,7 @@ export interface ControlDomainQuery extends BaseSelectListDto {
   // 业务查询字段
   applicationId?: number;
   controlDomainName?: string;
+  /** TRADE | APPLICATION | SELF */
   controlDomainType?: string;
   controlDomainScope?: string;
 }

@@ -10,6 +10,7 @@ import type { BaseSelectListDto, BaseVo } from '@platform/types/api.type';
 export interface IdpEnterpriseOrgan extends BaseVo {
   idpType: string;
   enterpriseId: string;
+  bindMode: string;
   organId: number;
   status: string;
   remark: string;
@@ -22,6 +23,7 @@ export interface IdpEnterpriseOrganPayload {
   id?: number; // 更新时传入 ID，新增时不传
   idpType?: string;
   enterpriseId?: string;
+  bindMode?: string;
   organId?: number;
   status?: string;
   remark?: string;
@@ -36,6 +38,7 @@ export interface IdpEnterpriseOrganQuery extends BaseSelectListDto {
   // 业务查询字段
   idpType?: string;
   enterpriseId?: string;
+  bindMode?: string;
   organId?: number;
   status?: string;
   remark?: string;
