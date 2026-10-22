@@ -99,8 +99,48 @@
   "pageElements": [
     {
       "parentId": null,
+      "pageElementName": "新增",
+      "pageElementCode": "anonymous_entry:add",
+      "pageElementType": "button",
+      "pageCode": "application_authorization",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "删除",
+      "pageElementCode": "anonymous_entry:delete",
+      "pageElementType": "button",
+      "pageCode": "application_authorization",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "编辑",
+      "pageElementCode": "anonymous_entry:edit",
+      "pageElementType": "button",
+      "pageCode": "application_authorization",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "状态变更",
+      "pageElementCode": "anonymous_entry:status_update",
+      "pageElementType": "switch",
+      "pageCode": "application_authorization",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
       "pageElementName": "control_utils_sync",
       "pageElementCode": "application_authorization:control_utils_sync",
+      "pageElementType": "button",
+      "pageCode": "application_authorization",
+      "status": "ENABLED"
+    },
+    {
+      "parentId": null,
+      "pageElementName": "manage_anonymous_entries",
+      "pageElementCode": "application_authorization:manage_anonymous_entries",
       "pageElementType": "button",
       "pageCode": "application_authorization",
       "status": "ENABLED"

@@ -113,7 +113,7 @@ import type { ApplicationAuthorization, ApplicationAuthorizationQuery } from './
 import type { PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, StatusSwitch, type QueryFormData } from '@/components';
 import PersonalStaticAccessToken from '../personal_static_access_token/index.vue';
-import AnonymousEntry from '../anonymous_entry/index.vue';
+import AnonymousEntry from './anonymous_entry/index.vue';
 
 // 定义字典引用
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
