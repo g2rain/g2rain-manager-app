@@ -61,7 +61,7 @@
             active-value="ACTIVATED"
             inactive-value="DEACTIVATED"
             usage-code="AUTHORIZATION_STATUS"
-            :api-method="({ nextValue }) => ApplicationAuthorizationApi.updateStatus(row.id, String(nextValue))"
+            :api-method="changeStatus(row)"
             @success="loadData"
           />
         </template>
@@ -69,10 +69,11 @@
       <el-table-column prop="subscriptionId" :label="$t('MG_APP_AUTH_FIELD_SUBSCRIPTION', '订阅序号')" width="140" />
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="200">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
         <template #default="{ row }">
           <el-button type="warning" v-permission="'application_authorization:control_utils_sync'" link size="small" @click="updateSyncControlUtils(row)">{{ $t('MG_APP_AUTH_BTN_SYNC', '同步能力') }}</el-button>
           <el-button v-if="row.apiKeySupported" type="primary"  v-permission="'application_authorization:manager_api_keys'" link size="small" @click="openApiKeyManager(row)">{{ $t('MG_APP_AUTH_BTN_API_KEY', '模型秘钥管理') }}</el-button>
+          <el-button type="primary" v-permission="'application_authorization:manage_anonymous_entries'" link size="small" @click="openAnonymousEntries(row)">{{ $t('MG_APP_AUTH_BTN_ANONYMOUS_ENTRY', '匿名接入码') }}</el-button>
         </template>
         <template #header>
           <div style="display: flex; align-items: center; gap: 8px;">
@@ -93,6 +94,10 @@
     <el-dialog v-model="apiKeyManagerVisible" :title="$t('MG_APP_AUTH_DLG_API_KEY', '模型秘钥管理')" width="1120px">
       <PersonalStaticAccessToken :application-authorization="currentAuthorization" embedded />
     </el-dialog>
+
+    <el-dialog v-model="anonymousEntryVisible" :title="$t('MG_APP_AUTH_DLG_ANONYMOUS_ENTRY', '匿名接入码')" width="880px" destroy-on-close>
+      <AnonymousEntry v-if="currentAuthorization" :application-authorization="currentAuthorization" />
+    </el-dialog>
   </div>
 </template>
 
@@ -108,6 +113,7 @@ import type { ApplicationAuthorization, ApplicationAuthorizationQuery } from './
 import type { PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, StatusSwitch, type QueryFormData } from '@/components';
 import PersonalStaticAccessToken from '../personal_static_access_token/index.vue';
+import AnonymousEntry from '../anonymous_entry/index.vue';
 
 // 定义字典引用
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
@@ -150,6 +156,18 @@ const pagination = reactive({
 const tableData = ref<ApplicationAuthorization[]>([]);
 const currentAuthorization = ref<ApplicationAuthorization | null>(null);
 const apiKeyManagerVisible = ref(false);
+const anonymousEntryVisible = ref(false);
+
+// 状态开关回调：放在 script 里，避免模板内直接引用类导致 IDE 类型误报
+const changeStatus = (row: ApplicationAuthorization) =>
+  ({ nextValue }: { nextValue: string | number | boolean }) =>
+    ApplicationAuthorizationApi.updateStatus(row.id, String(nextValue));
+
+// 打开匿名接入码管理（机构与应用取自当前授权行）
+const openAnonymousEntries = (row: ApplicationAuthorization) => {
+  currentAuthorization.value = row;
+  anonymousEntryVisible.value = true;
+};
 
 // 加载列表数据
 const loadData = async () => {
