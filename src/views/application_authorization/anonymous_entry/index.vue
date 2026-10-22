@@ -1,5 +1,6 @@
 <template>
-  <!-- 嵌入应用授权页：管理某组"机构 + 应用"下的匿名接入码 -->
+  <!-- 嵌入应用授权页：管理某组"机构 + 应用"下的匿名接入码。
+       放在 application_authorization 目录下，build:config 才会把这里的权限码收集到应用授权页面 -->
   <div class="anonymous-entry">
     <div class="anonymous-entry__header">
       <span class="anonymous-entry__scope">
@@ -65,7 +66,7 @@ import type { FormInstance, FormRules } from 'element-plus';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { AnonymousEntryApi } from './api';
 import type { AnonymousEntry, EntryStatus } from './type';
-import type { ApplicationAuthorization } from '../application_authorization/type';
+import type { ApplicationAuthorization } from '../type';
 import { StatusSwitch, showErrorMessage } from '@/components';
 
 const props = defineProps<{
