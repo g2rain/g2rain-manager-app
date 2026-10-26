@@ -38,7 +38,7 @@
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            v-permission="'personal_static_access_token:status_update'"
+            permission="personal_static_access_token:status_update"
             active-value="ACTIVATED"
             inactive-value="REVOKED"
             usage-code="STATIC_TOKEN_STATUS"

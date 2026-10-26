@@ -43,7 +43,7 @@ route-map 中每个非 `/`、非 `/home` 路由生成一个页面资源。页面
 
 ```vue
 <el-button v-permission="'member:add'">新增</el-button>
-<StatusSwitch v-permission="'member:status_update'" />
+<StatusSwitch permission="member:status_update" />
 ```
 
 - 动态变量、模板插值和不含冒号的值不会生成。

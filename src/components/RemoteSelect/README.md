@@ -215,13 +215,13 @@ const form = reactive({
 
 ### StatusSwitch（推荐：状态列封装）
 
-权限与按钮一致：在组件上写 `v-permission="'xxx:status_update'"`，`build:config` 会扫描；运行时 ENABLED 可操作，VISIBLE/无权限置灰。
+权限：在组件上写 `permission="xxx:status_update"`，`build:config` 会扫描；组件按页面元素权限计算 `disabled`，ENABLED 可操作，VISIBLE/无权限不可操作（不要用 `v-permission`，指令改不了组件的 disabled）。
 
 ```vue
 <template>
   <StatusSwitch
     v-model="row.status"
-    v-permission="'application_authorization:status_update'"
+    permission="application_authorization:status_update"
     active-value="ACTIVATED"
     inactive-value="DEACTIVATED"
     usage-code="AUTHORIZATION_STATUS"

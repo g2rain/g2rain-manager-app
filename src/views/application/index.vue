@@ -60,7 +60,7 @@
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            v-permission="'application:status_update'"
+            permission="application:status_update"
             active-value="PUBLISHED"
             inactive-value="UNPUBLISHED"
             usage-code="APPLICATION_STATUS"

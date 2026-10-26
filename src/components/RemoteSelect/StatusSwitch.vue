@@ -2,7 +2,7 @@
   <el-switch
     :key="`${localeStore.locale}-${innerValue}`"
     v-model="innerValue"
-    :disabled="disabled || loading ? true : undefined"
+    :disabled="disabled || loading || !permitted ? true : undefined"
     :loading="loading"
     :inline-prompt="inlinePrompt"
     :active-value="activeValue"
@@ -17,15 +17,15 @@
 /**
  * 状态列开关封装。
  *
- * 权限：在业务页使用 v-permission="'page:status_update'" 绑定在本组件上，
- * 指令会透传到根节点 el-switch（与按钮同一套权限体系；ENABLED 可操作，VISIBLE/无权限置灰）。
- * build:config 扫描 v-permission 静态字符串即可收集。
+ * 权限：在业务页传 permission="page:status_update"，组件按页面元素权限计算 disabled
+ * （ENABLED 可操作，VISIBLE/无权限不可操作）。build:config 扫描 permission 静态字符串收集。
  */
 import { computed, nextTick, ref, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useLocaleStore } from '@platform/stores/locale.store';
 import { t } from '@platform/i18n';
 import { DictItemApi } from '@/views/dict/api';
+import { PageElementPermission } from '../permission';
 
 type StatusValue = string | number | boolean;
 
@@ -42,6 +42,8 @@ interface Props {
   usageCode?: string;
   options?: StatusOption[];
   disabled?: boolean;
+  /** 页面元素权限码；有值时按页面元素权限判断能否操作 */
+  permission?: string;
   inlinePrompt?: boolean;
   successMessage?: string;
   errorMessage?: string;
@@ -68,6 +70,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>();
 const localeStore = useLocaleStore();
+
+/** 未传 permission 不受控 */
+const permitted = computed(() => !props.permission || PageElementPermission.isEnabled(props.permission));
 
 const innerValue = ref<StatusValue>(props.modelValue);
 const loading = ref(false);

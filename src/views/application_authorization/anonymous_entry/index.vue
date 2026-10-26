@@ -21,7 +21,7 @@
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            v-permission="'anonymous_entry:status_update'"
+            permission="anonymous_entry:status_update"
             active-value="ACTIVE"
             inactive-value="INACTIVE"
             :options="statusOptions"

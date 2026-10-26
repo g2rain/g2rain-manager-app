@@ -57,7 +57,7 @@
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            v-permission="'application_authorization:status_update'"
+            permission="application_authorization:status_update"
             active-value="ACTIVATED"
             inactive-value="DEACTIVATED"
             usage-code="AUTHORIZATION_STATUS"

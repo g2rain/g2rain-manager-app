@@ -55,7 +55,7 @@
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            v-permission="'passport:status_update'"
+            permission="passport:status_update"
             active-value="NORMAL"
             inactive-value="FROZEN"
             usage-code="PASSPORT_STATUS"

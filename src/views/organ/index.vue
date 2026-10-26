@@ -53,7 +53,7 @@
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            v-permission="'organ:status_update'"
+            permission="organ:status_update"
             active-value="ACTIVE"
             inactive-value="INACTIVE"
             usage-code="ORGAN_STATUS"
