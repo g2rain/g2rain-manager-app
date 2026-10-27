@@ -397,9 +397,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -421,7 +420,6 @@ const handleReset = () => {
   baseQueryForm.id = undefined;
   baseQueryForm.createTime = undefined;
   baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
   // 重置业务特定查询表单
   queryForm.applicationId = undefined;
   queryForm.controlUnitName = '';
@@ -463,18 +461,13 @@ const handleDelete = (row: ControlUnit) => {
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await ControlUnitApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        ElMessage.error(msg);
+      await ControlUnitApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => { });
 };
@@ -553,19 +546,14 @@ const submitEdit = async () => {
     description: editForm.description,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await ControlUnitApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    ElMessage.error(msg);
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await ControlUnitApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  await loadData();
+  editDialogVisible.value = false;
 };
 // --------------------关联资源-----------------------------------
 
@@ -690,9 +678,8 @@ const loadMenuTree = async (row: ControlUnit) => {
 
     sortTree(tree);
     menuTreeData.value = tree;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_CTRL_UNIT_MSG_MENU_LOAD_FAIL', '加载菜单树失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 
   // 再加载已选菜单并回显
@@ -934,110 +921,105 @@ const configureResources = async () => {
   if (!configureResourcesDialog.controlUnitId) return
   const controlUnitId = configureResourcesDialog.controlUnitId;
 
-  try {
-    // 1. 定义关联资源行为的数据结构
+  // 1. 定义关联资源行为的数据结构
 
-    // ------------------ 菜单 ------------------
-    const menuToCreate: { resourceId: number; resourceType: string }[] = []
-    const menuToDelete: { resourceId: number; resourceType: string }[] = []
+  // ------------------ 菜单 ------------------
+  const menuToCreate: { resourceId: number; resourceType: string }[] = []
+  const menuToDelete: { resourceId: number; resourceType: string }[] = []
 
-    // ------------------ 页面 ------------------
-    const pageToCreate: { resourceId: number; resourceType: string }[] = []
-    const pageToDelete: { resourceId: number; resourceType: string }[] = []
+  // ------------------ 页面 ------------------
+  const pageToCreate: { resourceId: number; resourceType: string }[] = []
+  const pageToDelete: { resourceId: number; resourceType: string }[] = []
 
-    // ------------------ 元素 ------------------
-    const elemToCreate: { resourceId: number; resourceType: string; status: string }[] = []
-    const elemToUpdate: { resourceId: number; resourceType: string; status: string }[] = []
-    const elemToDelete: { resourceId: number; resourceType: string }[] = []
+  // ------------------ 元素 ------------------
+  const elemToCreate: { resourceId: number; resourceType: string; status: string }[] = []
+  const elemToUpdate: { resourceId: number; resourceType: string; status: string }[] = []
+  const elemToDelete: { resourceId: number; resourceType: string }[] = []
 
-    // ------------------ 接口 ------------------
-    const apisToCreate: { resourceId: number; resourceType: string }[] = []
-    const apisToDelete: { resourceId: number; resourceType: string }[] = []
+  // ------------------ 接口 ------------------
+  const apisToCreate: { resourceId: number; resourceType: string }[] = []
+  const apisToDelete: { resourceId: number; resourceType: string }[] = []
 
-    // 1. 赋值关联资源行为的数据结构
+  // 1. 赋值关联资源行为的数据结构
 
-    // ------------------ 菜单 ------------------
-    const checkedMenuIds = [
-      ...(menuTreeRef.value?.getCheckedKeys(false) || []),
-      ...(menuTreeRef.value?.getHalfCheckedKeys() || []),
-    ] as number[];
-    // 计算新增和删除菜单
-    checkedMenuIds.filter(id => !originalMenuIds.includes(id)).forEach(m => {
-      menuToCreate.push({ resourceId: m, resourceType: 'MENU' })
-    });
+  // ------------------ 菜单 ------------------
+  const checkedMenuIds = [
+    ...(menuTreeRef.value?.getCheckedKeys(false) || []),
+    ...(menuTreeRef.value?.getHalfCheckedKeys() || []),
+  ] as number[];
+  // 计算新增和删除菜单
+  checkedMenuIds.filter(id => !originalMenuIds.includes(id)).forEach(m => {
+    menuToCreate.push({ resourceId: m, resourceType: 'MENU' })
+  });
 
-    originalMenuIds.filter(id => !checkedMenuIds.includes(id)).forEach(m => {
-      menuToDelete.push({ resourceId: m, resourceType: 'MENU' })
-    });
+  originalMenuIds.filter(id => !checkedMenuIds.includes(id)).forEach(m => {
+    menuToDelete.push({ resourceId: m, resourceType: 'MENU' })
+  });
 
-    // ------------------ 页面 & 元素 ------------------
-    pages.forEach(p => {
-      // 页面
-      if (p.checked && !originalPageIds.includes(p.id)) {
-        pageToCreate.push({ resourceId: p.id, resourceType: 'PAGE' })
-      }
-
-      if (!p.checked && originalPageIds.includes(p.id)) {
-        pageToDelete.push({ resourceId: p.id, resourceType: 'PAGE' })
-      }
-
-      // 元素
-      p.elements.forEach(e => {
-        // 原始状态
-        const oriStatus = originalElementMap.get(e.id)
-
-        // 新增
-        if (e.checked && !oriStatus) {
-          elemToCreate.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT', status: e.status })
-          return
-        }
-
-        // 更新
-        if (e.checked && oriStatus !== e.status) {
-          elemToUpdate.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT', status: e.status })
-          return
-        }
-
-        // 删除
-        if (!e.checked && oriStatus) {
-          elemToDelete.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT' })
-        }
-      })
-    })
-
-    // ------------------ 接口 ------------------
-    const checkedApiIds = Array.from(selectedApiIds.value)
-    // 计算新增和删除接口
-    checkedApiIds.filter(id => !originalApiIds.includes(id)).forEach(m => {
-      apisToCreate.push({ resourceId: m, resourceType: 'API_ENDPOINT' })
-    });
-
-    originalApiIds.filter(id => !checkedApiIds.includes(id)).forEach(m => {
-      apisToDelete.push({ resourceId: m, resourceType: 'API_ENDPOINT' })
-    });
-
-    // 定义三个关联关系的变量, 需要统一做验证
-    const createRelations = [...menuToCreate, ...pageToCreate, ...elemToCreate, ...apisToCreate];
-    const updateRelations = [...elemToUpdate];
-    const deleteRelations = [...menuToDelete, ...pageToDelete, ...elemToDelete, ...apisToDelete];
-    if (createRelations.length === 0 && updateRelations.length === 0 && deleteRelations.length === 0) {
-      ElMessage.success(t('MG_CTRL_UNIT_MSG_RESOURCE_OK', '资源更新成功'));
-      return;
+  // ------------------ 页面 & 元素 ------------------
+  pages.forEach(p => {
+    // 页面
+    if (p.checked && !originalPageIds.includes(p.id)) {
+      pageToCreate.push({ resourceId: p.id, resourceType: 'PAGE' })
     }
 
-    const payload: ControlUnitResourceRelationPayload = {
-      controlUnitId,
-      createRelations,
-      updateRelations,
-      deleteRelations
-    };
-    await ControlUnitResourceRelationApi.save(payload);
+    if (!p.checked && originalPageIds.includes(p.id)) {
+      pageToDelete.push({ resourceId: p.id, resourceType: 'PAGE' })
+    }
+
+    // 元素
+    p.elements.forEach(e => {
+      // 原始状态
+      const oriStatus = originalElementMap.get(e.id)
+
+      // 新增
+      if (e.checked && !oriStatus) {
+        elemToCreate.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT', status: e.status })
+        return
+      }
+
+      // 更新
+      if (e.checked && oriStatus !== e.status) {
+        elemToUpdate.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT', status: e.status })
+        return
+      }
+
+      // 删除
+      if (!e.checked && oriStatus) {
+        elemToDelete.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT' })
+      }
+    })
+  })
+
+  // ------------------ 接口 ------------------
+  const checkedApiIds = Array.from(selectedApiIds.value)
+  // 计算新增和删除接口
+  checkedApiIds.filter(id => !originalApiIds.includes(id)).forEach(m => {
+    apisToCreate.push({ resourceId: m, resourceType: 'API_ENDPOINT' })
+  });
+
+  originalApiIds.filter(id => !checkedApiIds.includes(id)).forEach(m => {
+    apisToDelete.push({ resourceId: m, resourceType: 'API_ENDPOINT' })
+  });
+
+  // 定义三个关联关系的变量, 需要统一做验证
+  const createRelations = [...menuToCreate, ...pageToCreate, ...elemToCreate, ...apisToCreate];
+  const updateRelations = [...elemToUpdate];
+  const deleteRelations = [...menuToDelete, ...pageToDelete, ...elemToDelete, ...apisToDelete];
+  if (createRelations.length === 0 && updateRelations.length === 0 && deleteRelations.length === 0) {
     ElMessage.success(t('MG_CTRL_UNIT_MSG_RESOURCE_OK', '资源更新成功'));
-    resetConfigureResourcesDialog();
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_CTRL_UNIT_MSG_RESOURCE_FAIL', '菜单资源更新失败');
-    ElMessage.error(msg);
+    return;
   }
+
+  const payload: ControlUnitResourceRelationPayload = {
+    controlUnitId,
+    createRelations,
+    updateRelations,
+    deleteRelations
+  };
+  await ControlUnitResourceRelationApi.save(payload);
+  ElMessage.success(t('MG_CTRL_UNIT_MSG_RESOURCE_OK', '资源更新成功'));
+  resetConfigureResourcesDialog();
 };
 
 // 挂载回调

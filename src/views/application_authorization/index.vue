@@ -188,9 +188,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -213,7 +212,6 @@ const handleReset = () => {
   baseQueryForm.id = undefined;
   baseQueryForm.createTime = undefined;
   baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
   // 重置业务特定查询表单
   queryForm.organId = undefined;
   queryForm.applicationId = undefined;

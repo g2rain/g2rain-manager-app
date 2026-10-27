@@ -65,6 +65,7 @@ export function createHttpClient<ResponseType = DefaultResponseType>(options: Ht
     authSessionProvider,
     authErrorHandler,
     ensureAccessToken,
+    onError,
   } = options;
 
   const axiosInstance = createAxiosInstance(baseURL);
@@ -84,7 +85,13 @@ export function createHttpClient<ResponseType = DefaultResponseType>(options: Ht
     async request<T = any>(config: AxiosRequestConfig): Promise<ResponseType extends Result<any> ? Result<T> : T> {
       // 处理请求体序列化（表单等）
       const finalConfig = await applyFormSerializer(config);
-      const response = await axiosInstance.request(finalConfig);
+      let response;
+      try {
+        response = await axiosInstance.request(finalConfig);
+      } catch (error) {
+        if (!axios.isCancel(error)) onError?.(error);
+        throw error;
+      }
 
       // 根据配置决定返回格式
       // 如果 isDirectResponse 为 true，直接返回数据（不包装 Result）

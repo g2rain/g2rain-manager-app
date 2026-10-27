@@ -1,7 +1,6 @@
 import { ref } from 'vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { t } from '@platform/i18n';
-import { showErrorMessage } from '@/components';
 import { TenantIdpSyncApi } from './api';
 import type { TenantIdpSyncResult } from './type';
 import { RoleApi } from '../role/api';
@@ -15,23 +14,6 @@ export interface TenantIdpSyncTarget {
 }
 
 const SUPPORTED_SYNC_IDP_TYPE = 'DINGTALK';
-
-function resolveSyncErrorMessage(error: any) {
-  const code = error?.errorCode as string | undefined;
-  if (code === 'basis.50203') {
-    return t('MG_IDP_ENT_SYNC_SNAPSHOT_INCOMPLETE', 'IdP 通讯录快照不完整，已阻断 FULL 对账删除');
-  }
-  if (code === 'basis.50204') {
-    return t('MG_IDP_ENT_SYNC_SNAPSHOT_EMPTY', 'IdP 通讯录快照为空且租户已有同步数据，已阻断 FULL 对账删除');
-  }
-  if (code === 'basis.50205') {
-    return t('MG_IDP_ENT_SYNC_RATIO_EXCEEDED', 'FULL 对账删除比例超过安全阈值，已阻断同步');
-  }
-  if (code === 'basis.40067') {
-    return t('MG_IDP_ENT_SYNC_DINGTALK_ONLY', '当前仅支持钉钉（DINGTALK）通讯录同步');
-  }
-  return error?.message || t('MG_IDP_ENT_SYNC_FAIL', '同步失败');
-}
 
 function formatSyncSuccessMessage(result: TenantIdpSyncResult): string {
   return t(
@@ -79,8 +61,7 @@ export function useTenantIdpSync() {
     syncRolesLoadingOrganId.value = row.organId;
     try {
       syncRolesByOrganId.value[row.organId] = await RoleApi.list({ organId: row.organId });
-    } catch (error: any) {
-      showErrorMessage(error || t('MG_IDP_ENT_SYNC_ROLE_LOAD_FAIL', '加载角色列表失败'));
+    } catch {
       syncRolesByOrganId.value[row.organId] = [];
     } finally {
       syncRolesLoadingOrganId.value = null;
@@ -121,8 +102,6 @@ export function useTenantIdpSync() {
         roleId,
       });
       ElMessage.success(formatSyncSuccessMessage(result));
-    } catch (error: any) {
-      showErrorMessage(resolveSyncErrorMessage(error));
     } finally {
       syncLoadingId.value = null;
     }

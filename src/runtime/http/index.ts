@@ -8,7 +8,11 @@
 import { loadingManager } from '@/components/loading';
 import { sso } from '@runtime/auth';
 import { updateHttpClientOptions, type HttpAuthSession, type HttpClientOptions, type Client } from '@/components/http';
+import { ElMessage } from 'element-plus';
 import { useAccessTokenStore } from '@platform/stores';
+import type { AppError } from '@/components/error';
+import { markNotified } from './notified';
+import { isQiankunRuntime } from '@shared/utils/mode.util';
 
 /**
  * 将 platform 层的 token.store 适配为 HttpAuthSession
@@ -37,11 +41,25 @@ async function defaultAuthErrorHandler(reason: 'NO_LOGIN' | 'TOKEN_REFRESH_FAILE
   // 确保关闭 loading
   loadingManager.hide();
 
+  // 嵌入主壳时登录态归主壳管理，不把整个页面带去子应用自己的 SSO
+  if (isQiankunRuntime()) return;
+
   try {
     await sso.redirectToSSO();
   } catch (redirectError) {
     console.error('[Runtime HTTP] redirectToSSO failed:', redirectError);
   }
+}
+
+/**
+ * 请求失败的统一提示：显示后端返回的 errorMessage。
+ * 登录态错误由 defaultAuthErrorHandler 处理，不重复提示。
+ */
+function notifyHttpError(error: unknown): void {
+  const { errorCode, message } = error as AppError;
+  if (errorCode === 'gateway.40001' || errorCode === 'gateway.40002') return;
+  markNotified(error);
+  ElMessage.error(message);
 }
 
 /**
@@ -58,6 +76,7 @@ export function initHttp(): void {
     authSessionProvider,
     authErrorHandler: defaultAuthErrorHandler,
     ensureAccessToken: (opts) => sso.ensureAccessToken(opts),
+    onError: notifyHttpError,
   };
 
   // 为 default 客户端「增量」注入认证相关配置（保持 components/http 中的默认 baseURL 等配置不变）

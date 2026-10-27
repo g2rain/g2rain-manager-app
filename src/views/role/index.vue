@@ -248,9 +248,8 @@ const loadData = async () => {
     tableData.value = pageData.records;
     pagination.total = pageData.total;
     await loadRolePermissions(pageData.records);
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -267,7 +266,6 @@ const handleReset = () => {
   baseQueryForm.id = undefined;
   baseQueryForm.createTime = undefined;
   baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
   queryForm.organId = undefined;
   queryForm.roleType = '';
   queryForm.roleName = '';
@@ -301,17 +299,12 @@ const handleDelete = (row: Role) => {
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await RoleApi.remove(row.id);
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        ElMessage.error(msg);
+      await RoleApi.remove(row.id);
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => { });
 };

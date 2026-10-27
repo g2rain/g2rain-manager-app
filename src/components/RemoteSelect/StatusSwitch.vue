@@ -46,7 +46,6 @@ interface Props {
   permission?: string;
   inlinePrompt?: boolean;
   successMessage?: string;
-  errorMessage?: string;
   apiMethod: (params: {
     nextValue: StatusValue;
     prevValue: StatusValue;
@@ -173,11 +172,6 @@ const handleChange = async (val: StatusValue) => {
 
     innerValue.value = prevValue;
     emit('update:modelValue', prevValue);
-
-    const errorMsg = props.errorMessage ?? t('G2_MSG_UPDATE_FAIL', '更新失败');
-    if (errorMsg) {
-      ElMessage.error(errorMsg);
-    }
 
     emit('error', { nextValue, prevValue, error });
   } finally {

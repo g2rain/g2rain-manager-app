@@ -3,7 +3,7 @@
  * 用于需要认证的业务接口，处理 Result 格式响应
  */
 
-import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosResponse } from 'axios';
 import { dpopSign } from '../sign';
 import { env } from '@shared/env';
 import { handleError, handleAuthFailure } from '../error-handler';
@@ -213,6 +213,7 @@ export function setupDefaultResponseInterceptor(instance: AxiosInstance, options
       return response;
     },
     async (error: any) => {
+      if (axios.isCancel(error)) return Promise.reject(error);
       const originalRequest = error.config;
       const authSession = options?.authSessionProvider?.();
 

@@ -167,9 +167,7 @@ const loadAssignable = async (organId: number) => {
     const list = await RoleControlUnitRelationApi.listAssignable(organId);
     // 后端已过滤 USER；前端再兜底，避免非 USER 进入员工角色分配
     assignablePerms.value = list.filter((item) => !item.sessionType || item.sessionType === 'USER');
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_ROLE_MSG_PERM_LOAD_FAIL', '加载功能权限失败');
-    ElMessage.error(msg);
+  } catch {
     assignablePerms.value = [];
   } finally {
     permsLoading.value = false;
@@ -276,12 +274,7 @@ const submit = async () => {
           controlUnitIds,
           deleteControlUnitIds,
         });
-      } catch (error: unknown) {
-        const msg =
-          error instanceof Error
-            ? error.message
-            : t('MG_ROLE_MSG_PERM_SAVE_FAIL', '角色已保存，但功能权限配置失败');
-        ElMessage.error(msg);
+      } catch {
         emit('success', buildRoleResult(roleId));
         visible.value = false;
         return;
@@ -291,9 +284,6 @@ const submit = async () => {
     ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
     emit('success', buildRoleResult(roleId));
     visible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    ElMessage.error(msg);
   } finally {
     saving.value = false;
   }

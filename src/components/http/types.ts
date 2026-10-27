@@ -156,6 +156,9 @@ export interface HttpClientOptions<ResponseType = Result<any>> {
 
   /** 由 initHttp 注入；`force` 见 {@link EnsureAccessTokenOptions} */
   ensureAccessToken?: (opts?: EnsureAccessTokenOptions) => Promise<void>;
+
+  /** 请求失败（不含取消）时回调，用于统一提示 */
+  onError?: (error: unknown) => void;
 }
 
 /**

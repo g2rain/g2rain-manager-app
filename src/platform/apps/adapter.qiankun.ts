@@ -14,6 +14,7 @@ import { initMicroAppMessageHandlers } from './message-handlers';
 import { removeShell } from '@/runtime/micro-shells';
 import { teardownTokenExpiredWatcher } from '@/runtime/boot';
 import { useLocaleStore } from '@platform/stores/locale.store';
+import { addMountedInstance, removeMountedInstance } from './mounted-instances';
 
 // WindowEventSubAppEventAdapter 直接复用 components/micro-app 中的实现
 
@@ -122,10 +123,11 @@ export function registerQiankunLifecycle(ctx: QiankunLifecycleContext): void {
 
         if (router && props.appKey && props.activeRule) {
           router.afterEach((to: any, _from: any) => {
-            const routePath: string = to.path;
+            // 带上查询串与 hash：主应用据此恢复子页面
+            const routePath: string = to.fullPath;
             const activeRule = props.activeRule as string;
-            // 确保路径拼接正确
-            const fullPath = `/${activeRule}/${routePath}`.replace(/\/{2,}/g, '/');
+            // 路径段去掉重复斜杠，查询串原样保留
+            const fullPath = `/${activeRule}/${to.path}`.replace(/\/{2,}/g, '/') + to.fullPath.slice(to.path.length);
 
             qiankunEventAdapter.emitEvent({
               type: 'g2rain:sub-app:route-change',
@@ -173,6 +175,7 @@ export function registerQiankunLifecycle(ctx: QiankunLifecycleContext): void {
       // 此时 Router 内部的 Matcher 已经有值，且 currentRoute 已经指向 initialRoute
       app.mount(mountContainer);
       ctx.setApp(instanceKey, app); // 记录 app 实例用于 unmount
+      addMountedInstance(instanceKey);
     },
 
     async unmount(props?: MicroAppProps) {
@@ -183,6 +186,7 @@ export function registerQiankunLifecycle(ctx: QiankunLifecycleContext): void {
         console.warn('[qiankun] unmount: 无法解析 appKey，跳过实例级清理');
         return;
       }
+      removeMountedInstance(instanceKey);
 
       const app = ctx.getApp(instanceKey);
       if (app) {

@@ -294,9 +294,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -319,7 +318,6 @@ const handleReset = () => {
   baseQueryForm.id = undefined;
   baseQueryForm.createTime = undefined;
   baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
   // 重置业务特定查询表单
   queryForm.username = '';
   queryForm.realName = '';
@@ -362,12 +360,7 @@ const userListRows = ref<User[]>([]);
 const openUserListDialog = async (row: Passport) => {
   userListDialogVisible.value = true;
   userListRows.value = [];
-  try {
-    userListRows.value = await UserApi.list({ passportId: row.id });
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_PP_MSG_USER_LOAD_FAIL', '加载用户列表失败');
-    ElMessage.error(msg);
-  }
+  userListRows.value = await UserApi.list({ passportId: row.id });
 };
 
 // 查看第三方身份绑定列表
@@ -383,12 +376,7 @@ const openIdpBindingListDialog = async (row: Passport) => {
   currentPassportId.value = row.id;
   idpBindingListDrawerVisible.value = true;
   idpBindingListRows.value = [];
-  try {
-    idpBindingListRows.value = await PassportIdpBindingApi.list({ passportId: row.id });
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_PP_MSG_IDP_LOAD_FAIL', '加载第三方绑定列表失败');
-    ElMessage.error(msg);
-  }
+  idpBindingListRows.value = await PassportIdpBindingApi.list({ passportId: row.id });
 };
 
 // 删除数据记录
@@ -399,18 +387,13 @@ const handleDelete = (row: Passport) => {
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await PassportApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        ElMessage.error(msg);
+      await PassportApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => { });
 };
@@ -507,19 +490,14 @@ const submitEdit = async () => {
     email: editForm.email,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await PassportApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    ElMessage.error(msg);
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await PassportApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  await loadData();
+  editDialogVisible.value = false;
 };
 
 // 挂载回调

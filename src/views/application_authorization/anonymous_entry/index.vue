@@ -67,7 +67,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { AnonymousEntryApi } from './api';
 import type { AnonymousEntry, EntryStatus } from './type';
 import type { ApplicationAuthorization } from '../type';
-import { StatusSwitch, showErrorMessage } from '@/components';
+import { StatusSwitch } from '@/components';
 
 const props = defineProps<{
   applicationAuthorization: ApplicationAuthorization;
@@ -93,8 +93,8 @@ const loadData = async () => {
       organId: props.applicationAuthorization.organId,
       applicationId: props.applicationAuthorization.applicationId,
     });
-  } catch (error: any) {
-    showErrorMessage(error || '加载接入码失败');
+  } catch {
+    // 请求失败已由 http 层统一提示
   } finally {
     loading.value = false;
   }
@@ -117,13 +117,9 @@ const handleDelete = (row: AnonymousEntry) => {
     appendTo: 'body',
   })
     .then(async () => {
-      try {
-        await AnonymousEntryApi.remove(row.id);
-        await loadData();
-        ElMessage.success('删除成功');
-      } catch (error: any) {
-        showErrorMessage(error || '删除失败');
-      }
+      await AnonymousEntryApi.remove(row.id);
+      await loadData();
+      ElMessage.success('删除成功');
     })
     .catch(() => {});
 };
@@ -164,8 +160,6 @@ const submitEdit = async () => {
     ElMessage.success(editForm.id ? '更新成功' : '新增成功');
     editDialogVisible.value = false;
     await loadData();
-  } catch (error: any) {
-    showErrorMessage(error || '保存失败');
   } finally {
     saving.value = false;
   }

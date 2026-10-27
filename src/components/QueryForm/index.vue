@@ -108,10 +108,9 @@ function clearBaseFields() {
     current.id = undefined
     current.createTime = undefined
     current.updateTime = undefined
-    current.sorts = undefined
     return
   }
-  model.value = {}
+  model.value = { sorts: current?.sorts }
 }
 
 /**

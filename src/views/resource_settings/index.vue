@@ -66,8 +66,8 @@ const loadDicts = async () => {
       value: u.id,
       label: u.applicationName || `${u.id}`
     }));
-  } catch (e) {
-    ElMessage.error(t('MG_RES_SETTINGS_MSG_LOAD_APP_FAIL', '加载应用列表失败'));
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 // 2. 校验规则
 };
@@ -112,24 +112,20 @@ const submitEdit = async () => {
 
   await editFormRef.value.validate(async (valid) => {
     if (valid) {
-      try {
-        if (!editForm.applicationId) {
-          ElMessage.error(t('MG_RES_SETTINGS_MSG_SELECT_APP', '请选择所属应用'));
-          return;
-        }
-        
-        // 使用 FormData 封装参数
-        const formData = new FormData();
-        if (editForm.file) {
-          formData.append('file', editForm.file);
-        }
-
-        // 调用 API（确保接口支持 FormData）
-        await ResourceSettingsApi.uploadResource(editForm.applicationId, formData);
-        ElMessage.success(t('MG_RES_SETTINGS_MSG_UPLOAD_OK', '上传成功'));
-      } catch (error: any) {
-        ElMessage.error(error.message || t('MG_RES_SETTINGS_MSG_UPLOAD_FAIL', '上传失败'));
+      if (!editForm.applicationId) {
+        ElMessage.error(t('MG_RES_SETTINGS_MSG_SELECT_APP', '请选择所属应用'));
+        return;
       }
+      
+      // 使用 FormData 封装参数
+      const formData = new FormData();
+      if (editForm.file) {
+        formData.append('file', editForm.file);
+      }
+
+      // 调用 API（确保接口支持 FormData）
+      await ResourceSettingsApi.uploadResource(editForm.applicationId, formData);
+      ElMessage.success(t('MG_RES_SETTINGS_MSG_UPLOAD_OK', '上传成功'));
     }
   });
 };

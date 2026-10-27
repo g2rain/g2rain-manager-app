@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick, computed } from 'vue';
+import { ref, watch, onMounted, onBeforeUnmount, nextTick, computed } from 'vue';
 import { ArrowDown } from '@element-plus/icons-vue';
 import type { SelectInstance } from 'element-plus';
 import { useLocaleStore } from '@platform/stores/locale.store';
@@ -122,6 +122,15 @@ const userTypedSearch = ref(false);
 const lastRemoteQuery = ref<string | null>(null);
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 const prefetching = ref(false);
+/** 进行中的远程搜索；发起新搜索、清空或卸载时取消 */
+let searchController: AbortController | null = null;
+
+const cancelSearch = () => {
+  if (!searchController) return;
+  searchController.abort();
+  searchController = null;
+  loading.value = false;
+};
 
 const mergeOptions = (base: RemoteSelectOption[], incoming: RemoteSelectOption[]): RemoteSelectOption[] => {
   const map = new Map<string | number, RemoteSelectOption>();
@@ -241,6 +250,7 @@ const isNumeric = (str: string): boolean => {
  * 远程搜索处理（带防抖）
  */
 const handleRemoteSearch = debounce(async (query: string) => {
+  cancelSearch();
   const trimmed = (query ?? '').trim();
   if (trimmed) {
     userTypedSearch.value = true;
@@ -272,6 +282,8 @@ const handleRemoteSearch = debounce(async (query: string) => {
     }
   }
 
+  const controller = new AbortController();
+  searchController = controller;
   loading.value = true;
   try {
     // 判断输入是否为数字，构建查询参数
@@ -282,16 +294,21 @@ const handleRemoteSearch = debounce(async (query: string) => {
           ? { value: Number(trimmed) } // 数字时使用 value
           : { key: trimmed }; // 字符串时使用 key
 
-    const data = await props.fetchData(params);
+    const data = await props.fetchData({ ...params, signal: controller.signal });
+    if (controller.signal.aborted) return;
     const list = data || [];
     rememberOptions(list);
     options.value = list;
     lastRemoteQuery.value = trimmed;
   } catch (error) {
+    if (controller.signal.aborted) return;
     console.error('RemoteSelect fetchData error:', error);
     options.value = [];
   } finally {
-    loading.value = false;
+    if (searchController === controller) {
+      searchController = null;
+      loading.value = false;
+    }
   }
 }, props.debounceDelay);
 
@@ -376,6 +393,7 @@ const handleChange = (value: number | string | null | undefined) => {
  * 处理清空
  */
 const handleClear = () => {
+  cancelSearch();
   restoreDefaultOptions();
   emit('clear');
 };
@@ -444,4 +462,6 @@ onMounted(() => {
     loadInitialOption();
   }
 });
+
+onBeforeUnmount(cancelSearch);
 </script>

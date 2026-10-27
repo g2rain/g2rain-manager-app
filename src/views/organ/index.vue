@@ -363,9 +363,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -387,7 +386,6 @@ const handleReset = () => {
   baseQueryForm.id = undefined;
   baseQueryForm.createTime = undefined;
   baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
   // 重置业务特定查询表单
   queryForm.organType = '';
   queryForm.organName = '';
@@ -428,18 +426,13 @@ const handleDelete = (row: Organ) => {
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await OrganApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        ElMessage.error(msg);
+      await OrganApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => { });
 };
@@ -502,19 +495,14 @@ const submitEdit = async () => {
     organName: editForm.organName,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await OrganApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    ElMessage.error(msg);
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await OrganApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  await loadData();
+  editDialogVisible.value = false;
 };
 
 // 调整归属组件引用
@@ -575,12 +563,7 @@ const openIdpEnterpriseOrganListDialog = async (row: Organ) => {
   currentOrganName.value = row.organName;
   idpEnterpriseOrganListDrawerVisible.value = true;
   idpEnterpriseOrganListRows.value = [];
-  try {
-    idpEnterpriseOrganListRows.value = await IdpEnterpriseOrganApi.list({ organId: row.id });
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_ORGAN_MSG_IDP_LOAD_FAIL', '加载企业三方授权绑定失败');
-    ElMessage.error(msg);
-  }
+  idpEnterpriseOrganListRows.value = await IdpEnterpriseOrganApi.list({ organId: row.id });
 };
 
 // 打开调整归属弹窗
@@ -674,9 +657,7 @@ const openInviteDialog = async (row: Organ) => {
   try {
     inviteDialog.roles = await RoleApi.list({ organId: row.id });
     syncInviteRoleSelection();
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_ORGAN_MSG_ROLES_FAIL', '加载角色列表失败');
-    ElMessage.error(msg);
+  } catch {
     inviteDialog.roles = [];
   } finally {
     inviteDialog.rolesLoading = false;
@@ -716,9 +697,6 @@ const generateInvite = async () => {
       validDays: inviteDialog.validDays,
     });
     ElMessage.success(t('MG_ORGAN_MSG_INVITE_OK', '邀请码已生成'));
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_ORGAN_MSG_INVITE_FAIL', '生成邀请码失败');
-    ElMessage.error(msg);
   } finally {
     inviteDialog.generating = false;
   }

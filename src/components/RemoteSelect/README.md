@@ -289,7 +289,6 @@ const form = reactive({
 | disabled | 是否禁用（与 v-permission 置灰叠加；loading 时也会禁用） | `boolean` | `false` |
 | inlinePrompt | 是否显示开关文案 | `boolean` | `true` |
 | successMessage | 成功提示文案 | `string` | `'更新成功'` |
-| errorMessage | 失败提示文案 | `string` | `'更新失败'` |
 
 ## Events
 

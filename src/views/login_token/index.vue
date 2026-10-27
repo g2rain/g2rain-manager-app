@@ -187,14 +187,13 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import { t } from '@platform/i18n';
 import { LoginTokenApi } from './api';
 import { OrganApi } from '../organ/api';
 import { DictItemApi } from '../dict/api';
 import type { LoginToken, LoginTokenQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMessage, OrganSelect, DictSelect, DictText } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText } from '@/components';
 
 // 组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
@@ -249,8 +248,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    showErrorMessage(error || t('G2_MSG_LOAD_FAIL', '加载列表失败'));
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -274,7 +273,6 @@ const handleReset = () => {
   baseQueryForm.id = undefined;
   baseQueryForm.createTime = undefined;
   baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
   // 重置业务特定查询表单
   queryForm.sessionType = '';
   queryForm.organId = undefined;
