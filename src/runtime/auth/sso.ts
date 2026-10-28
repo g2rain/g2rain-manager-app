@@ -5,8 +5,8 @@
 
 import { env, getPathWithContextPath, isMockEnabled } from '@shared/env';
 import { useAccessTokenStore } from '@platform/stores';
-import { fetchIamKeyId, fetchIamPublicKey, dpopSign, getHttpClient, HttpClient, type Result, type EnsureAccessTokenOptions } from '@/components/http';
-import { refreshBarrier } from '@/components/http/refresh-barrier';
+import { createDpopProof, type DpopClient } from '@g2rain/http';
+import { fetchIamKeyId, fetchIamPublicKey, getHttpClient, refreshBarrier, type Result, type EnsureAccessTokenOptions, type HttpClient } from '@runtime/http';
 import { emitTokenInvalid } from '@platform/apps';
 import { isQiankunRuntime } from '@shared/utils/mode.util';
 import type { AxiosRequestConfig } from 'axios';
@@ -14,16 +14,44 @@ import { watch } from 'vue';
 import { Generator } from '@shared/utils/random.util';
 import { generateClient } from '@shared/utils/jwt.util';
 
+/**
+ * 当前页面相对路由 base（VITE_CONTEXT_PATH）的完整路径，供 router.replace 使用。
+ * 位于 SSO 回调页时返回 null（回调页不能作为登录后的目标）。
+ */
+function currentRouterPath(): string | null {
+  const { pathname, search, hash } = window.location;
+  if (pathname.endsWith('/sso_callback')) return null;
+  const base = getPathWithContextPath('').replace(/\/$/, '');
+  const inner = base && (pathname === base || pathname.startsWith(`${base}/`)) ? pathname.slice(base.length) : pathname;
+  return `${inner || '/'}${search}${hash}`;
+}
+
 class SSOService {
   private isAuthenticationPending = false;
   private isRefreshPending = false;
-  private pendingSubscribers: ((token: string) => void)[] = [];
+  /** 等待同一次换票的调用方：成功时 resolve，失败时 reject，不会永远挂起 */
+  private pendingSubscribers: Array<{ resolve: () => void; reject: (error: unknown) => void }> = [];
   private refreshPromise: Promise<{ token: string; tokenKid: string }> | null = null;
   /** HTTP 层「保证 access 可用」单飞 Promise，与 requestRefreshToken 内单飞配合 */
   private ensureAccessTokenPromise: Promise<void> | null = null;
 
   private getAccessTokenStore() {
     return useAccessTokenStore();
+  }
+
+  private createTokenProof(url: string, data: unknown, client: DpopClient | null, jti: string): Promise<string> {
+    if (!client) {
+      throw new Error('client is required');
+    }
+    return createDpopProof({
+      url,
+      method: 'post',
+      params: '',
+      data,
+      applicationCode: env.VITE_APPLICATION_CODE,
+      client,
+      jti,
+    });
   }
 
   public async redirectToSSO(): Promise<void> {
@@ -59,15 +87,32 @@ class SSOService {
     });
 
     ssoUrl.search = params.toString();
+    // 独立模式记住登录前的页面，回调完成后由 main.ts 统一跳回（回调页本身不记录，已有记录不覆盖）
+    if (!isQiankunRuntime() && !localStorage.getItem('return_url')) {
+      const returnUrl = currentRouterPath();
+      if (returnUrl) localStorage.setItem('return_url', returnUrl);
+    }
+    // 插件 $subscribe 不会在跳转前同步落盘；独立模式按 Token Store 的 pick 直接写入。
+    if (!isQiankunRuntime()) {
+      localStorage.setItem(
+        'g2rain_token',
+        JSON.stringify({
+          client: accessTokenStore.client,
+          token: accessTokenStore.token,
+          tokenString: accessTokenStore.tokenString,
+          logged: accessTokenStore.logged,
+          tokenExpired: accessTokenStore.tokenExpired,
+        }),
+      );
+    }
     window.location.href = ssoUrl.toString();
+    return new Promise<void>(() => undefined);
   }
 
   public async generateToken(code: string): Promise<void> {
     if (this.isAuthenticationPending) {
-      return new Promise((resolve) => {
-        this.pendingSubscribers.push(() => {
-          resolve();
-        });
+      return new Promise((resolve, reject) => {
+        this.pendingSubscribers.push({ resolve, reject });
       });
     }
 
@@ -92,37 +137,31 @@ class SSOService {
       params: '',
       data,
     };
-    headers.DPoP = await dpopSign(
-      env.VITE_TOKEN_END_POINT,
-      'post',
-      '',
-      data,
-      env.VITE_APPLICATION_CODE,
-      accessTokenStore.client,
-      jti,
-    );
-    headers['Application-DPoP'] = await this.callSignApi(generateTokenInstant, data, headers.DPoP, jti);
-
-    await generateTokenInstant
-      .post<{ token: string; keyId: string }>(env.VITE_TOKEN_END_POINT, data, request)
-      .then(async (response) => {
-        // 返回的是 Result<{ token: string; keyId: string }> 格式
-        const result = response as Result<{ token: string; keyId: string }>;
-        if (result.status !== 200 && result.status !== 0) {
-          throw new Error('GENERATE_TOKEN_FAILURE');
-        }
-        const { token, keyId } = result.data;
-        const iamKeyId = await fetchIamKeyId(generateTokenInstant);
-        const publicKey = await fetchIamPublicKey(generateTokenInstant);
-        await this.getAccessTokenStore().setTokens(token, keyId, iamKeyId, publicKey);
-      })
-      .catch((error) => {
-        this.pendingSubscribers = [];
-        throw error;
-      })
-      .finally(() => {
-        this.isAuthenticationPending = false;
-      });
+    // 签名等前置步骤也放进 try：任何一步失败都要结束 pending 并通知等待方
+    try {
+      headers.DPoP = await this.createTokenProof(env.VITE_TOKEN_END_POINT, data, accessTokenStore.client, jti);
+      headers['Application-DPoP'] = await this.callSignApi(generateTokenInstant, data, headers.DPoP, jti);
+      const response = await generateTokenInstant.post<{ token: string; keyId: string }>(
+        env.VITE_TOKEN_END_POINT,
+        data,
+        request,
+      );
+      // auth 客户端 isDirectResponse=true；若网关仍返回 Result 外壳则兼容解析
+      const result = response as unknown as Result<{ token: string; keyId: string }>;
+      if (result.status !== 200 && result.status !== 0) {
+        throw new Error('GENERATE_TOKEN_FAILURE');
+      }
+      const { token, keyId } = result.data;
+      const iamKeyId = await fetchIamKeyId(generateTokenInstant);
+      const publicKey = await fetchIamPublicKey(generateTokenInstant);
+      await this.getAccessTokenStore().setTokens(token, keyId, iamKeyId, publicKey);
+      this.pendingSubscribers.splice(0).forEach(({ resolve }) => resolve());
+    } catch (error) {
+      this.pendingSubscribers.splice(0).forEach(({ reject }) => reject(error));
+      throw error;
+    } finally {
+      this.isAuthenticationPending = false;
+    }
   }
 
   /**
@@ -158,7 +197,10 @@ class SSOService {
       const barrier = refreshBarrier.waitForRefresh();
       if (isQiankunRuntime()) {
         // 必须先同步通知主应用，再 await 屏障；仅依赖 watch 异步触发 emit 会导致死等
-        emitTokenInvalid(env.VITE_APPLICATION_CODE);
+        // 没有在挂实例时主应用不会回发，立即失败，不等 10 秒超时
+        if (!emitTokenInvalid(env.VITE_APPLICATION_CODE)) {
+          refreshBarrier.rejectRefresh(new Error('NO_MOUNTED_INSTANCE'));
+        }
         if (!store.tokenExpired) {
           store.setTokenExpired(true);
         }
@@ -215,22 +257,14 @@ class SSOService {
           data,
         };
 
-        headers.DPoP = await dpopSign(
-          env.VITE_TOKEN_END_POINT,
-          'post',
-          '',
-          data,
-          env.VITE_APPLICATION_CODE,
-          tokenStore.client,
-          jti,
-        );
+        headers.DPoP = await this.createTokenProof(env.VITE_TOKEN_END_POINT, data, tokenStore.client, jti);
 
         const response = await refreshInstant.post<{ token: string; keyId: string }>(
           env.VITE_TOKEN_END_POINT,
           data,
           request,
         );
-        const result = response as Result<{ token: string; keyId: string }>;
+        const result = response as unknown as Result<{ token: string; keyId: string }>;
 
         if (result.status !== 200 && result.status !== 0) {
           throw new Error('REFRESH_TOKEN_FAILURE');
@@ -261,7 +295,7 @@ class SSOService {
     return this.refreshPromise;
   }
 
-  public async callSignApi(http: HttpClient, data: any, headerDPoP: string, jti: string): Promise<string> {
+  public async callSignApi(http: HttpClient<true>, data: any, headerDPoP: string, jti: string): Promise<string> {
     const response = await http.post('/lua/sign_code?jti=' + jti, data, {
       headers: {
         'Content-Type': 'application/json',

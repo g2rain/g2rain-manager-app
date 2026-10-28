@@ -2,7 +2,7 @@
  * control_domain相关 API 服务
  * 提供control_domain数据的 CRUD 操作接口
  */
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 import type { ControlDomain, ControlDomainPayload, ControlDomainQuery } from './type';
 import type { PageData, PageSelectListDto } from '@platform/types/api.type';
 

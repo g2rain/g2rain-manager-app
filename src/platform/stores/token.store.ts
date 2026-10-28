@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia';
 import type { Token, ApplicationScope } from '@platform/types/http.types';
-import type { Client } from '@/components/http';
+import type { DpopClient as Client } from '@g2rain/http';
 import { jwtVerify } from 'jose';
 import { publicKeyStringToJwk } from '@shared/utils/jwt.util';
 import { isQiankunRuntime } from '@shared/utils/mode.util';
+import { isMockEnabled } from '@shared/env';
 
+/** 独立模式自有键；集成模式禁止落盘。勿读写壳键 g2rain-shell-token:*（壳会话由 Main Shell 拥有）。 */
 const STORAGE_KEY = 'g2rain_token';
 
 export const useAccessTokenStore = defineStore('token', {
@@ -22,14 +24,15 @@ export const useAccessTokenStore = defineStore('token', {
       if (!this.client || !this.token) {
         return (this.logged = false);
       }
-      // mock 模式下，now 设置为 0，token 永不过期
-      const now = new Date();
+      // mock 模式下 token 永不过期，避免硬编码/历史 JWT 的 expireAt 干扰本地联调
+      if (isMockEnabled()) {
+        return (this.logged = true);
+      }
 
       // 2. 检查 token 的过期时间
       try {
-        const refreshExpireAt = new Date(this.token?.refreshExpireAt * 1000);
-
-        // 刷新未到期即认为已登录
+        const now = new Date();
+        const refreshExpireAt = new Date(this.token.refreshExpireAt * 1000);
         return (this.logged = refreshExpireAt > now);
       } catch (error) {
         // 如果日期解析失败，也认为未登录
@@ -37,7 +40,6 @@ export const useAccessTokenStore = defineStore('token', {
         return false;
       }
     },
-    // 检查 access token 是否有效
     isAdminCompany(): boolean {
       return this.token?.adminCompany === true;
     },
@@ -45,11 +47,15 @@ export const useAccessTokenStore = defineStore('token', {
       return this.token?.organId;
     },
     isAccessTokenValid(): boolean {
-      if (!this.token?.expireAt) return false;
+      if (!this.token) return false;
+      // mock 模式下 token 永不过期
+      if (isMockEnabled()) {
+        return true;
+      }
+      if (!this.token.expireAt) return false;
 
       try {
         const expireAt = new Date(this.token.expireAt * 1000);
-        // mock 模式下，now 设置为 0，token 永不过期
         const now = new Date();
         return expireAt > now;
       } catch (error) {
@@ -105,13 +111,11 @@ export const useAccessTokenStore = defineStore('token', {
       this.tokenExpired = tokenExpired;
     },
   },
-  // 持久化配置：子应用不进行 token 持久化（token 由主应用管理）
-  persist: isQiankunRuntime()
-    ? false
-    : {
-      key: STORAGE_KEY,
-      storage: localStorage,
-      pick: ['client', 'token', 'tokenString', 'logged', 'tokenExpired'],
-    },
+  // 持久化：仅独立模式。qiankun 集成模式 Token 经 Auth Bridge 进内存 Store，不持久化壳会话。
+  // 首次 useStore 时求值（qiankun bootstrap 之后），而不是模块求值时
+  get persist() {
+    return isQiankunRuntime()
+      ? false
+      : { key: STORAGE_KEY, storage: localStorage, pick: ['client', 'token', 'tokenString', 'logged', 'tokenExpired'] };
+  },
 });
-

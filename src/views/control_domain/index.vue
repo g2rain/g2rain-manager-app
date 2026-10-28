@@ -215,7 +215,7 @@
 
     <!-- 开通功能 -->
     <el-dialog v-model="activateFeaturesDialog.visible" :title="$t('MG_CTRL_DOM_DLG_ACTIVATE', '开通功能')" width="600px">
-      <OrganSelect v-model="activateFeaturesDialog.organId" :api-method="OrganApi.searchOrgans" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
+      <OrganSelect v-model="activateFeaturesDialog.organId" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
       <template #footer>
         <el-button @click="resetActivateFeaturesDialogDialog">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
         <el-button type="primary" @click="activateFeatures">{{ $t('G2_BTN_CONFIRM', '确定') }}</el-button>
@@ -239,7 +239,8 @@ import { ControlDomainControlUnitRelationApi } from '../control_domain_control_u
 import type { ControlDomain, ControlDomainPayload, ControlDomainQuery } from './type';
 import type { ControlUnit } from '../control_unit/type'
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { OrganSelect, DictSelect, DictText } from '@g2rain/ui/platform';
 
 /** Basis ControlDomainType.SELF：租户授权确认时自动开通 */
 const CONTROL_DOMAIN_TYPE_SELF = 'SELF';
@@ -256,7 +257,7 @@ const loadDicts = async () => {
 };
 
 // 基础查询状态（使用 reactive v-model 替换整个对象时保持响应式）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -289,7 +290,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as ControlDomainQuery;
 
@@ -323,9 +324,9 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.applicationId = undefined;
   queryForm.controlDomainName = '';
@@ -612,7 +613,7 @@ onMounted(async () => {
 <style scoped>
 .control-domain-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -625,7 +626,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -650,7 +651,7 @@ onMounted(async () => {
 
 .control-domain-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .control-domain-page__type-tip {

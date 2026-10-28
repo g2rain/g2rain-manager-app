@@ -1,4 +1,4 @@
-import { getHttpClient, type Result } from '@/components/http';
+import { getHttpClient, type Result } from '@runtime/http';
 import { env } from '@/shared/env';
 
 export interface I18nLocaleMessage {
@@ -8,7 +8,7 @@ export interface I18nLocaleMessage {
 }
 
 /** GET /api/infra/i18n_message/locale?tags={VITE_I18N_TAGS}&locale=zh-CN */
-/** GET /api/infra/i18n_message/locale?tag=MANAGER&locale=zh-CN */
+/** GET /api/infra/i18n_message/locale?tag=TEMPLATE&locale=zh-CN */
 export async function fetchI18nLocaleMessages(locale: string): Promise<I18nLocaleMessage[]> {
   const httpClient = getHttpClient('auth');
   const result = (await httpClient.get('/api/infra/i18n_message/locale', {

@@ -138,7 +138,7 @@ import type { ApplicationAuthorization } from '../application_authorization/type
 import type { PageSelectListDto } from '@platform/types/api.type';
 
 import { DictItemApi } from '../dict/api';
-import { DictSelect, DictText, StatusSwitch } from '@/components';
+import { DictSelect, DictText, StatusSwitch } from '@g2rain/ui/platform';
 
 const props = withDefaults(defineProps<{
   embedded?: boolean;
@@ -409,7 +409,7 @@ watch(
 <style scoped>
 .personal_static_access_token-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -427,7 +427,7 @@ watch(
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -461,7 +461,7 @@ watch(
 
 .personal_static_access_token-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .personal_static_access_token-page__pagination {

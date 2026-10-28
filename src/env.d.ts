@@ -1,3 +1,4 @@
+declare module '*.vue'
 interface ImportMetaEnv {
     readonly DEV: boolean; // 是否为开发模式
     readonly VITE_APPLICATION_CODE: string; // 应用编码（用于从资源接口加载路由）

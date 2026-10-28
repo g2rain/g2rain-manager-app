@@ -2,7 +2,7 @@
  * control_unit相关 API 服务
  * 提供control_unit数据的 CRUD 操作接口
  */
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 import type { ControlUnit, ControlUnitPayload, ControlUnitQuery } from './type';
 import type { PageData, PageSelectListDto } from '@platform/types/api.type';
 

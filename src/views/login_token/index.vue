@@ -16,7 +16,6 @@
         <el-form-item :label="$t('MG_LOGIN_TOKEN_FIELD_ORGAN_ID', '机构标识')">
           <OrganSelect
             v-model="queryForm.organId"
-            :api-method="OrganApi.searchOrgans"
             :placeholder="$t('MG_LOGIN_TOKEN_PH_ORGAN', '请选择机构')"
             width="200px"
           />
@@ -64,7 +63,6 @@
         <el-form-item :label="$t('MG_LOGIN_TOKEN_FIELD_APP_ORGAN_ID', '应用所属机构标识')">
           <OrganSelect
             v-model="queryForm.applicationOrganId"
-            :api-method="OrganApi.searchOrgans"
             :placeholder="$t('MG_LOGIN_TOKEN_PH_APP_ORGAN', '请选择应用所属机构')"
             width="200px"
           />
@@ -193,13 +191,14 @@ import { DictItemApi } from '../dict/api';
 import type { LoginToken, LoginTokenQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { OrganSelect, DictSelect, DictText } from '@g2rain/ui/platform';
 
 // 组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
 // 基础查询表单（BaseSelectListDto）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -234,7 +233,7 @@ const loadData = async () => {
   try {
       // 合并基础查询 + 业务查询，并过滤空值
       const query = Object.fromEntries(
-        Object.entries({ ...baseQueryForm, ...queryForm })
+        Object.entries({ ...baseQueryForm.value, ...queryForm })
           .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
       ) as LoginTokenQuery;
 
@@ -270,9 +269,9 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.sessionType = '';
   queryForm.organId = undefined;
@@ -322,7 +321,7 @@ onMounted(() => {
 <style scoped>
 .login_token-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -335,7 +334,7 @@ onMounted(() => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -360,7 +359,7 @@ onMounted(() => {
 
 .login_token-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .login_token-page__pagination {

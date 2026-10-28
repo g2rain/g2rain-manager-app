@@ -3,7 +3,7 @@
  * 提供service_registry数据的 CRUD 操作接口
  */
 
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 import type { ServiceRegistry, ServiceRegistryPayload, ServiceRegistryQuery } from './type';
 import type { PageData, PageSelectListDto } from '@platform/types/api.type';
 

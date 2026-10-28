@@ -2,7 +2,7 @@
  * resource_settings相关 API 服务
  * 提供resource_settings数据的 CRUD 操作接口
  */
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 
 /**
  * resource_settings API 服务类

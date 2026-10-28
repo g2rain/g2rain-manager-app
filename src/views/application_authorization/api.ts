@@ -2,7 +2,7 @@
  * application_authorization相关 API 服务
  * 提供application_authorization数据的 CRUD 操作接口
  */
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 import type { ApplicationAuthorization, ApplicationAuthorizationQuery, ApplicationAuthorizationPayload } from './type';
 import type { PageData, PageSelectListDto } from '@platform/types/api.type';
 

@@ -20,8 +20,7 @@
           ref="organSelectRef"
           v-model="form.organId"
           :disabled="isEdit"
-          :use-token-default="false"
-          :api-method="OrganApi.searchOrgans"
+          :default-value="null"
           :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')"
           width="100%"
           @change="handleOrganChange"
@@ -79,7 +78,7 @@ import { computed, nextTick, reactive, ref, watch } from 'vue';
 import type { FormInstance, FormRules, InputInstance } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { t } from '@platform/i18n';
-import { OrganSelect } from '@/components';
+import { OrganSelect } from '@g2rain/ui/platform';
 import { OrganApi } from '../organ/api';
 import { RoleApi } from './api';
 import { RoleControlUnitRelationApi } from '../role_control_unit_relation/api';

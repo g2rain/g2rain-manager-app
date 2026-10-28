@@ -2,7 +2,7 @@
  * 租户 IdP 同步 API
  */
 
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 import type { TenantIdpSyncPayload, TenantIdpSyncResult } from './type';
 
 export class TenantIdpSyncApi {

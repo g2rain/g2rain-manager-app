@@ -171,7 +171,7 @@ const showDemoMessage = () => {
   margin: 0 0 16px 0;
   font-size: 18px;
   font-weight: 500;
-  color: #303133;
+  color: var(--g2-text-primary);
 }
 
 .routes-grid {
@@ -199,7 +199,7 @@ const showDemoMessage = () => {
 
 .route-icon {
   font-size: 32px;
-  color: #409eff;
+  color: var(--g2-color-primary);
   flex-shrink: 0;
 }
 
@@ -211,7 +211,7 @@ const showDemoMessage = () => {
 .route-title {
   font-size: 16px;
   font-weight: 500;
-  color: #303133;
+  color: var(--g2-text-primary);
   margin-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -220,7 +220,7 @@ const showDemoMessage = () => {
 
 .route-path {
   font-size: 12px;
-  color: #909399;
+  color: var(--g2-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -1,7 +1,7 @@
 /**
  * 机构邀请码 API
  */
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 
 export interface OrganInviteGeneratePayload {
   organId: number;

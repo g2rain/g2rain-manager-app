@@ -10,9 +10,13 @@ architectureBaseline:
   ref: architecture-v1.1.0
   profile: docs/architecture/profiles/frontend-app
   version: 1.0.0
-  status: adopted
+  status: pilot
   releasedAt: "2026-08-25"
   deviations: docs/architecture/deviations.md
+
+projectArchitecture:
+  role: frontend-app
+  note: HTTP 公共内核经 @g2rain/http，生命周期经 @g2rain/platform/sub；集成挂载要求显式 applicationCode/viewId/instanceId（appKey===instanceId），认证经 Auth Bridge，不再接受仅 appKey 或 props Token 的旧壳路径。
 
 ownership:
   owns:
@@ -20,6 +24,7 @@ ownership:
     - 菜单、页面、页面元素、API 资源和控制域的管理端页面
     - 应用、应用套件、授权、身份提供方、服务注册和审计的管理端页面
     - 本应用的路由注册、资源加载、权限呈现、国际化和微前端生命周期
+    - 本项目生成输入（scripts/database.sql）与资源配置产物
   excludes:
     - IAM 的认证、Token 签发、会话和身份提供方后端规则
     - Gateway 的鉴权、路由与请求转发
@@ -71,15 +76,13 @@ runtime:
       auth: 应用自行执行 IAM SSO、Token 管理和资源加载
     integrated:
       selector: 默认空模式
-      auth: main-shell 通过 qiankun props 注入 Token、Client、Locale、初始路由和 appKey
+      auth: main-shell 经 Auth Bridge 定向消息下发 Token；公开 props 下发身份字段与 Locale
   resourceEndpoint: /basis/authority/resources
-  devServer:
-    portSource: process.env.VITE_SERVER_PORT
-    fallbackPort: 3001
+  backendRoutePrefix: /manager
+  devServerPort: 3001
   container:
     exposedPort: 8080
     defaultServerPort: 80
-    recommendedServerPort: 8080
 
 commands:
   install: npm ci
@@ -91,19 +94,21 @@ commands:
   image: docker build --build-arg VITE_BUILD_MODE=production -t g2rain/g2rain-manager-app:<tag> .
 
 generators:
+  engine: create-g2rain-app
   code:
-    input: src/shared/generator/database.sql
+    command: g2rain-app generate
+    input: scripts/database.sql
     output: src/views/<table>
     updatesRouteMap: true
     overwritesExistingFiles: true
+    switches: [--skip-view, --skip-api, --skip-mock, --skip-route]
   resource:
+    command: g2rain-app build-config
     routeInput: src/views/route-map.ts
     viewInput: src/views
     output: src/shared/config-util/config
-    generated:
-      - resources.json
-      - pages.json
-      - page-elements.json
+    outputTracked: true
+    generated: [resources.json, pages.json, page-elements.json]
     apiEndpointGeneration: false
 
 collaborators:
@@ -117,6 +122,16 @@ collaborators:
     role: 应用资源、机构和平台基础数据
   - repository: g2rain/g2rain-infra
     role: 服务、资源与平台基础设施管理能力
+
+validation:
+  reviewedAt: "2026-10-28"
+  command: npm run build
+  status: build-passed
+  testsRun: 0
+  notes:
+    - 已接入 @g2rain/{http,platform,theme,ui}、createStandardSubPlatform、Auth Bridge
+    - 壳侧已将 g2rain-manager-app 从 legacy registry 迁出（main-shell / admin-shell）
+    - 代码/资源配置生成已迁 create-g2rain-app（scripts/ + file:../g2rain-app-cli）
 
 community:
   website: https://www.g2rain.com

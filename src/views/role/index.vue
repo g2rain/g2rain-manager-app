@@ -4,7 +4,7 @@
     <el-card class="role-page__search" shadow="never">
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')">
-          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
+          <OrganSelect v-model="queryForm.organId" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
         </el-form-item>
 
         <el-form-item :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')">
@@ -169,14 +169,15 @@ import { RoleControlUnitRelationApi } from '../role_control_unit_relation/api';
 import type { RoleControlUnitRelation } from '../role_control_unit_relation/type';
 import type { Role, RoleQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { OrganSelect, DictSelect, DictText } from '@g2rain/ui/platform';
 import RoleEditDialog from './RoleEditDialog.vue';
 import RolePermissionTags from './RolePermissionTags.vue';
 import PermissionTooltip from './PermissionTooltip.vue';
 
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -235,7 +236,7 @@ const loadRolePermissions = async (roles: Role[]) => {
 const loadData = async () => {
   try {
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as RoleQuery;
 
@@ -263,9 +264,9 @@ const handleSearch = () => {
 };
 
 const handleReset = () => {
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   queryForm.organId = undefined;
   queryForm.roleType = '';
   queryForm.roleName = '';
@@ -461,7 +462,7 @@ onMounted(async () => {
 <style scoped>
 .role-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -474,7 +475,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -499,7 +500,7 @@ onMounted(async () => {
 
 .role-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .role-page__pagination {

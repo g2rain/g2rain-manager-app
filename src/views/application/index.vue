@@ -5,7 +5,7 @@
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')">
-          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
+          <OrganSelect v-model="queryForm.organId" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
         <!-- 业务特定查询字段 -->
         </el-form-item>
 
@@ -116,7 +116,7 @@
     <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="150px">
         <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')" prop="organId">
-          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :api-method="OrganApi.searchOrgans" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
+          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
         </el-form-item>
 
         <el-form-item :label="$t('MG_APP_FIELD_TYPE', '应用类型')" prop="applicationType">
@@ -351,7 +351,8 @@ import { ApplicationIdpProvisionApi } from '../application_idp_provision/api';
 import type { Application, ApplicationPayload, ApplicationQuery } from './type';
 import type { ApplicationIdpProvision, ApplicationIdpProvisionPayload } from '../application_idp_provision/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText, StatusSwitch } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { OrganSelect, DictSelect, DictText, StatusSwitch } from '@g2rain/ui/platform';
 
 // 定义字典引用
 const boolOptions = ref<Array<{ label: string; value: boolean }>>([]);
@@ -361,7 +362,7 @@ const loadDicts = async () => {
   try {
     const items = await DictItemApi.loadByUsageCode('BOOLEAN_FLAG');
     boolOptions.value = [...items]
-      .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+      .sort((a, b) => Number((a as { sortIndex?: number }).sortIndex ?? 0) - Number((b as { sortIndex?: number }).sortIndex ?? 0))
       .map((item) => {
         const value = parseDictCodeAsBoolean(String(item.code));
         if (value === undefined) return null;
@@ -378,7 +379,7 @@ const loadDicts = async () => {
 };
 
 // 基础查询状态（使用 reactive 以确保 v-model 的双向绑定完全生效）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -411,7 +412,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as ApplicationQuery;
 
@@ -446,9 +447,9 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.organId = undefined;
   queryForm.applicationName = '';
@@ -859,7 +860,7 @@ onMounted(async () => {
 <style scoped>
 .application-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -872,7 +873,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -897,7 +898,7 @@ onMounted(async () => {
 
 .application-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .application-page__pagination {

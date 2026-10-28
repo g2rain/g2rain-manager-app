@@ -6,7 +6,7 @@
     </div>
 
     <!-- 表单内容 -->
-    <div class="resource-settings-page__content" style="background: #fff; padding: 24px; border-radius: 4px;">
+    <div class="resource-settings-page__content" style="background: var(--g2-bg-container); padding: 24px; border-radius: 4px;">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px" style="max-width: 500px">
         <el-form-item :label="$t('MG_RES_SETTINGS_FIELD_APPLICATION', '所属应用')" prop="applicationId">
           <el-select
@@ -146,14 +146,14 @@ onMounted(async () => {
 <style scoped>
 .resource-settings-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100vh;
 }
 
 .resource-settings-page__header {
   margin-bottom: 20px;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 

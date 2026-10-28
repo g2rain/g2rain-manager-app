@@ -67,7 +67,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { AnonymousEntryApi } from './api';
 import type { AnonymousEntry, EntryStatus } from './type';
 import type { ApplicationAuthorization } from '../type';
-import { StatusSwitch } from '@/components';
+import { StatusSwitch } from '@g2rain/ui/platform';
 
 const props = defineProps<{
   applicationAuthorization: ApplicationAuthorization;
