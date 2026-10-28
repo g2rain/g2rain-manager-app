@@ -14,6 +14,7 @@
     </PermissionTooltip>
     <el-tooltip
       v-if="overflowCount > 0"
+      effect="light"
       placement="top"
       :show-after="200"
       popper-class="role-perm-tags-more-popper"
@@ -77,8 +78,20 @@ const overflowCount = computed(() => Math.max(0, props.items.length - props.maxV
 }
 </style>
 
-<!-- tooltip content 会 teleport 到 body，需非 scoped -->
+<!-- tooltip content 会 teleport 到 body，需非 scoped；跟随页面主题，不用 EP 默认反色气泡 -->
 <style>
+.role-perm-tags-more-popper.el-popper {
+  background: var(--g2-bg-overlay) !important;
+  color: var(--g2-text-primary);
+  border: 1px solid var(--g2-border-color);
+  box-shadow: var(--el-box-shadow-light);
+}
+
+.role-perm-tags-more-popper.el-popper .el-popper__arrow::before {
+  background: var(--g2-bg-overlay) !important;
+  border: 1px solid var(--g2-border-color);
+}
+
 .role-perm-tags-more-popper .role-perm-tags__more {
   max-width: 320px;
   max-height: 280px;
@@ -88,18 +101,18 @@ const overflowCount = computed(() => Math.max(0, props.items.length - props.maxV
 .role-perm-tags-more-popper .role-perm-tags__more-item + .role-perm-tags__more-item {
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid var(--g2-border-color);
 }
 
 .role-perm-tags-more-popper .role-perm-tags__more-name {
   font-weight: 600;
-  color: var(--el-color-primary-light-3);
+  color: var(--g2-color-primary);
 }
 
 .role-perm-tags-more-popper .role-perm-tags__more-desc {
   margin-top: 2px;
   font-size: 12px;
   line-height: 1.4;
-  opacity: 0.9;
+  color: var(--g2-text-secondary);
 }
 </style>

@@ -2,22 +2,21 @@
 
 本项目采用 g2rain `frontend-app 1.0.0`。本页记录当前源码相对中央 Profile 的已知偏差；状态为“待迁移”不表示普通需求自动获得修改授权，新增代码不得扩大这些依赖。
 
-## DEV-001：components 反向依赖 platform/runtime/views
+## DEV-001：components 反向依赖 platform/runtime/views（已消除）
 
 ### 状态
 
-待迁移。
+已于 AppKit 升级完成 HTTP/UI 迁移并关闭。
 
 ### 证据
 
-- `components/http/index.ts` 引用 `platform/apps/types`。
-- `components/http/interceptors/base.ts` 引用 `platform/locale`。
-- `components/http/mock-data` 引用 runtime 资源类型和 shared 生成配置。
-- `components/RemoteSelect` 中 Dict、Organ、StatusSwitch 引用 platform Store/i18n 和 views API。
+- `src/components/http` 已删除；HTTP 请求、DPoP、序列化、错误与刷新内核由 `@g2rain/http` 提供。
+- Client 注册表、Mock、Loading 组合、IAM 拉钥与 `refreshBarrier` 属于应用装配，已迁至 `src/runtime/http`。
+- 原 `components/RemoteSelect` / QueryForm / TableSort 等本地 UI 已删除；页面直接依赖 `@g2rain/ui`，organ/dict 由 `runtime/ui/setup-g2rain-ui.ts` 注入。
 
 ### 风险与方向
 
-通用组件无法脱离当前 App 复用，并可能形成循环依赖。应将通用 HTTP/Select 内核与 g2rain 平台封装拆开，通过接口、props 或 provider 注入 Token、Locale、字典和机构查询；领域封装上移到 platform/runtime/views。
+该反向依赖已经消除。后续不得在 `components` 中重新建立 HTTP、Store、runtime 或 views 依赖；应用 HTTP 装配继续保留在 runtime，公共能力通过 `@g2rain/http` 演进。
 
 ## DEV-002：platform 反向依赖 runtime
 
@@ -27,12 +26,14 @@
 
 ### 证据
 
-- `platform/apps/adapter.qiankun.ts` 调用 runtime boot、router 和 micro-shells。
-- `platform/i18n`、`platform/stores/locale.store.ts` 调用 runtime API。
+- `platform/i18n`、`platform/stores/locale.store.ts` 仍调用 runtime 的远程文案和语言列表 API。
+- `platform/apps/message-handlers.ts` 与 `platform/apps/init.ts` 仍调用 runtime HTTP，把 `TOKEN_RESPONSE`（Auth Bridge）写入共享 Token Store。
+
+qiankun 适配器不再直接调用 runtime boot、router 或实例 Map。`src/platform/apps/adapter.qiankun.ts` 只注册 `renderWithQiankun`，并把 `mount` / `update` / `unmount` 交给 `src/main.ts`。Vue、Router 和 `afterEach` 由 `@g2rain/platform/sub` 按 `instanceId` 持有。
 
 ### 风险与方向
 
-平台能力与当前应用启动实现绑定。qiankun 适配器应只实现平台协议，具体 boot/router 回调由组合根注入；i18n/locale 的远程加载接口由 runtime 注册 provider。
+语言远程加载和 Token 写入仍绑在 platform 实现上。i18n/locale 的远程接口应由 runtime 注册 provider；消息处理器可以继续留在应用，但不要再从 platform 直接依赖某个应用的 HTTP 装配细节。
 
 ## DEV-003：runtime 直接引用 views
 
@@ -69,7 +70,7 @@ runtime 无法作为独立应用运行时复用。建议由 views 导出页面�
 
 ### 说明
 
-- `.env` 已显式设置 `VITE_SERVER_PORT=3001`，但 shared env 的代码默认值仍为 `3000`，Vite server 未设置进程变量时回退到 `3001`。
+- `.env` 已显式设置 `VITE_SERVER_PORT=3001`，但 shared env 的代码默认值仍可能与 Vite 回退不一致。
 - Dockerfile `EXPOSE 8080`，容器入口的 `SERVER_PORT` 默认值为 `80`。
 
 在代码统一前，开发命令显式设置 `VITE_SERVER_PORT`，部署显式设置 `SERVER_PORT=8080`。文档按当前执行代码说明，不把声明值混为同一个端口。
@@ -82,7 +83,7 @@ runtime 无法作为独立应用运行时复用。建议由 views 导出页面�
 
 ### 说明
 
-`parser/api.ts` 已存在，但 `config-util/index.ts` 中调用被注释，`generator/json.ts` 也未写出 `api-endpoints.json`。当前命令只生成页面和页面元素，`resources.json.apiEndpoints` 为空。启用前需要测试解析准确性、去重、服务/路由前缀语义和后端导入契约。
+`create-g2rain-app` 的 `build-config` 仍不产出 `api-endpoints.json`（解析逻辑可在 CLI 内但主流程关闭）。`resources.json.apiEndpoints` 为空。启用前需要测试解析准确性、去重、服务/路由前缀语义和后端导入契约。
 
 ## DEV-007：生产构建存在循环分块与体积警告
 
@@ -93,7 +94,7 @@ runtime 无法作为独立应用运行时复用。建议由 views 导出页面�
 ### 当前警告
 
 - `runtime/auth` 的 `sso` 重导出与 SSO Callback 形成 Rollup 循环分块风险，构建器提示可能破坏执行顺序。
-- platform/apps、runtime/boot、runtime/router、micro-shells 和 main 的静态/动态导入交织，无法按预期拆分 Chunk。
+- platform/apps、runtime/boot、runtime/router 和 main 的静态导入仍然交织。`micro-shells` 已删除。
 - 主 JavaScript Chunk 当前约 `1.6 MB`（未压缩），超过 Vite 默认警告阈值。
 - MockJS 的 `eval` 被生产构建扫描，说明 Mock 相关代码仍进入依赖图。
 - `env-config.js` 作为在主模块前执行的经典脚本，会产生 Vite “无法打包”提示；这是当前运行时注入设计，但仍需验证 CSP、缓存和加载顺序。
@@ -101,3 +102,21 @@ runtime 无法作为独立应用运行时复用。建议由 views 导出页面�
 ### 演进方向
 
 优先解除跨层循环依赖和 `sso` 重导出循环，再设计稳定的 manualChunks；让 Mock 注册仅在开发/显式 Mock 条件下进入构建图；为 `env-config.js` 明确缓存与 CSP 策略。不能只提高 chunk 警告阈值隐藏问题。
+
+## DEV-008：Docker 未刷新资源配置 / 未跑 vue-tsc
+
+### 状态
+
+待评估。
+
+### 说明
+
+Dockerfile 使用 CLI stub 满足 `npm ci` 后直接 `npx vite build`，不跑 `npm run build:config`，也不经 `vue-tsc`。资源 JSON 已跟踪进仓；改路由/权限后需本地 regenerate 再提交。镜像成功不代表 Profile 构建验证通过或资源配置最新。
+
+## 已知保留
+
+| 项 | 说明 |
+| --- | --- |
+| Role 业务对话框 | `RoleEditDialog` / `RolePermissionTags` / `PermissionTooltip` 留在 `views/role` |
+| `js-sha256` | `personal_static_access_token` 本地哈希仍依赖 |
+| API 权限前端检查 | `ResourceManager.hasApiPermission` 直接放行（与同类 App 一致） |

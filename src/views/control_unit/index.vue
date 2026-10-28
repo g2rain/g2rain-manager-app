@@ -198,6 +198,11 @@
               default-expand-all
               :props="{ label: 'name', children: 'children' }"
             />
+            <el-empty
+              v-else
+              :description="$t('G2_EMPTY_DATA', '暂无数据')"
+              :image-size="80"
+            />
           </el-scrollbar>
         </el-tab-pane>
 
@@ -1041,7 +1046,7 @@ onMounted(async () => {
 }
 
 .table-wrapper {
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--g2-border-color);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -1056,7 +1061,7 @@ onMounted(async () => {
 
 .table-wrapper :deep(.el-table th.el-table__cell) {
   font-weight: 600;
-  color: #2c2c2c;
+  color: var(--g2-text-primary);
 }
 
 /* 允许单元格内容向上溢出 */
@@ -1100,9 +1105,10 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   padding: 7px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--g2-border-color);
   border-radius: 4px;
   background-color: var(--g2-bg-container);
+  color: var(--g2-text-primary);
   font-size: 13px;
   position: relative;
   overflow: visible;
@@ -1128,7 +1134,7 @@ onMounted(async () => {
 }
 
 .api-fieldset {
-  border: 1px solid #e0e3eb;
+  border: 1px solid var(--g2-border-color);
   border-radius: 12px;
   padding: 16px;
   position: relative;
@@ -1138,7 +1144,7 @@ onMounted(async () => {
   padding: 0 12px;
   font-weight: 600;
   font-size: 14px;
-  color: #2c2c2c;
+  color: var(--g2-text-primary);
   margin-left: 40px;
 }
 
@@ -1203,7 +1209,7 @@ onMounted(async () => {
 
 .api-name {
   font-weight: 500;
-  color: #2c2c2c;
+  color: var(--g2-text-primary);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1222,7 +1228,7 @@ onMounted(async () => {
 
 .api-meta {
   font-size: 12px;
-  color: #6e6e6e;
+  color: var(--g2-text-secondary);
   margin-left: 0;
   max-width: 100%;
   overflow: hidden;

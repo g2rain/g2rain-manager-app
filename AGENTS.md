@@ -38,11 +38,12 @@
 - 业务页面、页面 API、类型和 Mock 保留在 `src/views`；新增页面同步 `src/views/route-map.ts`。
 - 可复用模块通过稳定 `index.ts` 暴露公共 API，不深度导入内部实现。
 - 使用 Vue Composition API 和 `<script setup lang="ts">`；避免新增 `any`，第三方边界确需使用时限制范围并说明原因。
-- 独立模式与 qiankun 集成模式都要考虑；集成模式保持 `appKey` 多实例隔离和 mount/update/unmount 配对清理。
+- 独立模式与 qiankun 集成模式都要考虑；集成模式要求显式 `applicationCode`/`viewId`/`instanceId`（`appKey===instanceId`），认证经 Auth Bridge，禁止回退 props Token。
+- 通用 UI / HTTP 用 `@g2rain/{ui,http}`；`platform/stores/setup.ts` 须在模块加载时 `setActivePinia`（Auth Bridge 在 Vue mount 前读 Store）。
 - 前端权限只控制界面呈现，不能替代 Gateway 和后端服务鉴权。
 - Token、私钥、生产域名、真实个人数据和敏感配置不得写入源码、Mock、生成结果、文档或提交记录。
-- 修改路由或静态权限点后评估并运行 `npm run build:config`；当前工具不生成 API endpoint，不能伪造生成结果。
-- 运行代码生成器前检查 Git 状态；生成器会覆盖文件，生成后必须 Review Diff。
+- `build:config` 会覆盖已跟踪的资源 JSON；当前 API parser 未接入主流程，`apiEndpoints` 为空。改路由/权限后本地 regenerate 再提交。
+- 运行 `create-g2rain-app` 生成前检查 Git 状态；生成器会覆盖文件，生成后必须 Review Diff。
 - 修改 API、页面、配置、命令、生成流程、运行时或部署时同步更新 docs 和 README。
 - 有意偏离中央 Profile 时更新 `docs/architecture/deviations.md`；跨项目长期变化提交中央 ADR/Profile。
 - 不添加只供 Agent 使用的项目脚本；真正的自动检查应服务开发者和 CI。
