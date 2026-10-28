@@ -209,7 +209,7 @@
         <!-- 界面 -->
         <el-tab-pane :label="$t('MG_CTRL_UNIT_TAB_VIEW', '界面资源')" name="view">
           <el-scrollbar max-height="58vh">
-            <div class="table-wrapper">
+            <div v-if="pages.length > 0" class="table-wrapper">
               <el-table :data="pages" style="width: 100%">
                 <!-- 页面 -->
                 <el-table-column :label="$t('MG_CTRL_UNIT_COL_PAGE', '页面')" width="200" header-align="center">
@@ -239,6 +239,11 @@
                 </el-table-column>
               </el-table>
             </div>
+            <el-empty
+              v-else
+              :description="$t('G2_EMPTY_DATA', '暂无数据')"
+              :image-size="80"
+            />
           </el-scrollbar>
         </el-tab-pane>
 
@@ -280,8 +285,7 @@
             </div>
           </div>
           <el-scrollbar max-height="58vh">
-            <!-- 根据接口数据渲染复选框即可 -->
-            <div class="api-groups-container">
+            <div v-if="apiServiceCode && apiGroups.length > 0" class="api-groups-container">
               <fieldset class="api-fieldset" v-for="group in apiGroups" :key="group.tag">
                 <legend class="api-legend">{{ group.tag }}</legend>
                 <div class="api-items">
@@ -305,6 +309,15 @@
                 </div>
               </fieldset>
             </div>
+            <el-empty
+              v-else
+              :description="
+                apiServiceCode
+                  ? $t('G2_EMPTY_DATA', '暂无数据')
+                  : $t('MG_CTRL_UNIT_PH_API_SERVICE', '请选择服务后加载接口')
+              "
+              :image-size="80"
+            />
           </el-scrollbar>
         </el-tab-pane>
       </el-tabs>
