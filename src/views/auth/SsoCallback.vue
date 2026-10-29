@@ -21,14 +21,12 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { sso } from '@runtime/auth';
 import { useAccessTokenStore } from '@platform/stores';
 import { t } from '@platform/i18n';
 
 const isLoading = ref(true);
 const error = ref<string | null>(null);
-const vueRouter = useRouter(); // 在独立模式下使用 Vue Router 实例
 
 const extractCodeFromUrl = (): string | null => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -41,7 +39,6 @@ const extractClientIdFromUrl = (): string | null => {
 };
 
 const processCallback = async () => {
-    // 短暂延迟，确保 UI 更新
   try {
     const accessTokenStore = useAccessTokenStore();
     accessTokenStore.status = 'SSO';
@@ -53,21 +50,8 @@ const processCallback = async () => {
 
     await sso.generateToken(code);
 
-    const returnUrl = localStorage.getItem('return_url') || '/';
-    localStorage.removeItem('return_url');
-
-    // 设置加载状态为 false，显示成功状态
+    // 只显示成功状态；跳回 return_url 由 main.ts 在资源路由加载完成后统一处理
     isLoading.value = false;
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    // 根据运行模式进行路由跳转
-    try {
-      await vueRouter.replace(returnUrl);
-    } catch (routerError) {
-      console.error('[SsoCallback] 路由跳转失败:', routerError);
-      // 如果路由跳转失败，尝试使用 window.location
-      window.location.href = returnUrl;
-    }
   } catch (err) {
     error.value = err instanceof Error ? err.message : t('MG_AU_SSO_ERR', '认证处理失败');
     isLoading.value = false;
