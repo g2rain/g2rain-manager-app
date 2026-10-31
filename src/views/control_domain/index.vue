@@ -36,7 +36,7 @@
     <!-- 标题和操作按钮 -->
     <div class="control-domain-page__header">
       <div class="control-domain-page__title-group">
-        <h2>{{ $t('MG_CTRL_DOM_TITLE', '管理业务能力数据') }}</h2>
+        <h2>{{ $t('MG_CTRL_DOM_TITLE', '业务能力') }}</h2>
       </div>
       <el-button type="primary" v-permission="'control_domain:add'" @click="handleCreate">{{ $t('MG_CTRL_DOM_BTN_ADD', '新增业务能力') }}</el-button>
     </div>
@@ -62,7 +62,7 @@
       </el-table-column>
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="300">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="480">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
           <el-button type="primary" v-permission="'control_domain:edit'" link size="small"
@@ -138,8 +138,8 @@
           />
         </el-form-item>
 
-        <el-form-item :label="$t('MG_FIELD_DESC', '描述')" prop="description">
-          <el-input v-model="editForm.description" type="textarea" :rows="4" :placeholder="$t('MG_PH_DESC', '请输入描述')" show-word-limit
+        <el-form-item :label="$t('G2_FIELD_DESC', '描述')" prop="description">
+          <el-input v-model="editForm.description" type="textarea" :rows="4" :placeholder="$t('G2_PH_DESC', '请输入描述')" show-word-limit
             maxlength="200" />
         </el-form-item>
       </el-form>
@@ -173,7 +173,7 @@
             <DictText :value="currentRow?.controlDomainScope" usage-code="CONTROL_DOMAIN_SCOPE" :api-method="DictItemApi.select"/>
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_FIELD_DESC', '描述')">{{ currentRow?.description }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_DESC', '描述')">{{ currentRow?.description }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
@@ -195,7 +195,7 @@
         </el-table-column>
         <!-- 业务展示列 -->
         <el-table-column prop="controlUnitName" :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')" />
-        <el-table-column prop="sessionType" :label="$t('MG_CTRL_UNIT_FIELD_SESSION_TYPE', '会话类型')" width="120">
+        <el-table-column prop="sessionType" :label="$t('MG_CTRL_UNIT_FIELD_SESSION_TYPE', '会话类型')" width="140">
           <template #default="{ row }">
             <DictText :value="row?.sessionType" usage-code="SESSION_TYPE" :api-method="DictItemApi.select" />
           </template>
@@ -215,7 +215,7 @@
 
     <!-- 开通功能 -->
     <el-dialog v-model="activateFeaturesDialog.visible" :title="$t('MG_CTRL_DOM_DLG_ACTIVATE', '开通功能')" width="600px">
-      <OrganSelect v-model="activateFeaturesDialog.organId" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
+      <OrganSelect v-model="activateFeaturesDialog.organId" :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')" width="200px" />
       <template #footer>
         <el-button @click="resetActivateFeaturesDialogDialog">{{ $t('G2_BTN_CANCEL', '取消') }}</el-button>
         <el-button type="primary" @click="activateFeatures">{{ $t('G2_BTN_CONFIRM', '确定') }}</el-button>
@@ -363,7 +363,7 @@ const handleView = (row: ControlDomain) => {
 // 删除数据记录
 const handleDelete = (row: ControlDomain) => {
   ElMessageBox.confirm(
-    t('MG_CTRL_DOM_DEL_CONFIRM', `确认删除业务能力「${row.id}」吗？`),
+    t('MG_CTRL_DOM_DEL_CONFIRM', { id: row.id }, '确认删除业务能力「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
@@ -408,7 +408,7 @@ const editRules = computed<FormRules>(() => ({
   controlDomainName: [{ required: true, message: t('MG_CTRL_DOM_VLD_NAME', '请输入业务能力名称'), trigger: 'blur' }],
   controlDomainType: [{ required: true, message: t('MG_CTRL_DOM_VLD_TYPE', '请选择业务能力类型'), trigger: 'blur' }],
   controlDomainScope: [{ required: true, message: t('MG_CTRL_DOM_VLD_SCOPE', '请选择业务能力范围'), trigger: 'blur' }],
-  description: [{ required: false, message: t('MG_PH_DESC', '请输入描述'), trigger: 'blur' }],
+  description: [{ required: false, message: t('G2_PH_DESC', '请输入描述'), trigger: 'blur' }],
 }));
 
 /** 类型为 TRADE 时，范围仅允许 CUSTOMER */

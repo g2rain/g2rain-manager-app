@@ -2,19 +2,19 @@
   <div class="sso-callback">
     <div v-if="isLoading" class="loading-container">
       <div class="spinner"></div>
-      <p>{{ $t('MG_AU_SSO_PROC', '正在处理认证...') }}</p>
+      <p>{{ $t('G2_AU_SSO_PROC', '正在处理认证...') }}</p>
     </div>
 
     <div v-else-if="error" class="error-container">
-      <h2>{{ $t('MG_AU_SSO_FAIL', '认证失败') }}</h2>
+      <h2>{{ $t('G2_AU_SSO_FAIL', '认证失败') }}</h2>
       <p>{{ error }}</p>
       <button @click="retry" class="retry-button">{{ $t('G2_BTN_RETRY', '重试') }}</button>
-      <button @click="goToLogin" class="login-button">{{ $t('MG_AU_BACK_LOGIN', '返回登录') }}</button>
+      <button @click="goToLogin" class="login-button">{{ $t('G2_AU_BACK_LOGIN', '返回登录') }}</button>
     </div>
 
     <div v-else class="success-container">
-      <h2>{{ $t('MG_AU_SSO_OK', '认证成功') }}</h2>
-      <p>{{ $t('MG_AU_SSO_REDIRECT', '正在跳转到应用...') }}</p>
+      <h2>{{ $t('G2_AU_SSO_OK', '认证成功') }}</h2>
+      <p>{{ $t('G2_AU_SSO_REDIRECT', '正在跳转到应用...') }}</p>
     </div>
   </div>
 </template>
@@ -45,7 +45,7 @@ const processCallback = async () => {
     const code = extractCodeFromUrl();
     const clientId = extractClientIdFromUrl();
     if (!code || !clientId) {
-      throw new Error(t('MG_AU_NO_CODE', '未找到授权码或者客户端ID'));
+      throw new Error(t('G2_AU_NO_CODE', '未找到授权码或者客户端ID'));
     }
 
     await sso.generateToken(code);
@@ -53,7 +53,7 @@ const processCallback = async () => {
     // 只显示成功状态；跳回 return_url 由 main.ts 在资源路由加载完成后统一处理
     isLoading.value = false;
   } catch (err) {
-    error.value = err instanceof Error ? err.message : t('MG_AU_SSO_ERR', '认证处理失败');
+    error.value = err instanceof Error ? err.message : t('G2_AU_SSO_ERR', '认证处理失败');
     isLoading.value = false;
   }
 };

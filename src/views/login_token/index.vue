@@ -25,7 +25,7 @@
             v-model="queryForm.organType"
             usage-code="ORGAN_TYPE"
             :api-method="DictItemApi.select"
-            :placeholder="$t('MG_LOGIN_TOKEN_PH_ORGAN_TYPE', '请选择机构类型')"
+            :placeholder="$t('G2_VLD_REQ_ORG_TYPE', '请选择机构类型')"
           />
         </el-form-item>
         <el-form-item :label="$t('MG_LOGIN_TOKEN_FIELD_PASSPORT_ID', '账号标识')">
@@ -36,7 +36,7 @@
             style="width: 200px"
           />
         </el-form-item>
-        <el-form-item :label="$t('MG_LOGIN_TOKEN_FIELD_USER_ID', '用户标识')">
+        <el-form-item :label="$t('G2_FIELD_USER_ID', '用户标识')">
           <el-input
             v-model="queryForm.userId"
             :placeholder="$t('MG_LOGIN_TOKEN_PH_USER_ID', '请输入用户标识')"
@@ -52,7 +52,7 @@
             style="width: 200px"
           />
         </el-form-item>
-        <el-form-item :label="$t('MG_LOGIN_TOKEN_FIELD_APPLICATION_ID', '应用标识')">
+        <el-form-item :label="$t('G2_FIELD_APP_ID', '应用标识')">
           <el-input
             v-model="queryForm.applicationId"
             :placeholder="$t('MG_LOGIN_TOKEN_PH_APPLICATION_ID', '请输入应用标识')"
@@ -89,7 +89,7 @@
     <!-- 标题和操作按钮 -->
     <div class="login_token-page__header">
       <div class="login_token-page__title-group">
-        <h2>{{ $t('MG_LOGIN_TOKEN_TITLE', '管理登陆日志数据') }}</h2>
+        <h2>{{ $t('MG_LOGIN_TOKEN_TITLE', '登录日志') }}</h2>
       </div>
     </div>
 
@@ -102,7 +102,7 @@
       @sort-change="handleSortChange"
     >
       <el-table-column prop="clientId" :label="$t('MG_LOGIN_TOKEN_FIELD_CLIENT_ID', '客户端标识')" width="180" />
-      <el-table-column prop="applicationId" :label="$t('MG_LOGIN_TOKEN_FIELD_APPLICATION_ID', '应用标识')" width="140" />
+      <el-table-column prop="applicationId" :label="$t('G2_FIELD_APP_ID', '应用标识')" width="140" />
       <el-table-column
         prop="applicationOrganId"
         :label="$t('MG_LOGIN_TOKEN_FIELD_APP_ORGAN_ID', '应用所属机构标识')"
@@ -114,9 +114,13 @@
         </template>
       </el-table-column>
       <el-table-column prop="passportId" :label="$t('MG_LOGIN_TOKEN_FIELD_PASSPORT_ID', '账号标识')" width="140" />
-      <el-table-column prop="userId" :label="$t('MG_LOGIN_TOKEN_FIELD_USER_ID', '用户标识')" width="140" />
+      <el-table-column prop="userId" :label="$t('G2_FIELD_USER_ID', '用户标识')" width="140" />
       <el-table-column prop="realName" :label="$t('G2_FIELD_REAL_NAME', '真实姓名')" width="180" />
-      <el-table-column prop="organId" :label="$t('MG_LOGIN_TOKEN_FIELD_ORGAN_ID', '机构标识')" width="140" />
+      <el-table-column :label="$t('G2_FIELD_ORGAN', '所属机构')" width="140">
+        <template #default="{ row }">
+          {{ row.organName || row.organId }}
+        </template>
+      </el-table-column>
       <el-table-column prop="organType" :label="$t('MG_LOGIN_TOKEN_FIELD_ORGAN_TYPE', '机构类型')" width="180">
         <template #default="{ row }">
           <DictText :value="row?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
@@ -152,21 +156,21 @@
       />
     </div>
 
-    <el-dialog v-model="detailDialogVisible" :title="$t('MG_LOGIN_TOKEN_DETAIL', '登陆日志明细')" width="520px">
+    <el-dialog v-model="detailDialogVisible" :title="$t('MG_LOGIN_TOKEN_DETAIL', '登陆日志明细')" width="600px">
     <!-- 明细弹窗 -->
       <el-descriptions :column="1" border>
         <el-descriptions-item :label="$t('MG_LOGIN_TOKEN_COL_LOG_ID', '日志标识')">{{ currentRow?.id }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_LOGIN_TOKEN_FIELD_CLIENT_ID', '客户端标识')">{{ currentRow?.clientId }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_LOGIN_TOKEN_FIELD_APPLICATION_ID', '应用标识')">{{ currentRow?.applicationId }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_APP_ID', '应用标识')">{{ currentRow?.applicationId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_LOGIN_TOKEN_FIELD_APP_ORGAN_ID', '应用所属机构标识')">{{ currentRow?.applicationOrganId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_LOGIN_TOKEN_FIELD_SESSION_TYPE', '会话类型')">
           <DictText :value="currentRow?.sessionType" usage-code="SESSION_TYPE" :api-method="DictItemApi.select" />
         </el-descriptions-item>
         <el-descriptions-item :label="$t('MG_LOGIN_TOKEN_FIELD_PASSPORT_ID', '账号标识')">{{ currentRow?.passportId }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_LOGIN_TOKEN_FIELD_USER_ID', '用户标识')">{{ currentRow?.userId }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_USER_ID', '用户标识')">{{ currentRow?.userId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_REAL_NAME', '真实姓名')">{{ currentRow?.realName }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_LOGIN_TOKEN_FIELD_ADMIN_USER', '超级管理员')">{{ currentRow?.adminUser }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_LOGIN_TOKEN_FIELD_ORGAN_ID', '机构标识')">{{ currentRow?.organId }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName || currentRow?.organId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_LOGIN_TOKEN_FIELD_ORGAN_TYPE', '机构类型')">
           <DictText :value="currentRow?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
         </el-descriptions-item>

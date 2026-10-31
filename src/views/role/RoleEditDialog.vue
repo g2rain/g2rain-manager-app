@@ -8,7 +8,7 @@
     @closed="handleClosed"
   >
     <el-form ref="formRef" :model="form" :rules="formRules" label-width="100px">
-      <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')" prop="organId">
+      <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')" prop="organId">
         <el-input
           v-if="mode === 'invite'"
           :model-value="organNameDisplay"
@@ -21,7 +21,7 @@
           v-model="form.organId"
           :disabled="isEdit"
           :default-value="null"
-          :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')"
+          :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')"
           width="100%"
           @change="handleOrganChange"
         />
@@ -140,7 +140,7 @@ const form = reactive({
 const organNameDisplay = computed(() => props.organName || String(form.organId ?? ''));
 
 const formRules = computed<FormRules>(() => ({
-  organId: [{ required: true, message: t('MG_ROLE_VLD_ORGAN', '请选择所属机构'), trigger: 'change' }],
+  organId: [{ required: true, message: t('G2_PH_ORGAN', '请选择所属机构'), trigger: 'change' }],
   roleName: [
     { required: true, message: t('MG_ROLE_VLD_NAME', '请输入角色名称'), trigger: 'blur' },
     {

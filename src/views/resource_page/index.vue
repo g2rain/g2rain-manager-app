@@ -17,19 +17,19 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item :label="$t('MG_RES_PAGE_FIELD_NAME', '页面名称')">
+        <el-form-item :label="$t('G2_FIELD_PAGE_NAME', '页面名称')">
           <el-input
             v-model="queryForm.pageName"
-            :placeholder="$t('MG_RES_PAGE_PH_NAME', '请输入页面名称')"
+            :placeholder="$t('G2_PH_PAGE_NAME', '请输入页面名称')"
             clearable
             style="width: 200px"
           />
         </el-form-item>
 
-        <el-form-item :label="$t('MG_RES_PAGE_FIELD_CODE', '页面编码')">
+        <el-form-item :label="$t('G2_FIELD_PAGE_CODE', '页面编码')">
           <el-input
             v-model="queryForm.pageCode"
-            :placeholder="$t('MG_RES_PAGE_PH_CODE', '请输入页面编码')"
+            :placeholder="$t('G2_PH_PAGE_CODE', '请输入页面编码')"
             clearable
             style="width: 200px"
           />
@@ -46,22 +46,22 @@
     <!-- 标题和操作按钮 -->
     <div class="resource-page-page__header">
       <div class="resource-page-page__title-group">
-        <h2>{{ $t('MG_RES_PAGE_TITLE', '管理页面数据') }}</h2>
+        <h2>{{ $t('G2_FIELD_PAGE', '页面') }}</h2>
       </div>
       <el-button type="primary" v-permission="'resource_page:add'" @click="handleCreate">
-        {{ $t('MG_RES_PAGE_BTN_ADD', '新增页面') }}
+        {{ $t('G2_BTN_ADD_PAGE', '新增页面') }}
       </el-button>
     </div>
 
     <el-table :data="tableData" border stripe style="width: 100%">
       <el-table-column prop="id" :label="$t('MG_RES_PAGE_COL_ID', '页面序号')" width="160" />
-      <el-table-column prop="applicationId" :label="$t('MG_FIELD_APPLICATION', '所属应用')" width="130">
+      <el-table-column prop="applicationId" :label="$t('MG_FIELD_APPLICATION', '所属应用')" width="200">
         <template #default="{ row }">
           {{ applicationOptions.find(item => item.value === row?.applicationId)?.label || '' }}
         </template>
       </el-table-column>
-      <el-table-column prop="pageName" :label="$t('MG_RES_PAGE_FIELD_NAME', '页面名称')" width="160" />
-      <el-table-column prop="pageCode" :label="$t('MG_RES_PAGE_FIELD_CODE', '页面编码')" width="180" />
+      <el-table-column prop="pageName" :label="$t('G2_FIELD_PAGE_NAME', '页面名称')" width="160" />
+      <el-table-column prop="pageCode" :label="$t('G2_FIELD_PAGE_CODE', '页面编码')" width="180" />
       <el-table-column prop="linkPath" :label="$t('MG_RES_MENU_FIELD_LINK', '链接路径')" width="240" />
       <el-table-column prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" />
       <el-table-column prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" />
@@ -116,12 +116,12 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item :label="$t('MG_RES_PAGE_FIELD_NAME', '页面名称')" prop="pageName">
-          <el-input v-model="editForm.pageName" :placeholder="$t('MG_RES_PAGE_PH_NAME', '请输入页面名称')" />
+        <el-form-item :label="$t('G2_FIELD_PAGE_NAME', '页面名称')" prop="pageName">
+          <el-input v-model="editForm.pageName" :placeholder="$t('G2_PH_PAGE_NAME', '请输入页面名称')" />
         </el-form-item>
 
-        <el-form-item :label="$t('MG_RES_PAGE_FIELD_CODE', '页面编码')" prop="pageCode">
-          <el-input v-model="editForm.pageCode" :placeholder="$t('MG_RES_PAGE_PH_CODE', '请输入页面编码')" />
+        <el-form-item :label="$t('G2_FIELD_PAGE_CODE', '页面编码')" prop="pageCode">
+          <el-input v-model="editForm.pageCode" :placeholder="$t('G2_PH_PAGE_CODE', '请输入页面编码')" />
         </el-form-item>
 
         <el-form-item :label="$t('MG_RES_PAGE_FIELD_PATH', '页面路径')" prop="linkPath">
@@ -244,7 +244,7 @@ const handlePageChange = (page: number) => {
 // 删除数据记录
 const handleDelete = (row: ResourcePage) => {
   ElMessageBox.confirm(
-    t('MG_RES_PAGE_DEL_CONFIRM', `确认删除页面「${row.id}」吗？`),
+    t('G2_MSG_DEL_PAGE_CONFIRM', { id: row.id }, '确认删除页面「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
@@ -277,14 +277,14 @@ const editForm = reactive({
 });
 
 const editDialogTitle = computed(() =>
-  isEdit.value ? t('MG_RES_PAGE_DLG_EDIT', '编辑页面') : t('MG_RES_PAGE_DLG_ADD', '新增页面'),
+  isEdit.value ? t('G2_BTN_EDIT_PAGE', '编辑页面') : t('G2_BTN_ADD_PAGE', '新增页面'),
 );
 
 // 表单校验规则
 const editRules = computed<FormRules>(() => ({
   applicationId: [{ required: true, message: t('MG_RES_PAGE_VLD_APP', '请选择归属应用'), trigger: 'blur' }],
-  pageName: [{ required: true, message: t('MG_RES_PAGE_VLD_NAME', '请输入页面名称'), trigger: 'blur' }],
-  pageCode: [{ required: true, message: t('MG_RES_PAGE_VLD_CODE', '请输入页面编码'), trigger: 'blur' }],
+  pageName: [{ required: true, message: t('G2_PH_PAGE_NAME', '请输入页面名称'), trigger: 'blur' }],
+  pageCode: [{ required: true, message: t('G2_PH_PAGE_CODE', '请输入页面编码'), trigger: 'blur' }],
   linkPath: [{ required: true, message: t('MG_RES_PAGE_VLD_PATH', '请输入链接路径'), trigger: 'blur' }],
 }));
 

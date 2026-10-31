@@ -4,8 +4,8 @@
     <el-card class="application-authorization-page__search" shadow="never">
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
-        <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')">
-          <OrganSelect v-model="queryForm.organId" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
+        <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')">
+          <OrganSelect v-model="queryForm.organId" :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')" width="200px" />
         <!-- 业务特定查询字段 -->
         </el-form-item>
 
@@ -20,7 +20,7 @@
         </el-form-item>
 
         <el-form-item :label="$t('G2_FIELD_STATUS', '状态')">
-          <DictSelect v-model="queryForm.status" usage-code="AUTHORIZATION_STATUS" :api-method="DictItemApi.select" :placeholder="$t('MG_APP_AUTH_PH_STATUS', '请选择状态')" />
+          <DictSelect v-model="queryForm.status" usage-code="AUTHORIZATION_STATUS" :api-method="DictItemApi.select" :placeholder="$t('G2_PH_STATUS', '请选择状态')" />
         </el-form-item>
         <!-- 操作按钮 -->
         <template #actions>
@@ -35,14 +35,18 @@
     <!-- 标题和操作按钮 -->
     <div class="application-authorization-page__header">
       <div class="application-authorization-page__title-group">
-        <h2>{{ $t('MG_APP_AUTH_TITLE', '管理应用授权数据') }}</h2>
+        <h2>{{ $t('MG_APP_AUTH_TITLE', '应用授权') }}</h2>
       </div>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
-      <el-table-column prop="id" :label="$t('MG_APP_AUTH_COL_ID', '应用授权序号')" width="120" />
-      <el-table-column prop="organName" :label="$t('MG_FIELD_ORGAN', '所属机构')" width="140" />
+      <el-table-column prop="id" :label="$t('MG_APP_AUTH_COL_ID', '应用授权序号')" width="140" />
+      <el-table-column :label="$t('G2_FIELD_ORGAN', '所属机构')" width="140">
+        <template #default="{ row }">
+          {{ row.organName || row.organId }}
+        </template>
+      </el-table-column>
       <el-table-column prop="applicationName" :label="$t('MG_APP_AUTH_FIELD_APPLICATION', '所属应用')" width="140" />
       <el-table-column prop="controlDomainName" :label="$t('MG_APP_AUTH_COL_CAPABILITY', '业务能力名称')" width="160">
         <template #default="{ row }">
@@ -66,10 +70,10 @@
           />
         </template>
       </el-table-column>
-      <el-table-column prop="subscriptionId" :label="$t('MG_APP_AUTH_FIELD_SUBSCRIPTION', '订阅序号')" width="140" />
+      <el-table-column prop="subscriptionId" :label="$t('MG_APP_AUTH_FIELD_SUBSCRIPTION', '订阅序号')" width="180" />
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="300">
         <template #default="{ row }">
           <el-button type="warning" v-permission="'application_authorization:control_utils_sync'" link size="small" @click="updateSyncControlUtils(row)">{{ $t('MG_APP_AUTH_BTN_SYNC', '同步能力') }}</el-button>
           <el-button v-if="row.apiKeySupported" type="primary"  v-permission="'application_authorization:manager_api_keys'" link size="small" @click="openApiKeyManager(row)">{{ $t('MG_APP_AUTH_BTN_API_KEY', '模型秘钥管理') }}</el-button>

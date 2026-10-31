@@ -7,7 +7,7 @@
 
     <!-- 表单内容 -->
     <div class="resource-settings-page__content" style="background: var(--g2-bg-container); padding: 24px; border-radius: 4px;">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px" style="max-width: 500px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="140px" style="max-width: 500px">
         <el-form-item :label="$t('MG_RES_SETTINGS_FIELD_APPLICATION', '所属应用')" prop="applicationId">
           <el-select
             v-model="editForm.applicationId"

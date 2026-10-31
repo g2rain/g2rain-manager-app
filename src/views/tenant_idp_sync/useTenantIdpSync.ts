@@ -18,11 +18,15 @@ const SUPPORTED_SYNC_IDP_TYPE = 'DINGTALK';
 function formatSyncSuccessMessage(result: TenantIdpSyncResult): string {
   return t(
     'MG_IDP_ENT_SYNC_OK',
-    '同步完成：'
-      + `部门新增 ${result.departmentsCreated}、更新 ${result.departmentsUpdated}；`
-      + `成员新增 ${result.membersCreated}、更新 ${result.membersUpdated}；`
-      + `角色分配 ${result.rolesAssigned ?? 0}；`
-      + `耗时 ${result.elapsedMs}ms`,
+    {
+      departmentsCreated: result.departmentsCreated,
+      departmentsUpdated: result.departmentsUpdated,
+      membersCreated: result.membersCreated,
+      membersUpdated: result.membersUpdated,
+      rolesAssigned: result.rolesAssigned ?? 0,
+      elapsedMs: result.elapsedMs,
+    },
+    '同步完成：部门新增 {departmentsCreated}、更新 {departmentsUpdated}；成员新增 {membersCreated}、更新 {membersUpdated}；角色分配 {rolesAssigned}；耗时 {elapsedMs}ms',
   );
 }
 
@@ -83,7 +87,8 @@ export function useTenantIdpSync() {
       await ElMessageBox.confirm(
         t(
           'MG_IDP_ENT_SYNC_CONFIRM_WITH_ROLE',
-          `将从 IdP 拉取通讯录并初始化部门与员工，并为快照内全部成员分配角色「${roleLabel}」；FULL 模式会对快照外数据做对账处理，是否继续？`,
+          { role: roleLabel },
+          '将从 IdP 拉取通讯录并初始化部门与员工，并为快照内全部成员分配角色「{role}」；FULL 模式会对快照外数据做对账处理，是否继续？',
         ),
         t('G2_LBL_TIP', '提示'),
         { type: 'warning' },

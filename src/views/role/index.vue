@@ -3,8 +3,8 @@
     <!-- 查询表单 -->
     <el-card class="role-page__search" shadow="never">
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
-        <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')">
-          <OrganSelect v-model="queryForm.organId" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
+        <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')">
+          <OrganSelect v-model="queryForm.organId" :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')" width="200px" />
         </el-form-item>
 
         <el-form-item :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')">
@@ -26,7 +26,7 @@
 
     <div class="role-page__header">
       <div class="role-page__title-group">
-        <h2>{{ $t('MG_ROLE_TITLE', '管理角色数据') }}</h2>
+        <h2>{{ $t('MG_ROLE_TITLE', '角色') }}</h2>
       </div>
       <el-button type="primary" v-permission="'role:add'" @click="handleCreate">{{ $t('MG_ROLE_BTN_ADD', '新增角色') }}</el-button>
     </div>
@@ -35,7 +35,11 @@
       @sort-change="handleSortChange">
       <el-table-column prop="id" :label="$t('MG_ROLE_COL_ID', '角色序号')" width="120" />
 
-      <el-table-column prop="organName" :label="$t('MG_FIELD_ORGAN', '所属机构')" width="140" />
+      <el-table-column :label="$t('G2_FIELD_ORGAN', '所属机构')" width="140">
+        <template #default="{ row }">
+          {{ row.organName || row.organId }}
+        </template>
+      </el-table-column>
 
       <el-table-column prop="roleType" :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')" width="140">
         <template #default="{ row }">
@@ -57,7 +61,7 @@
 
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
 
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="300">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="450">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
           <el-button type="primary" v-permission="'role:edit'" link size="small" @click="handleEdit(row)">{{ $t('G2_BTN_EDIT', '编辑') }}</el-button>
@@ -96,7 +100,7 @@
     <el-dialog v-model="detailDialogVisible" :title="$t('MG_ROLE_DETAIL', '角色明细')" width="520px">
       <el-descriptions :column="1" border>
         <el-descriptions-item :label="$t('MG_ROLE_COL_ID', '角色序号')">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName || currentRow?.organId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')">
           <el-tag>
             <DictText :value="currentRow?.roleType" usage-code="ROLE_TYPE" :api-method="DictItemApi.select" />
@@ -295,7 +299,7 @@ const handleView = (row: Role) => {
 
 const handleDelete = (row: Role) => {
   ElMessageBox.confirm(
-    t('MG_ROLE_DEL_CONFIRM', `确认删除角色「${row.id}」吗？`),
+    t('MG_ROLE_DEL_CONFIRM', { id: row.id }, '确认删除角色「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )

@@ -33,7 +33,7 @@
     <!-- 标题和操作按钮 -->
     <div class="resource-page-element-page__header">
       <div class="resource-page-element-page__title-group">
-        <h2>{{ $t('MG_RES_ELEM_TITLE', '管理页面元素数据') }}</h2>
+        <h2>{{ $t('MG_RES_ELEM_TITLE', '页面元素') }}</h2>
       </div>
       <el-button type="primary" @click="handleCreate">
         {{ $t('MG_RES_ELEM_BTN_ADD', '新增页面元素') }}
@@ -41,7 +41,7 @@
     </div>
 
     <el-table :data="tableData" border stripe style="width: 100%">
-      <el-table-column prop="id" :label="$t('MG_RES_ELEM_COL_ID', '页面元素序号')" width="120" />
+      <el-table-column prop="id" :label="$t('MG_RES_ELEM_COL_ID', '页面元素序号')" width="160" />
       <el-table-column prop="pageElementName" :label="$t('MG_RES_ELEM_FIELD_NAME', '页面元素名称')" width="180" />
       <el-table-column prop="pageElementCode" :label="$t('MG_RES_ELEM_FIELD_CODE', '页面元素编码')" width="180" />
       <el-table-column prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" />
@@ -181,7 +181,7 @@ const handlePageChange = (page: number) => {
 // 删除数据记录
 const handleDelete = (row: ResourcePageElement) => {
   ElMessageBox.confirm(
-    t('MG_RES_ELEM_DEL_CONFIRM', `确认删除页面元素「${row.id}」吗？`),
+    t('MG_RES_ELEM_DEL_CONFIRM', { id: row.id }, '确认删除页面元素「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )

@@ -12,6 +12,8 @@ export interface IdpEnterpriseOrgan extends BaseVo {
   enterpriseId: string;
   bindMode: string;
   organId: number;
+  /** 网关根据 organId 补全 */
+  organName?: string;
   status: string;
   remark: string;
 }

@@ -6,15 +6,15 @@
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
         <!-- 业务特定查询字段 -->
         <el-form-item :label="$t('MG_ORGAN_FIELD_TYPE', '机构类型')">
-          <DictSelect v-model="queryForm.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" :placeholder="$t('MG_ORGAN_PH_TYPE', '请选择机构类型')" />
+          <DictSelect v-model="queryForm.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" :placeholder="$t('G2_VLD_REQ_ORG_TYPE', '请选择机构类型')" />
         </el-form-item>
 
-        <el-form-item :label="$t('MG_ORGAN_FIELD_NAME', '机构名称')">
-          <el-input v-model="queryForm.organName" :placeholder="$t('MG_ORGAN_PH_NAME', '请输入机构名称')" clearable style="width: 200px" />
+        <el-form-item :label="$t('G2_FIELD_ORGAN_NAME', '机构名称')">
+          <el-input v-model="queryForm.organName" :placeholder="$t('G2_VLD_REQ_ORG_NAME', '请输入机构名称')" clearable style="width: 200px" />
         </el-form-item>
 
         <el-form-item :label="$t('MG_ORGAN_FIELD_STATUS', '机构状态')">
-          <DictSelect v-model="queryForm.status" usage-code="ORGAN_STATUS" :api-method="DictItemApi.select" :placeholder="$t('MG_ORGAN_PH_STATUS', '请选择机构状态')" />
+          <DictSelect v-model="queryForm.status" usage-code="ENABLE_STATUS" :api-method="DictItemApi.select" :placeholder="$t('MG_ORGAN_PH_STATUS', '请选择机构状态')" />
         </el-form-item>
 
         <!-- 操作按钮 -->
@@ -30,14 +30,14 @@
     <!-- 标题和操作按钮 -->
     <div class="organ-page__header">
       <div class="organ-page__title-group">
-        <h2>{{ $t('MG_ORGAN_TITLE', '管理机构数据') }}</h2>
+        <h2>{{ $t('MG_ORGAN_TITLE', '机构') }}</h2>
       </div>
       <el-button type="primary" v-permission="'organ:add'" @click="handleCreate">{{ $t('MG_ORGAN_BTN_ADD', '新增机构') }}</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
-      <el-table-column prop="id" :label="$t('MG_ORGAN_COL_ID', '机构序号')" width="120" />
+      <el-table-column prop="id" :label="$t('MG_ORGAN_COL_ID', '机构序号')" width="140" />
 
       <el-table-column prop="organType" :label="$t('MG_ORGAN_FIELD_TYPE', '机构类型')" width="180">
         <template #default="{ row }">
@@ -47,7 +47,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column prop="organName" :label="$t('MG_ORGAN_FIELD_NAME', '机构名称')" width="180" />
+      <el-table-column prop="organName" :label="$t('G2_FIELD_ORGAN_NAME', '机构名称')" width="180" />
 
       <el-table-column prop="status" :label="$t('MG_ORGAN_FIELD_STATUS', '机构状态')" width="180">
         <template #default="{ row }">
@@ -56,8 +56,8 @@
             permission="organ:status_update"
             active-value="ACTIVE"
             inactive-value="INACTIVE"
-            usage-code="ORGAN_STATUS"
-            :api-method="({ nextValue }) => OrganApi.updateStatus(row.id, String(nextValue))"
+            usage-code="ENABLE_STATUS"
+            :api-method="changeStatus(row)"
             @success="loadData"
           />
         </template>
@@ -98,13 +98,13 @@
 
     <!-- 新增 / 编辑弹窗 -->
     <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="140px">
         <el-form-item :label="$t('MG_ORGAN_FIELD_TYPE', '机构类型')" prop="organType">
-          <DictSelect v-model="editForm.organType" usage-code="ORGAN_TYPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" :placeholder="$t('MG_ORGAN_PH_TYPE', '请选择机构类型')" />
+          <DictSelect v-model="editForm.organType" usage-code="ORGAN_TYPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" :placeholder="$t('G2_VLD_REQ_ORG_TYPE', '请选择机构类型')" />
         </el-form-item>
 
-        <el-form-item :label="$t('MG_ORGAN_FIELD_NAME', '机构名称')" prop="organName">
-          <el-input v-model="editForm.organName" :placeholder="$t('MG_ORGAN_PH_NAME', '请输入机构名称')" />
+        <el-form-item :label="$t('G2_FIELD_ORGAN_NAME', '机构名称')" prop="organName">
+          <el-input v-model="editForm.organName" :placeholder="$t('G2_VLD_REQ_ORG_NAME', '请输入机构名称')" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -124,10 +124,10 @@
             <DictText :value="currentRow?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_ORGAN_FIELD_NAME', '机构名称')">{{ currentRow?.organName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_ORGAN_NAME', '机构名称')">{{ currentRow?.organName }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_ORGAN_FIELD_STATUS', '机构状态')">
           <el-tag :type="currentRow?.status === 'ACTIVE' ? 'success' : 'info'">
-            <DictText :value="currentRow?.status" usage-code="ORGAN_STATUS" :api-method="DictItemApi.select" />
+            <DictText :value="currentRow?.status" usage-code="ENABLE_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
@@ -184,7 +184,7 @@
       destroy-on-close
       @closed="resetInviteDialog"
     >
-      <el-form label-width="100px">
+      <el-form label-width="140px">
         <el-form-item :label="$t('MG_ORGAN_INVITE_ROLE', '加入后角色')" required>
           <el-select
             v-model="inviteDialog.roleId"
@@ -234,7 +234,7 @@
         <el-descriptions :column="1" border>
           <el-descriptions-item :label="$t('MG_ORGAN_INVITE_CODE', '邀请码')">
             <span class="invite-code">{{ inviteDialog.result.inviteCode }}</span>
-            <el-button type="primary" link size="small" @click="copyInviteCode">{{ $t('MG_ORGAN_BTN_COPY', '复制') }}</el-button>
+            <el-button type="primary" link size="small" @click="copyInviteCode">{{ $t('G2_BTN_COPY', '复制') }}</el-button>
           </el-descriptions-item>
           <el-descriptions-item :label="$t('MG_ORGAN_INVITE_EXPIRE', '过期时间')">{{ inviteDialog.result.expireAt }}</el-descriptions-item>
           <el-descriptions-item :label="$t('MG_ORGAN_INVITE_ASSIGNED_ROLE', '分配角色')">{{ inviteDialog.result.roleName }}</el-descriptions-item>
@@ -284,11 +284,11 @@
         <el-table-column prop="status" :label="$t('G2_FIELD_STATUS', '状态')" width="100">
           <template #default="{ row: item }">
             <el-tag effect="light" size="small">
-              <DictText :value="item?.status" usage-code="STATUS" :api-method="DictItemApi.select" />
+              <DictText :value="item?.status" usage-code="ENABLE_STATUS" :api-method="DictItemApi.select" />
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="remark" :label="$t('MG_ORGAN_COL_REMARK', '备注')" min-width="140" show-overflow-tooltip />
+        <el-table-column prop="remark" :label="$t('G2_FIELD_REMARK', '备注')" min-width="140" show-overflow-tooltip />
         <el-table-column prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="170" />
       </el-table>
       <template #footer>
@@ -316,6 +316,11 @@ import type { IdpEnterpriseOrgan } from '../idp_enterprise_organ/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
 import { DictSelect, DictText, StatusSwitch } from '@g2rain/ui/platform';
+
+// 状态开关回调：放在 script 里，避免模板内直接引用类导致 IDE 类型误报
+const changeStatus = (row: Organ) =>
+  ({ nextValue }: { nextValue: string | number | boolean }) =>
+    OrganApi.updateStatus(row.id, String(nextValue));
 
 // 组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
@@ -422,7 +427,7 @@ const handleView = (row: Organ) => {
 // 删除数据记录
 const handleDelete = (row: Organ) => {
   ElMessageBox.confirm(
-    t('MG_ORGAN_DEL_CONFIRM', `确认删除机构「${row.id}」吗？`),
+    t('MG_ORGAN_DEL_CONFIRM', { id: row.id }, '确认删除机构「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
@@ -619,11 +624,11 @@ const inviteRoleReady = computed(
 );
 
 const inviteDialogTitle = computed(() =>
-  t('MG_ORGAN_DLG_INVITE_TITLE', `机构邀请码 — ${inviteDialog.organName ?? ''}`),
+  t('MG_ORGAN_DLG_INVITE_TITLE', { name: inviteDialog.organName ?? '' }, '机构邀请码 — {name}'),
 );
 
 const idpDrawerTitle = computed(() =>
-  t('MG_ORGAN_DLG_IDP_TITLE', `企业三方授权绑定（机构 ${currentOrganName.value ?? ''}）`),
+  t('MG_ORGAN_DLG_IDP_TITLE', { name: currentOrganName.value ?? '' }, '企业三方授权绑定（机构 {name}）'),
 );
 
 const resetInviteDialog = () => {

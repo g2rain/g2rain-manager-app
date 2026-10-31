@@ -4,8 +4,8 @@
     <el-card class="application-page__search" shadow="never">
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
-        <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')">
-          <OrganSelect v-model="queryForm.organId" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
+        <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')">
+          <OrganSelect v-model="queryForm.organId" :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')" width="200px" />
         <!-- 业务特定查询字段 -->
         </el-form-item>
 
@@ -34,15 +34,19 @@
     <!-- 标题和操作按钮 -->
     <div class="application-page__header">
       <div class="application-page__title-group">
-        <h2>{{ $t('MG_APP_TITLE', '管理应用数据') }}</h2>
+        <h2>{{ $t('MG_APP_TITLE', '应用') }}</h2>
       </div>
       <el-button type="primary" v-permission="'application:add'" @click="handleCreate">{{ $t('MG_APP_BTN_ADD', '新增应用') }}</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
-      <el-table-column prop="id" :label="$t('MG_APP_COL_ID', '应用标识')" width="140" />
-      <el-table-column prop="organName" :label="$t('MG_FIELD_ORGAN', '所属机构')" width="140" />
+      <el-table-column prop="id" :label="$t('G2_FIELD_APP_ID', '应用标识')" width="140" />
+      <el-table-column :label="$t('G2_FIELD_ORGAN', '所属机构')" width="140">
+        <template #default="{ row }">
+          {{ row.organName || row.organId }}
+        </template>
+      </el-table-column>
 
       <el-table-column prop="applicationType" :label="$t('MG_APP_FIELD_TYPE', '应用类型')" width="180">
         <template #default="{ row }">
@@ -63,14 +67,14 @@
             permission="application:status_update"
             active-value="PUBLISHED"
             inactive-value="UNPUBLISHED"
-            usage-code="APPLICATION_STATUS"
-            :api-method="({ nextValue }) => ApplicationApi.updateStatus(row.id, String(nextValue))"
+            usage-code="PUBLISH_STATUS"
+            :api-method="changeStatus(row)"
             @success="loadData"
           />
         </template>
       </el-table-column>
 
-      <el-table-column prop="canIntegrate" :label="$t('MG_APP_FIELD_CAN_INTEGRATE', '支持集成')" width="140">
+      <el-table-column prop="canIntegrate" :label="$t('MG_APP_FIELD_CAN_INTEGRATE', '支持集成')" width="260">
         <template #default="{ row }">
           <el-tag effect="light">
             <DictText :value="row?.canIntegrate" usage-code="BOOLEAN_FLAG" :api-method="DictItemApi.select" />
@@ -82,7 +86,7 @@
 
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
 
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="380">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="650">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
           <el-button type="primary" v-permission="'application:edit'" link size="small"
@@ -113,10 +117,10 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="150px">
-        <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')" prop="organId">
-          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="650px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="300px">
+        <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')" prop="organId">
+          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')" width="200px" />
         </el-form-item>
 
         <el-form-item :label="$t('MG_APP_FIELD_TYPE', '应用类型')" prop="applicationType">
@@ -163,7 +167,7 @@
           <el-input v-model="editForm.contextPath" :placeholder="$t('MG_APP_PH_CONTEXT_PATH', '请输入应用路径')" />
         </el-form-item>
 
-        <el-form-item :label="$t('MG_APP_FIELD_REMARK', '备注')" prop="description">
+        <el-form-item :label="$t('G2_FIELD_REMARK', '备注')" prop="description">
           <el-input v-model="editForm.description" type="textarea" :rows="4" :placeholder="$t('MG_APP_PH_REMARK', '请输入备注信息')" show-word-limit
             maxlength="200" />
         </el-form-item>
@@ -180,7 +184,7 @@
     <el-dialog v-model="detailDialogVisible" :title="$t('MG_APP_DETAIL', '应用明细')" width="520px">
     <!-- 明细弹窗 -->
       <el-descriptions :column="1" border>
-        <el-descriptions-item :label="$t('MG_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName || currentRow?.organId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_APP_FIELD_TYPE', '应用类型')">
           <DictText :value="currentRow?.applicationType" usage-code="APPLICATION_TYPE" :api-method="DictItemApi.select" />
         </el-descriptions-item>
@@ -198,14 +202,14 @@
         <el-descriptions-item :label="$t('MG_APP_FIELD_CODE', '应用编码')">{{ currentRow?.applicationCode }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_APP_FIELD_STATUS', '应用状态')">
           <el-tag>
-            <DictText :value="currentRow?.status" usage-code="APPLICATION_STATUS" :api-method="DictItemApi.select" />
+            <DictText :value="currentRow?.status" usage-code="PUBLISH_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item :label="$t('MG_APP_FIELD_ACCESS_TOKEN_EXP', '访问令牌有效期(秒)')">{{ currentRow?.accessTokenExpiresIn }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_APP_FIELD_REFRESH_TOKEN_EXP', '刷新令牌有效期(秒)')">{{ currentRow?.refreshTokenExpiresIn }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_APP_FIELD_ENDPOINT', '应用地址')">{{ currentRow?.endpointUrl }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_APP_FIELD_CONTEXT_PATH', '应用路径')">{{ currentRow?.contextPath }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_APP_FIELD_REMARK', '备注')">{{ currentRow?.description }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_REMARK', '备注')">{{ currentRow?.description }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
@@ -234,7 +238,7 @@
 
     <el-dialog v-model="pubKeyConfigDialog.visible" :title="$t('MG_APP_DLG_PUBKEY', '公钥配置')" width="520px">
     <!-- 公钥配置 -->
-      <el-form :model="pubKeyForm" label-width="100px">
+      <el-form :model="pubKeyForm" label-width="150px">
         <el-form-item :label="$t('MG_APP_FIELD_PUBKEY_ALG', '公钥算法')">
           <DictSelect v-model="pubKeyForm.algorithm" usage-code="KEY_ALGORITHM" :api-method="DictItemApi.select" :clearable="false" :placeholder="$t('MG_APP_PH_ALG', '请选择算法')" />
         <!-- 公钥算法（仅上传时需要） -->
@@ -243,8 +247,8 @@
         <el-form-item :label="$t('MG_APP_FIELD_CURRENT_PUBKEY', '当前公钥')">
         <!-- 当前公钥状态 + 下载 -->
           <el-space>
-            <el-tag v-if="pubKeyConfigDialog.hasPublicKey" type="success">{{ $t('MG_APP_PUBKEY_CONFIGURED', '已配置') }}</el-tag>
-            <el-tag v-else type="info">{{ $t('MG_APP_PUBKEY_NOT_CONFIGURED', '未配置') }}</el-tag>
+            <el-tag v-if="pubKeyConfigDialog.hasPublicKey" type="success">{{ $t('G2_LBL_CONFIGURED', '已配置') }}</el-tag>
+            <el-tag v-else type="info">{{ $t('G2_LBL_UNCONFIGURED', '未配置') }}</el-tag>
             <el-button v-if="pubKeyConfigDialog.hasPublicKey" type="primary" link @click="downloadPublicKey">
               {{ $t('MG_APP_BTN_DOWNLOAD_PUBKEY', '下载公钥') }}
             </el-button>
@@ -254,7 +258,7 @@
         <el-form-item :label="$t('MG_APP_FIELD_UPLOAD_PUBKEY', '上传公钥')">
         <!-- 上传公钥 -->
           <el-upload :auto-upload="false" :limit="1" accept=".pem,.der" :on-change="handlePubKeyFileChange">
-            <el-button>{{ $t('MG_APP_BTN_SELECT_FILE', '选择文件') }}</el-button>
+            <el-button>{{ $t('G2_BTN_SELECT_FILE', '选择文件') }}</el-button>
           </el-upload>
         </el-form-item>
       </el-form>
@@ -282,15 +286,15 @@
         </el-button>
       </div>
       <el-table :data="idpProvisionRows" border stripe style="width: 100%">
-        <el-table-column prop="idpType" :label="$t('MG_APP_IDP_FIELD_IDP_TYPE', '身份源类型')" width="140">
+        <el-table-column prop="idpType" :label="$t('MG_APP_IDP_FIELD_IDP_TYPE', '身份源类型')" width="180">
           <template #default="{ row: provision }">
             <el-tag effect="light" size="small">
               <DictText :value="provision?.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" />
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="idpApplicationCode" :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')" min-width="180" />
-        <el-table-column prop="remark" :label="$t('MG_APP_IDP_FIELD_REMARK', '备注')" min-width="160" show-overflow-tooltip />
+        <el-table-column prop="idpApplicationCode" :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')" min-width="240" />
+        <el-table-column prop="remark" :label="$t('G2_FIELD_REMARK', '备注')" min-width="160" show-overflow-tooltip />
         <el-table-column prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="170" />
         <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" width="140" fixed="right">
           <template #default="{ row: provision }">
@@ -310,11 +314,11 @@
     <el-dialog
       v-model="idpProvisionEditVisible"
       :title="idpProvisionEditDialogTitle"
-      width="520px"
+      width="600px"
       append-to-body
       destroy-on-close
     >
-      <el-form ref="idpProvisionEditFormRef" :model="idpProvisionEditForm" :rules="idpProvisionEditRules" label-width="160px">
+      <el-form ref="idpProvisionEditFormRef" :model="idpProvisionEditForm" :rules="idpProvisionEditRules" label-width="240px">
         <el-form-item :label="$t('MG_APP_IDP_COL_APP_ID', '应用ID')">
           <el-input :model-value="String(idpProvisionDialog.applicationId ?? '')" disabled />
         </el-form-item>
@@ -324,8 +328,8 @@
         <el-form-item :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')" prop="idpApplicationCode">
           <el-input v-model="idpProvisionEditForm.idpApplicationCode" :placeholder="$t('MG_APP_IDP_PH_IDP_APP_CODE', '请输入IDP侧应用ID')" />
         </el-form-item>
-        <el-form-item :label="$t('MG_APP_IDP_FIELD_REMARK', '备注')" prop="remark">
-          <el-input v-model="idpProvisionEditForm.remark" type="textarea" :rows="3" :placeholder="$t('MG_APP_IDP_PH_REMARK', '请输入备注')" />
+        <el-form-item :label="$t('G2_FIELD_REMARK', '备注')" prop="remark">
+          <el-input v-model="idpProvisionEditForm.remark" type="textarea" :rows="3" :placeholder="$t('G2_PH_REMARK', '请输入备注')" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -353,6 +357,11 @@ import type { ApplicationIdpProvision, ApplicationIdpProvisionPayload } from '..
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
 import { OrganSelect, DictSelect, DictText, StatusSwitch } from '@g2rain/ui/platform';
+
+// 状态开关回调：放在 script 里，避免模板内直接引用类导致 IDE 类型误报
+const changeStatus = (row: Application) =>
+  ({ nextValue }: { nextValue: string | number | boolean }) =>
+    ApplicationApi.updateStatus(row.id, String(nextValue));
 
 // 定义字典引用
 const boolOptions = ref<Array<{ label: string; value: boolean }>>([]);
@@ -488,7 +497,7 @@ const handleView = (row: Application) => {
 // 删除数据记录
 const handleDelete = (row: Application) => {
   ElMessageBox.confirm(
-    t('MG_APP_DEL_CONFIRM', `确认删除应用「${row.id}」吗？`),
+    t('MG_APP_DEL_CONFIRM', { id: row.id }, '确认删除应用「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
@@ -533,7 +542,7 @@ const editDialogTitle = computed(() =>
 
 // 表单校验规则
 const editRules = computed<FormRules>(() => ({
-  organId: [{ required: true, message: t('MG_APP_VLD_ORGAN', '请选择所属机构'), trigger: 'blur' }],
+  organId: [{ required: true, message: t('G2_PH_ORGAN', '请选择所属机构'), trigger: 'blur' }],
   applicationType: [{ required: true, message: t('MG_APP_VLD_TYPE', '请选择应用类型'), trigger: 'blur' }],
   applicationName: [{ required: true, message: t('MG_APP_VLD_NAME', '请输入应用名称'), trigger: 'blur' }],
   applicationCode: [{ required: false, message: t('MG_APP_PH_CODE', '请输入应用编码'), trigger: 'blur' }],
@@ -807,7 +816,7 @@ const handleIdpProvisionEdit = (row: ApplicationIdpProvision) => {
 
 const handleIdpProvisionDelete = (row: ApplicationIdpProvision) => {
   ElMessageBox.confirm(
-    t('MG_APP_IDP_DEL_CONFIRM_BIND', `确认删除三方应用绑定「${row.id}」吗？`),
+    t('MG_APP_IDP_DEL_CONFIRM_BIND', { id: row.id }, '确认删除三方应用绑定「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )

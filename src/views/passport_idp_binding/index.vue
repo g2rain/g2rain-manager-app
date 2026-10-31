@@ -24,7 +24,7 @@
         <el-form-item :label="$t('MG_PP_IDP_FIELD_IDP_APP_CODE', 'IDP侧的应用ID')">
           <el-input v-model="queryForm.idpApplicationCode" :placeholder="$t('MG_PP_IDP_PH_IDP_APP_CODE', '请输入IDP侧的应用ID')" clearable style="width: 200px" />
         </el-form-item>
-        <el-form-item :label="$t('MG_PP_IDP_FIELD_BIND_MODE', '接入形态')">
+        <el-form-item :label="$t('G2_FIELD_BIND_MODE', '接入形态')">
           <el-input v-model="queryForm.bindMode" :placeholder="$t('MG_PP_IDP_PH_BIND_MODE', '请输入接入形态')" clearable style="width: 200px" />
         </el-form-item>
 
@@ -41,7 +41,7 @@
     <!-- 标题 -->
     <div class="passport_idp_binding-page__header">
       <div class="passport_idp_binding-page__title-group">
-        <h2>{{ $t('MG_PP_IDP_TITLE', '管理账号与外部身份源绑定表数据') }}</h2>
+        <h2>{{ $t('MG_PP_IDP_TITLE', '账号身份绑定') }}</h2>
       </div>
     </div>
 
@@ -58,7 +58,7 @@
       <el-table-column prop="corpId" :label="$t('MG_PP_IDP_FIELD_CORP_ID', 'IDP侧企业ID')" width="180" />
       <el-table-column prop="idpUserId" :label="$t('MG_PP_IDP_FIELD_IDP_USER_ID', 'IDP侧用户ID')" width="180" />
       <el-table-column prop="idpApplicationCode" :label="$t('MG_PP_IDP_FIELD_IDP_APP_CODE', 'IDP侧的应用ID')" width="180" />
-      <el-table-column prop="bindMode" :label="$t('MG_PP_IDP_FIELD_BIND_MODE', '接入形态')" width="180" />
+      <el-table-column prop="bindMode" :label="$t('G2_FIELD_BIND_MODE', '接入形态')" width="180" />
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
       <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="160">
@@ -102,7 +102,7 @@
         <el-descriptions-item :label="$t('MG_PP_IDP_FIELD_CORP_ID', 'IDP侧企业ID')">{{ currentRow?.corpId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_PP_IDP_FIELD_IDP_USER_ID', 'IDP侧用户ID')">{{ currentRow?.idpUserId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_PP_IDP_FIELD_IDP_APP_CODE', 'IDP侧的应用ID')">{{ currentRow?.idpApplicationCode }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_PP_IDP_FIELD_BIND_MODE', '接入形态')">{{ currentRow?.bindMode }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_BIND_MODE', '接入形态')">{{ currentRow?.bindMode }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_PP_IDP_FIELD_RAW_PROFILE', 'IdP 返回的原始用户信息快照')">
           <span class="passport-idp-binding-detail__content">{{ currentRow?.rawProfile }}</span>
         </el-descriptions-item>
@@ -247,7 +247,7 @@ const handleView = (row: PassportIdpBinding) => {
 // 删除数据记录
 const handleDelete = (row: PassportIdpBinding) => {
   ElMessageBox.confirm(
-    t('MG_PP_IDP_DEL_CONFIRM', `确认删除账号与外部身份源绑定表「${row.id}」吗？`),
+    t('MG_PP_IDP_DEL_CONFIRM', { id: row.id }, '确认删除账号与外部身份源绑定表「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )

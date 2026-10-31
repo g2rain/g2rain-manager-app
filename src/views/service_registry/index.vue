@@ -13,7 +13,7 @@
       <!-- 基础查询表单（BaseSelectListDto） -->
         <!-- 业务特定查询字段 -->
         </el-form-item>
-        <el-form-item :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')">
+        <el-form-item :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')">
           <el-input
             v-model="queryForm.name"
             :placeholder="$t('MG_SVC_REG_PH_NAME', '请输入服务名称')"
@@ -51,7 +51,7 @@
     <!-- 标题和操作按钮 -->
     <div class="service_registry-page__header">
       <div class="service_registry-page__title-group">
-        <h2>{{ $t('MG_SVC_REG_TITLE', '管理服务注册数据') }}</h2>
+        <h2>{{ $t('MG_SVC_REG_TITLE', '服务注册') }}</h2>
       </div>
       <el-button type="primary" v-permission="'service_registry:add'" @click="handleCreate">
         {{ $t('MG_SVC_REG_BTN_ADD', '新增服务注册') }}
@@ -66,11 +66,11 @@
       :enable-multi-sort="true"
       @sort-change="handleSortChange"
     >
-      <el-table-column prop="id" :label="$t('MG_SVC_REG_COL_ID', '服务注册序号')" width="120" />
-      <el-table-column prop="serviceCode" :label="$t('MG_SVC_REG_COL_SERVICE_CODE', '服务编号')" width="180" />
-      <el-table-column prop="name" :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')" width="180" />
-      <el-table-column prop="endpoint" :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')" width="180" />
-      <el-table-column prop="routePrefix" :label="$t('MG_SVC_REG_FIELD_ROUTE_PREFIX', '路由前缀')" width="180" />
+      <el-table-column prop="id" :label="$t('MG_SVC_REG_COL_ID', '服务注册序号')" width="140" />
+      <el-table-column prop="serviceCode" :label="$t('MG_SVC_REG_COL_SERVICE_CODE', '服务编号')" width="200" />
+      <el-table-column prop="name" :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')" width="180" />
+      <el-table-column prop="endpoint" :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')" width="240" />
+      <el-table-column prop="routePrefix" :label="$t('MG_SVC_REG_FIELD_ROUTE_PREFIX', '路由前缀')" width="260" />
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
       <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
@@ -108,12 +108,12 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="600px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="280px">
         <el-form-item :label="$t('MG_SVC_REG_FIELD_SERVICE_CODE', '服务编码')" prop="serviceCode">
           <el-input v-model="editForm.serviceCode" :placeholder="$t('MG_SVC_REG_PH_SERVICE_CODE', '请输入服务编码')" />
         </el-form-item>
-        <el-form-item :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')" prop="name">
+        <el-form-item :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')" prop="name">
           <el-input v-model="editForm.name" :placeholder="$t('MG_SVC_REG_PH_NAME', '请输入服务名称')" />
         </el-form-item>
         <el-form-item :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')" prop="endpoint">
@@ -146,7 +146,7 @@
       <el-descriptions :column="1" border>
         <el-descriptions-item :label="$t('MG_SVC_REG_COL_REGISTRY_ID', '服务注册标识')">{{ currentRow?.id }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_SERVICE_CODE', '服务编码')">{{ currentRow?.serviceCode }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')">{{ currentRow?.name }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')">{{ currentRow?.name }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')">{{ currentRow?.endpoint }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_ROUTE_PREFIX', '路由前缀')">{{ currentRow?.routePrefix }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_DESCRIPTION', '服务说明')">{{ currentRow?.description }}</el-descriptions-item>
@@ -281,7 +281,7 @@ const handleView = (row: ServiceRegistry) => {
 // 删除数据记录
 const handleDelete = (row: ServiceRegistry) => {
   ElMessageBox.confirm(
-    t('MG_SVC_REG_DEL_CONFIRM', `确认删除服务注册「${row.id}」吗？`),
+    t('MG_SVC_REG_DEL_CONFIRM', { id: row.id }, '确认删除服务注册「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )

@@ -4,10 +4,10 @@
     <el-card class="user-page__search" shadow="never">
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
-        <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')">
+        <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')">
           <OrganSelect
             v-model="queryForm.organId"
-            :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')"
+            :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')"
             width="200px"
           />
         </el-form-item>
@@ -61,7 +61,7 @@
     <!-- 标题和操作按钮 -->
     <div class="user-page__header">
       <div class="user-page__title-group">
-        <h2>{{ $t('MG_USER_TITLE', '管理用户数据') }}</h2>
+        <h2>{{ $t('G2_FIELD_USER', '用户') }}</h2>
       </div>
       <el-button type="primary" v-permission="'user:add'" @click="handleCreate">
         {{ $t('MG_USER_BTN_ADD', '新增用户') }}
@@ -76,13 +76,17 @@
       :enable-multi-sort="true"
       @sort-change="handleSortChange"
     >
-      <el-table-column prop="passportId" :label="$t('MG_USER_COL_PASSPORT', '账号序号')" width="120">
+      <el-table-column prop="passportId" :label="$t('MG_USER_COL_PASSPORT', '账号序号')" width="180">
         <template #default="{ row }">
           <el-button type="primary" link @click="openPassportListDialog(row)">{{ row.passportId }}</el-button>
         </template>
       </el-table-column>
       <el-table-column prop="id" :label="$t('MG_USER_COL_ID', '用户序号')" width="140" />
-      <el-table-column prop="organName" :label="$t('MG_FIELD_ORGAN', '所属机构')" width="140" />
+      <el-table-column :label="$t('G2_FIELD_ORGAN', '所属机构')" width="140">
+        <template #default="{ row }">
+          {{ row.organName || row.organId }}
+        </template>
+      </el-table-column>
       <el-table-column prop="realName" :label="$t('G2_FIELD_REAL_NAME', '姓名')" width="180" />
       <el-table-column prop="admin" :label="$t('G2_FIELD_ADMIN', '管理员')" width="140">
         <template #default="{ row }">
@@ -161,7 +165,7 @@
     <!-- 明细弹窗 -->
       <el-descriptions :column="1" border>
         <el-descriptions-item :label="$t('MG_USER_COL_ID', '用户序号')">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName || currentRow?.organId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_REAL_NAME', '姓名')">{{ currentRow?.realName }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_EMAIL', '邮箱地址')">{{ currentRow?.email }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_MOBILE', '手机号码')">{{ currentRow?.mobile }}</el-descriptions-item>
@@ -194,7 +198,7 @@
         <el-table-column prop="realName" :label="$t('G2_FIELD_REAL_NAME', '姓名')" width="120" />
         <el-table-column prop="status" :label="$t('MG_USER_PASSPORT_STATUS', '账号状态')" width="100">
           <template #default="{ row: p }">
-            <DictText :value="p.status" usage-code="PASSPORT_STATUS" :api-method="DictItemApi.select" />
+            <DictText :value="p.status" usage-code="SUBJECT_STATUS" :api-method="DictItemApi.select" />
           </template>
         </el-table-column>
         <el-table-column prop="mobile" :label="$t('G2_FIELD_MOBILE', '手机号码')" width="140" />
@@ -336,7 +340,7 @@ const handleView = (row: User) => {
   // 删除数据记录
 const handleDelete = (row: User) => {
   ElMessageBox.confirm(
-    t('MG_USER_DEL_CONFIRM', `确认删除用户「${row.id}」吗？`),
+    t('MG_USER_DEL_CONFIRM', { id: row.id }, '确认删除用户「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )

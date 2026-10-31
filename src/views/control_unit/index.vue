@@ -36,22 +36,22 @@
     <!-- 标题和操作按钮 -->
     <div class="control-unit-page__header">
       <div class="control-unit-page__title-group">
-        <h2>{{ $t('MG_CTRL_UNIT_TITLE', '管理功能权限数据') }}</h2>
+        <h2>{{ $t('MG_CTRL_UNIT_TITLE', '功能权限') }}</h2>
       </div>
       <el-button type="primary" v-permission="'control_unit:add'" @click="handleCreate">{{ $t('MG_CTRL_UNIT_BTN_ADD', '新增功能权限') }}</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
-      <el-table-column prop="id" :label="$t('MG_CTRL_UNIT_COL_ID', '功能权限ID')" width="120" />
+      <el-table-column prop="id" :label="$t('MG_CTRL_UNIT_COL_ID', '功能权限ID')" width="180" />
       <el-table-column prop="applicationId" :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')" width="150">
         <template #default="{ row }">
           {{applicationOptions.find(item => item.value === row?.applicationId)?.label || ''}}
         </template>
       </el-table-column>
-      <el-table-column prop="controlUnitName" :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')" width="180" />
-      <el-table-column prop="description" :label="$t('MG_FIELD_DESC', '描述')" min-width="200" show-overflow-tooltip />
-      <el-table-column prop="controlUnitScope" :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')" width="180">
+      <el-table-column prop="controlUnitName" :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')" width="230" />
+      <el-table-column prop="description" :label="$t('G2_FIELD_DESC', '描述')" min-width="200" show-overflow-tooltip />
+      <el-table-column prop="controlUnitScope" :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')" width="200">
         <template #default="{ row }">
           <el-tag effect="light">
             <DictText :value="row?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
@@ -65,22 +65,22 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="status" :label="$t('MG_CTRL_UNIT_FIELD_STATUS', '功能权限状态')" width="180">
+      <el-table-column prop="status" :label="$t('MG_CTRL_UNIT_FIELD_STATUS', '功能权限状态')" width="220">
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
             permission="control_unit:status_update"
             active-value="PUBLISHED"
             inactive-value="UNPUBLISHED"
-            usage-code="CONTROL_UNIT_STATUS"
-            :api-method="({ nextValue }) => ControlUnitApi.updateStatus(row.id, String(nextValue))"
+            usage-code="PUBLISH_STATUS"
+            :api-method="changeStatus(row)"
             @success="loadData"
           />
         </template>
       </el-table-column>
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="320">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
           <el-button type="primary" v-permission="'control_unit:edit'" link size="small"
@@ -107,8 +107,8 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="120px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="600px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="200px">
         <!-- 所属应用 -->
         <el-form-item :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')" prop="applicationId" v-if="!isEdit">
           <el-select v-model="editForm.applicationId" :placeholder="$t('MG_CTRL_DOM_PH_APP', '请选择所属应用')" style="width: 200px">
@@ -128,8 +128,8 @@
           <DictSelect v-model="editForm.sessionType" usage-code="SESSION_TYPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" :placeholder="$t('MG_CTRL_UNIT_PH_SESSION_TYPE', '请选择会话类型')" />
         </el-form-item>
 
-        <el-form-item :label="$t('MG_FIELD_DESC', '描述')" prop="description">
-          <el-input v-model="editForm.description" type="textarea" :rows="4" :placeholder="$t('MG_PH_DESC', '请输入描述')" show-word-limit
+        <el-form-item :label="$t('G2_FIELD_DESC', '描述')" prop="description">
+          <el-input v-model="editForm.description" type="textarea" :rows="4" :placeholder="$t('G2_PH_DESC', '请输入描述')" show-word-limit
             maxlength="200" />
         </el-form-item>
 
@@ -162,10 +162,10 @@
         </el-descriptions-item>
         <el-descriptions-item :label="$t('MG_CTRL_UNIT_FIELD_STATUS', '功能权限状态')">
           <el-tag>
-            <DictText :value="currentRow?.status" usage-code="CONTROL_UNIT_STATUS" :api-method="DictItemApi.select" />
+            <DictText :value="currentRow?.status" usage-code="PUBLISH_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_FIELD_DESC', '描述')">{{ currentRow?.description }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_DESC', '描述')">{{ currentRow?.description }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
@@ -212,7 +212,7 @@
             <div v-if="pages.length > 0" class="table-wrapper">
               <el-table :data="pages" style="width: 100%">
                 <!-- 页面 -->
-                <el-table-column :label="$t('MG_CTRL_UNIT_COL_PAGE', '页面')" width="200" header-align="center">
+                <el-table-column :label="$t('G2_FIELD_PAGE', '页面')" width="200" header-align="center">
                   <template #default="{ row }">
                     <el-checkbox v-model="row.checked" @change="togglePage(row)">
                       <el-badge class="custom-badge" type="primary"
@@ -352,6 +352,11 @@ import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.t
 import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
 import { DictSelect, DictText, StatusSwitch } from '@g2rain/ui/platform';
 
+// 状态开关回调：放在 script 里，避免模板内直接引用类导致 IDE 类型误报
+const changeStatus = (row: ControlUnit) =>
+  ({ nextValue }: { nextValue: string | number | boolean }) =>
+    ControlUnitApi.updateStatus(row.id, String(nextValue));
+
 // 定义字典引用
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
 const srvRegistryOptions = ref<Array<{ label: string; value: string }>>([]);
@@ -475,7 +480,7 @@ const handleView = (row: ControlUnit) => {
 // 删除数据记录
 const handleDelete = (row: ControlUnit) => {
   ElMessageBox.confirm(
-    t('MG_CTRL_UNIT_DEL_CONFIRM', `确认删除功能权限「${row.id}」吗？`),
+    t('MG_CTRL_UNIT_DEL_CONFIRM', { id: row.id }, '确认删除功能权限「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
@@ -520,7 +525,7 @@ const editRules = computed<FormRules>(() => ({
   controlUnitName: [{ required: true, message: t('MG_CTRL_UNIT_VLD_NAME', '请输入功能权限名称'), trigger: 'blur' }],
   controlUnitScope: [{ required: true, message: t('MG_CTRL_UNIT_VLD_SCOPE', '请选择功能权限范围'), trigger: 'blur' }],
   sessionType: [{ required: true, message: t('MG_CTRL_UNIT_VLD_SESSION_TYPE', '请选择会话类型'), trigger: 'change' }],
-  description: [{ required: false, message: t('MG_PH_DESC', '请输入描述'), trigger: 'blur' }],
+  description: [{ required: false, message: t('G2_PH_DESC', '请输入描述'), trigger: 'blur' }],
 }));
 
 // 打开创建弹窗

@@ -42,14 +42,14 @@
         </template>
       </el-alert>
 
-      <p>{{ $t('MG_HOME_DESC', '这是子应用的默认首页。') }}</p>
+      <p>{{ $t('G2_HOME_DESC', '这是子应用的默认首页。') }}</p>
       <el-button type="primary" link @click="showDemoMessage">
-        {{ $t('MG_HOME_DEMO_BTN', '演示国际化提示') }}
+        {{ $t('G2_HOME_DEMO_BTN', '演示国际化提示') }}
       </el-button>
       <el-divider />
 
       <div v-if="homeRoutes.length > 0" class="routes-section">
-        <h3>{{ $t('MG_HOME_ENTRIES', '功能入口') }}</h3>
+        <h3>{{ $t('G2_HOME_ENTRIES', '功能入口') }}</h3>
         <div class="routes-grid">
           <el-card
             v-for="route in homeRoutes"
@@ -70,7 +70,7 @@
       </div>
 
       <div v-else class="empty-routes">
-        <el-empty :description="$t('MG_HOME_NO_ENTRY', '暂无可用功能入口')" :image-size="100" />
+        <el-empty :description="$t('G2_HOME_NO_ENTRY', '暂无可用功能入口')" :image-size="100" />
       </div>
     </el-card>
   </div>
