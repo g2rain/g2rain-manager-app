@@ -14,17 +14,36 @@ npm run build
 ```bash
 docker build \
   --build-arg VITE_BUILD_MODE=production \
-  -t g2rain/g2rain-manager-app:latest \
+  --build-arg IMAGE_VERSION=1.0.0 \
+  --build-arg VCS_REF="$(git rev-parse HEAD)" \
+  -t ghcr.io/g2rain/g2rain-manager-app:1.0.0 \
   .
 ```
 
 或使用项目脚本：
 
 ```bash
-./build.sh --image g2rain/g2rain-manager-app --tag latest --build-mode production
+./build.sh --tag 1.0.0 --build-mode production
 ```
 
-构建阶段使用 Node 22 Alpine，运行阶段使用 OpenResty Alpine，并从仓库 tar 包离线安装 luaossl。
+构建阶段使用 Node 22 Alpine，运行阶段使用 OpenResty Alpine，并从仓库 tar 包离线安装 luaossl。根目录 `Dockerfile` 是本地与 CI 唯一的镜像构建方案；入口为 `/docker-entrypoint.sh`，声明端口为 `8080`，实际监听端口仍由 `SERVER_PORT` 决定（默认 `80`）。OCI 元数据包含 title、source、url、version、revision 与许可证 `Apache-2.0`。
+
+最终镜像包含 Vite 静态产物、OpenResty/Nginx 模板、Lua 签名脚本及由仓库内离线包编译的 luaossl。`.env.production` 是已跟踪的公开构建期配置，会进入 Docker 构建上下文；其余 `.env*` 与 `lua/keys/` 被排除。运行时镜像只创建密钥目录，不复制任何密钥。Docker 忽略规则不改变 Git 已跟踪文件的公开性；发布前仍须检查配置中没有默认 Token、私有地址或真实凭据。
+
+## GitHub Container Registry（GHCR）发布
+
+镜像地址为 `ghcr.io/g2rain/g2rain-manager-app:<tag>`。工作流 `.github/workflows/image.yml` 只在推送稳定版 tag 时运行，不响应普通分支、Pull Request 或手动触发。它严格校验 `v<major>.<minor>.<patch>` 格式、标签提交属于 `origin/main` 历史、标签提交中存在同名非空 `docs/releases/v<版本>.md`，并确认 tag 版本和 `package.json` 一致。
+
+CI 使用 Node 22 执行 `npm ci` 与 `npm run build`，这是当前自动验证的全部范围（本仓没有独立 unit/E2E/lint 测试脚本）。随后它以同一 Dockerfile、`VITE_BUILD_MODE=production`、版本和完整提交 SHA 构建，并使用 `GITHUB_TOKEN` 推送 `:1.0.0` 与 `:sha-<完整提交 SHA>`。只有两个标签均推送成功才会写入 Actions Summary；工作流不创建 GitHub Release、不部署服务且不更新 `latest`。
+
+发布按 `feature/* → develop → main` 流程进行：先将发布改动与 `docs/releases/v1.0.0.md` 合入并验证 `main`，再在该提交创建 tag：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+首次成功推送后，如需匿名拉取，请在 GitHub Packages 的包页打开 **Package settings → Change visibility → Public**。若组织策略禁止此操作，请联系组织管理员。已有同名包若出现 `denied`，优先在 **Package settings → Actions access** 授予本仓库 Actions 写权限，并检查组织 Packages 策略；`packages: write` 本身不保证这些设置已满足。
 
 ## 启动示例
 
@@ -37,10 +56,11 @@ docker run --rm -p 8080:8080 \
   -e IAM_HOST=iam \
   -e IAM_PORT=8080 \
   -e SSO_BASE_URL=https://platform.example.com \
-  g2rain/g2rain-manager-app:latest
+  -v /secure/manager-keys:/usr/local/openresty/nginx/lua/keys:ro \
+  ghcr.io/g2rain/g2rain-manager-app:1.0.0
 ```
 
-生产部署通过 Secret/Volume 注入 Lua/IAM 密钥文件，不在镜像或仓库保存真实私钥。
+生产部署通过 Secret/只读 Volume 注入 Lua/IAM 密钥文件，不在镜像或仓库保存真实私钥；`VITE_*` 和 `env-config.js` 对浏览器用户可见，不能存放密钥。真实 Gateway/IAM 联调、浏览器访问、匿名拉取和实际部署验收必须在目标环境单独完成，不能由本地构建或 GHCR 推送推定。
 
 ## Nginx 路径
 
