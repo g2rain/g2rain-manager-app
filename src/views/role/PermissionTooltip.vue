@@ -1,6 +1,7 @@
 <template>
   <el-tooltip
     :disabled="disabled"
+    effect="light"
     placement="top"
     :show-after="200"
     popper-class="permission-tooltip-popper"
@@ -37,16 +38,28 @@ withDefaults(defineProps<Props>(), {
 }
 </style>
 
-<!-- tooltip content 会 teleport 到 body，需非 scoped -->
+<!-- tooltip content 会 teleport 到 body，需非 scoped；跟随页面主题，不用 EP 默认反色气泡 -->
 <style>
+.permission-tooltip-popper.el-popper {
+  background: var(--g2-bg-overlay) !important;
+  color: var(--g2-text-primary);
+  border: 1px solid var(--g2-border-color);
+  box-shadow: var(--el-box-shadow-light);
+}
+
+.permission-tooltip-popper.el-popper .el-popper__arrow::before {
+  background: var(--g2-bg-overlay) !important;
+  border: 1px solid var(--g2-border-color);
+}
+
 .permission-tooltip-popper .permission-tooltip__name {
   font-weight: 600;
-  color: var(--el-color-primary);
+  color: var(--g2-color-primary);
   margin-bottom: 4px;
 }
 
 .permission-tooltip-popper .permission-tooltip__desc {
-  color: var(--el-text-color-regular);
+  color: var(--g2-text-secondary);
   font-size: 12px;
   line-height: 1.4;
   max-width: 280px;

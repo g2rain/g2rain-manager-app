@@ -22,7 +22,7 @@
         </el-form-item>
 
         <el-form-item :label="$t('MG_PP_FIELD_STATUS', '账号状态')">
-          <DictSelect v-model="queryForm.status" usage-code="PASSPORT_STATUS" :api-method="DictItemApi.select" :placeholder="$t('MG_PP_PH_STATUS', '请选择状态')" />
+          <DictSelect v-model="queryForm.status" usage-code="SUBJECT_STATUS" :api-method="DictItemApi.select" :placeholder="$t('G2_PH_STATUS', '请选择状态')" />
         </el-form-item>
 
         <!-- 操作按钮 -->
@@ -38,7 +38,7 @@
     <!-- 标题和操作按钮 -->
     <div class="passport-page__header">
       <div class="passport-page__title-group">
-        <h2>{{ $t('MG_PP_TITLE', '管理账号数据') }}</h2>
+        <h2>{{ $t('MG_PP_TITLE', '账号') }}</h2>
       </div>
       <el-button type="primary" v-permission="'passport:add'" @click="handleCreate">{{ $t('MG_PP_BTN_ADD', '新增账号') }}</el-button>
     </div>
@@ -55,11 +55,11 @@
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            v-permission="'passport:status_update'"
+            permission="passport:status_update"
             active-value="NORMAL"
             inactive-value="FROZEN"
-            usage-code="PASSPORT_STATUS"
-            :api-method="({ nextValue }) => PassportApi.updateStatus(row.id, String(nextValue))"
+            usage-code="SUBJECT_STATUS"
+            :api-method="changeStatus(row)"
             @success="loadData"
           />
         </template>
@@ -103,8 +103,8 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="600px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="220px">
         <el-form-item :label="$t('G2_FIELD_USERNAME', '用户名')" prop="username">
           <el-input v-model="editForm.username" :placeholder="$t('G2_PH_USERNAME', '请输入用户名')" :disabled="isEdit" />
         </el-form-item>
@@ -162,7 +162,7 @@
         <el-descriptions-item :label="$t('G2_FIELD_EMAIL', '邮箱地址')">{{ currentRow?.email }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_PP_FIELD_STATUS', '账号状态')">
           <el-tag :type="currentRow?.status === 'NORMAL' ? 'success' : 'info'">
-            <DictText :value="currentRow?.status" usage-code="PASSPORT_STATUS" :api-method="DictItemApi.select" />
+            <DictText :value="currentRow?.status" usage-code="SUBJECT_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
@@ -180,12 +180,16 @@
       <el-table :data="userListRows" border stripe max-height="420">
         <el-table-column prop="id" :label="$t('MG_USER_COL_ID', '用户序号')" width="100" />
         <el-table-column prop="passportId" :label="$t('MG_USER_COL_PASSPORT', '账号序号')" width="100" />
-        <el-table-column prop="organId" :label="$t('MG_FIELD_ORGAN', '所属机构')" width="100" />
+        <el-table-column :label="$t('G2_FIELD_ORGAN', '所属机构')" width="140">
+          <template #default="{ row: u }">
+            {{ u.organName || u.organId }}
+          </template>
+        </el-table-column>
         <el-table-column prop="realName" :label="$t('G2_FIELD_REAL_NAME', '姓名')" width="120" />
         <el-table-column prop="admin" :label="$t('G2_FIELD_ADMIN', '管理员')" width="90">
           <template #default="{ row: u }">
             <el-tag :type="u.admin ? 'success' : 'info'" effect="light" size="small">
-              {{ u.admin ? $t('G2_OPT_YES', '是') : $t('G2_OPT_NO', '否') }}
+              {{ u.admin ? $t('G2_LBL_YES', '是') : $t('G2_LBL_NO', '否') }}
             </el-tag>
           </template>
         </el-table-column>
@@ -203,24 +207,24 @@
       v-model="idpBindingListDrawerVisible"
       :title="idpBindingDrawerTitle"
       direction="rtl"
-      size="800px"
+      size="100%"
       destroy-on-close
       @closed="idpBindingListRows = []"
     >
       <el-table :data="idpBindingListRows" border stripe style="width: 100%">
         <el-table-column prop="id" :label="$t('G2_FIELD_ID', 'ID')" width="80" />
-        <el-table-column prop="idpType" :label="$t('MG_PP_IDP_FIELD_IDP_TYPE', '身份源类型')" width="120">
+        <el-table-column prop="idpType" :label="$t('MG_PP_IDP_FIELD_IDP_TYPE', '身份源类型')" width="180">
           <template #default="{ row: binding }">
             <el-tag effect="light" size="small">
               <DictText :value="binding?.idpType" usage-code="PASSPORT_IDP_TYPE" :api-method="DictItemApi.select" />
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="idpSubject" :label="$t('MG_PP_IDP_FIELD_IDP_SUBJECT', 'IDP侧用户授权标识')" min-width="160" />
-        <el-table-column prop="corpId" :label="$t('MG_PP_IDP_FIELD_CORP_ID', 'IDP侧企业ID')" width="140" />
-        <el-table-column prop="idpUserId" :label="$t('MG_PP_IDP_FIELD_IDP_USER_ID', 'IDP侧用户ID')" width="120" />
-        <el-table-column prop="idpApplicationCode" :label="$t('MG_PP_IDP_FIELD_IDP_APP_CODE', 'IDP侧的应用ID')" width="140" />
-        <el-table-column prop="bindMode" :label="$t('MG_PP_IDP_FIELD_BIND_MODE', '接入形态')" width="100" />
+        <el-table-column prop="idpSubject" :label="$t('MG_PP_IDP_FIELD_IDP_SUBJECT', 'IDP侧用户授权标识')" min-width="220" />
+        <el-table-column prop="corpId" :label="$t('MG_PP_IDP_FIELD_CORP_ID', 'IDP侧企业ID')" width="260" />
+        <el-table-column prop="idpUserId" :label="$t('MG_PP_IDP_FIELD_IDP_USER_ID', 'IDP侧用户ID')" width="200" />
+        <el-table-column prop="idpApplicationCode" :label="$t('MG_PP_IDP_FIELD_IDP_APP_CODE', 'IDP侧的应用ID')" width="200" />
+        <el-table-column prop="bindMode" :label="$t('G2_FIELD_BIND_MODE', '接入形态')" width="140" />
         <el-table-column prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="170" />
       </el-table>
       <template #footer>
@@ -243,13 +247,19 @@ import type { Passport, PassportPayload, PassportQuery } from './type';
 import type { User } from '../user/type';
 import type { PassportIdpBinding } from '../passport_idp_binding/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { DictSelect, DictText, StatusSwitch } from '@g2rain/ui/platform';
+
+// 状态开关回调：放在 script 里，避免模板内直接引用类导致 IDE 类型误报
+const changeStatus = (row: Passport) =>
+  ({ nextValue }: { nextValue: string | number | boolean }) =>
+    PassportApi.updateStatus(row.id, String(nextValue));
 
 // 定义组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
 // 基础查询状态（使用 reactive v-model 替换整个对象时保持响应式）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -280,7 +290,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as PassportQuery;
 
@@ -294,9 +304,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -316,10 +325,9 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.username = '';
   queryForm.realName = '';
@@ -362,12 +370,7 @@ const userListRows = ref<User[]>([]);
 const openUserListDialog = async (row: Passport) => {
   userListDialogVisible.value = true;
   userListRows.value = [];
-  try {
-    userListRows.value = await UserApi.list({ passportId: row.id });
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_PP_MSG_USER_LOAD_FAIL', '加载用户列表失败');
-    ElMessage.error(msg);
-  }
+  userListRows.value = await UserApi.list({ passportId: row.id });
 };
 
 // 查看第三方身份绑定列表
@@ -376,41 +379,31 @@ const idpBindingListRows = ref<PassportIdpBinding[]>([]);
 const currentPassportId = ref<number | undefined>();
 
 const idpBindingDrawerTitle = computed(() =>
-  t('MG_PP_IDP_BINDING_DRAWER', `第三方身份绑定（账号 ${currentPassportId.value ?? ''}）`),
+  t('MG_PP_IDP_BINDING_DRAWER', { id: currentPassportId.value ?? '' }, '第三方身份绑定（账号 {id}）'),
 );
 
 const openIdpBindingListDialog = async (row: Passport) => {
   currentPassportId.value = row.id;
   idpBindingListDrawerVisible.value = true;
   idpBindingListRows.value = [];
-  try {
-    idpBindingListRows.value = await PassportIdpBindingApi.list({ passportId: row.id });
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_PP_MSG_IDP_LOAD_FAIL', '加载第三方绑定列表失败');
-    ElMessage.error(msg);
-  }
+  idpBindingListRows.value = await PassportIdpBindingApi.list({ passportId: row.id });
 };
 
 // 删除数据记录
 const handleDelete = (row: Passport) => {
   ElMessageBox.confirm(
-    t('MG_PP_DEL_CONFIRM', `确认删除账号「${row.id}」吗？`),
+    t('MG_PP_DEL_CONFIRM', { id: row.id }, '确认删除账号「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await PassportApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        ElMessage.error(msg);
+      await PassportApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => { });
 };
@@ -507,19 +500,14 @@ const submitEdit = async () => {
     email: editForm.email,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await PassportApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    ElMessage.error(msg);
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await PassportApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  await loadData();
+  editDialogVisible.value = false;
 };
 
 // 挂载回调
@@ -531,7 +519,7 @@ onMounted(async () => {
 <style scoped>
 .passport-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -544,7 +532,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -569,7 +557,7 @@ onMounted(async () => {
 
 .passport-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .passport-page__pagination {

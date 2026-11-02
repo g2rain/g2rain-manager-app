@@ -2,7 +2,7 @@
  * 匿名接入码 API
  */
 
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 import type { AnonymousEntry, AnonymousEntryPayload, AnonymousEntryQuery, EntryStatus } from './type';
 
 export class AnonymousEntryApi {

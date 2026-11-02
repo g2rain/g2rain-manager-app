@@ -61,7 +61,7 @@
             style="width: 200px"
           />
         </el-form-item>
-        <el-form-item :label="$t('MG_AUDIT_FIELD_USER_ID', '用户标识')">
+        <el-form-item :label="$t('G2_FIELD_USER_ID', '用户标识')">
           <el-input
             v-model="queryForm.userId"
             :placeholder="$t('MG_AUDIT_PH_USER_ID', '请输入用户标识')"
@@ -80,15 +80,14 @@
         <el-form-item :label="$t('MG_AUDIT_FIELD_ORGAN_ID', '机构标识')">
           <OrganSelect
             v-model="queryForm.organId"
-            :api-method="OrganApi.searchOrgans"
             :placeholder="$t('MG_AUDIT_PH_ORGAN', '请选择机构')"
             width="200px"
           />
         </el-form-item>
-        <el-form-item :label="$t('MG_AUDIT_FIELD_ORGAN_NAME', '机构名称')">
+        <el-form-item :label="$t('G2_FIELD_ORGAN_NAME', '机构名称')">
           <el-input
             v-model="queryForm.organName"
-            :placeholder="$t('MG_AUDIT_PH_ORGAN_NAME', '请输入机构名称')"
+            :placeholder="$t('G2_VLD_REQ_ORG_NAME', '请输入机构名称')"
             clearable
             style="width: 200px"
           />
@@ -99,10 +98,10 @@
             usage-code="ORGAN_TYPE"
             :api-method="DictItemApi.select"
             clearable
-            :placeholder="$t('MG_AUDIT_PH_ORGAN_TYPE', '请选择机构类型')"
+            :placeholder="$t('G2_VLD_REQ_ORG_TYPE', '请选择机构类型')"
           />
         </el-form-item>
-        <el-form-item :label="$t('MG_AUDIT_FIELD_APPLICATION_ID', '应用标识')">
+        <el-form-item :label="$t('G2_FIELD_APP_ID', '应用标识')">
           <el-input
             v-model="queryForm.applicationId"
             :placeholder="$t('MG_AUDIT_PH_APPLICATION_ID', '请输入应用标识')"
@@ -121,7 +120,6 @@
         <el-form-item :label="$t('MG_AUDIT_FIELD_APP_ORGAN_ID', '应用所属机构标识')">
           <OrganSelect
             v-model="queryForm.applicationOrganId"
-            :api-method="OrganApi.searchOrgans"
             :placeholder="$t('MG_AUDIT_PH_APP_ORGAN', '请选择应用所属机构')"
             width="200px"
           />
@@ -139,7 +137,7 @@
     <!-- 标题和操作按钮 -->
     <div class="audit_event-page__header">
       <div class="audit_event-page__title-group">
-        <h2>{{ $t('MG_AUDIT_TITLE', '管理审计日志数据') }}</h2>
+        <h2>{{ $t('MG_AUDIT_TITLE', '审计日志') }}</h2>
       </div>
     </div>
 
@@ -159,10 +157,10 @@
       <el-table-column prop="path" :label="$t('MG_AUDIT_FIELD_PATH', '请求路径')" width="180" />
       <el-table-column prop="method" :label="$t('MG_AUDIT_FIELD_METHOD', '请求方法')" width="180" />
       <el-table-column prop="passportId" :label="$t('MG_AUDIT_FIELD_PASSPORT_ID', '账号标识')" width="140" />
-      <el-table-column prop="userId" :label="$t('MG_AUDIT_FIELD_USER_ID', '用户标识')" width="140" />
+      <el-table-column prop="userId" :label="$t('G2_FIELD_USER_ID', '用户标识')" width="140" />
       <el-table-column prop="name" :label="$t('G2_FIELD_REAL_NAME', '真实姓名')" width="180" />
       <el-table-column prop="organId" :label="$t('MG_AUDIT_FIELD_ORGAN_ID', '机构标识')" width="140" />
-      <el-table-column prop="organName" :label="$t('MG_AUDIT_FIELD_ORGAN_NAME', '机构名称')" width="180" />
+      <el-table-column prop="organName" :label="$t('G2_FIELD_ORGAN_NAME', '机构名称')" width="180" />
       <el-table-column prop="organType" :label="$t('MG_AUDIT_FIELD_ORGAN_TYPE', '机构类型')" width="180">
         <template #default="{ row }">
           <DictText :value="row?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
@@ -198,7 +196,7 @@
       />
     </div>
 
-    <el-dialog v-model="detailDialogVisible" :title="$t('MG_AUDIT_DETAIL', '审计日志明细')" width="520px">
+    <el-dialog v-model="detailDialogVisible" :title="$t('MG_AUDIT_DETAIL', '审计日志明细')" width="600px">
     <!-- 明细弹窗 -->
       <el-descriptions :column="1" border>
         <el-descriptions-item :label="$t('MG_AUDIT_COL_LOG_ID', '日志标识')">{{ currentRow?.id }}</el-descriptions-item>
@@ -216,17 +214,17 @@
         <el-descriptions-item :label="$t('MG_AUDIT_FIELD_REFERER', '请求来源 URL')">{{ currentRow?.referer }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_AUDIT_FIELD_SESSION_TYPE', '会话类型')">{{ currentRow?.sessionType }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_AUDIT_FIELD_PASSPORT_ID', '账号标识')">{{ currentRow?.passportId }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_AUDIT_FIELD_USER_ID', '用户标识')">{{ currentRow?.userId }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_USER_ID', '用户标识')">{{ currentRow?.userId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_REAL_NAME', '真实姓名')">{{ currentRow?.name }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_AUDIT_FIELD_ADMIN_USER', '超级管理员')">{{ currentRow?.adminUser }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_AUDIT_FIELD_ORGAN_ID', '机构标识')">{{ currentRow?.organId }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_AUDIT_FIELD_ORGAN_NAME', '机构名称')">{{ currentRow?.organName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_ORGAN_NAME', '机构名称')">{{ currentRow?.organName }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_AUDIT_FIELD_ORGAN_TYPE', '机构类型')">
           <DictText :value="currentRow?.organType" usage-code="ORGAN_TYPE" :api-method="DictItemApi.select" />
         </el-descriptions-item>
         <el-descriptions-item :label="$t('MG_AUDIT_FIELD_ADMIN_COMPANY', '运营公司')">{{ currentRow?.adminCompany }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_AUDIT_FIELD_TARGET_ORGAN_ID', '目标机构标识')">{{ currentRow?.targetOrganId }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_AUDIT_FIELD_APPLICATION_ID', '应用标识')">{{ currentRow?.applicationId }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_APP_ID', '应用标识')">{{ currentRow?.applicationId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_AUDIT_FIELD_APPLICATION_CODE', '应用编码')">{{ currentRow?.applicationCode }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_AUDIT_FIELD_APP_ORGAN_ID', '应用所属机构标识')">{{ currentRow?.applicationOrganId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_AUDIT_FIELD_PAYLOAD', '请求载荷')">{{ currentRow?.payload }}</el-descriptions-item>
@@ -244,19 +242,19 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import { t } from '@platform/i18n';
 import { AuditEventApi } from './api';
 import { OrganApi } from '../organ/api';
 import { DictItemApi } from '../dict/api';
 import type { AuditEvent, AuditEventQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMessage, OrganSelect, DictSelect, DictText } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { OrganSelect, DictSelect, DictText } from '@g2rain/ui/platform';
 
 // 组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
 // 基础查询表单（BaseSelectListDto）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -297,7 +295,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as AuditEventQuery;
 
@@ -311,8 +309,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    showErrorMessage(error || t('G2_MSG_LOAD_FAIL', '加载列表失败'));
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -333,10 +331,9 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.traceId = '';
   queryForm.clientId = '';
@@ -392,7 +389,7 @@ onMounted(() => {
 <style scoped>
 .audit_event-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -405,7 +402,7 @@ onMounted(() => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -430,7 +427,7 @@ onMounted(() => {
 
 .audit_event-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .audit_event-page__pagination {

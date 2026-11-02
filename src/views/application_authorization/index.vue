@@ -4,8 +4,8 @@
     <el-card class="application-authorization-page__search" shadow="never">
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
-        <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')">
-          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
+        <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')">
+          <OrganSelect v-model="queryForm.organId" :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')" width="200px" />
         <!-- 业务特定查询字段 -->
         </el-form-item>
 
@@ -20,7 +20,7 @@
         </el-form-item>
 
         <el-form-item :label="$t('G2_FIELD_STATUS', '状态')">
-          <DictSelect v-model="queryForm.status" usage-code="AUTHORIZATION_STATUS" :api-method="DictItemApi.select" :placeholder="$t('MG_APP_AUTH_PH_STATUS', '请选择状态')" />
+          <DictSelect v-model="queryForm.status" usage-code="AUTHORIZATION_STATUS" :api-method="DictItemApi.select" :placeholder="$t('G2_PH_STATUS', '请选择状态')" />
         </el-form-item>
         <!-- 操作按钮 -->
         <template #actions>
@@ -35,14 +35,18 @@
     <!-- 标题和操作按钮 -->
     <div class="application-authorization-page__header">
       <div class="application-authorization-page__title-group">
-        <h2>{{ $t('MG_APP_AUTH_TITLE', '管理应用授权数据') }}</h2>
+        <h2>{{ $t('MG_APP_AUTH_TITLE', '应用授权') }}</h2>
       </div>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
-      <el-table-column prop="id" :label="$t('MG_APP_AUTH_COL_ID', '应用授权序号')" width="120" />
-      <el-table-column prop="organName" :label="$t('MG_FIELD_ORGAN', '所属机构')" width="140" />
+      <el-table-column prop="id" :label="$t('MG_APP_AUTH_COL_ID', '应用授权序号')" width="140" />
+      <el-table-column :label="$t('G2_FIELD_ORGAN', '所属机构')" width="140">
+        <template #default="{ row }">
+          {{ row.organName || row.organId }}
+        </template>
+      </el-table-column>
       <el-table-column prop="applicationName" :label="$t('MG_APP_AUTH_FIELD_APPLICATION', '所属应用')" width="140" />
       <el-table-column prop="controlDomainName" :label="$t('MG_APP_AUTH_COL_CAPABILITY', '业务能力名称')" width="160">
         <template #default="{ row }">
@@ -57,7 +61,7 @@
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            v-permission="'application_authorization:status_update'"
+            permission="application_authorization:status_update"
             active-value="ACTIVATED"
             inactive-value="DEACTIVATED"
             usage-code="AUTHORIZATION_STATUS"
@@ -66,10 +70,10 @@
           />
         </template>
       </el-table-column>
-      <el-table-column prop="subscriptionId" :label="$t('MG_APP_AUTH_FIELD_SUBSCRIPTION', '订阅序号')" width="140" />
+      <el-table-column prop="subscriptionId" :label="$t('MG_APP_AUTH_FIELD_SUBSCRIPTION', '订阅序号')" width="180" />
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="300">
         <template #default="{ row }">
           <el-button type="warning" v-permission="'application_authorization:control_utils_sync'" link size="small" @click="updateSyncControlUtils(row)">{{ $t('MG_APP_AUTH_BTN_SYNC', '同步能力') }}</el-button>
           <el-button v-if="row.apiKeySupported" type="primary"  v-permission="'application_authorization:manager_api_keys'" link size="small" @click="openApiKeyManager(row)">{{ $t('MG_APP_AUTH_BTN_API_KEY', '模型秘钥管理') }}</el-button>
@@ -111,7 +115,8 @@ import { ApplicationApi } from '../application/api';
 import { DictItemApi } from '../dict/api';
 import type { ApplicationAuthorization, ApplicationAuthorizationQuery } from './type';
 import type { PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, StatusSwitch, type QueryFormData } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm, type QueryFormData } from '@g2rain/ui';
+import { OrganSelect, DictSelect, StatusSwitch } from '@g2rain/ui/platform';
 import PersonalStaticAccessToken from '../personal_static_access_token/index.vue';
 import AnonymousEntry from './anonymous_entry/index.vue';
 
@@ -130,7 +135,7 @@ const loadDicts = async () => {
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
 // 基础查询状态（使用 reactive v-model 替换整个对象时保持响应式）
-let baseQueryForm = reactive<QueryFormData>({
+const baseQueryForm = ref<QueryFormData>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -174,7 +179,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as ApplicationAuthorizationQuery;
 
@@ -188,9 +193,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -210,10 +214,9 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.organId = undefined;
   queryForm.applicationId = undefined;
@@ -275,7 +278,7 @@ onMounted(async () => {
 
 .application-authorization-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -288,7 +291,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -313,7 +316,7 @@ onMounted(async () => {
 
 .application-authorization-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .application-authorization-page__pagination {

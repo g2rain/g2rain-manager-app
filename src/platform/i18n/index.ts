@@ -17,11 +17,20 @@ function currentI18nLocale(): string {
   return typeof loc === 'string' ? loc : loc.value;
 }
 
-/** script 中取文案；读取当前 locale 以便 computed 内随语言切换重算 */
-export function t(code: string, defaultText?: string): string {
+/** 无占位：`t(code, '默认')`；有占位：`t(code, { id }, '…{id}…')` */
+export function t(code: string, defaultText?: string): string;
+export function t(code: string, vars: Record<string, unknown>, defaultText: string): string;
+export function t(
+  code: string,
+  varsOrDefault?: string | Record<string, unknown>,
+  defaultText?: string,
+): string {
   void currentI18nLocale();
-  if (defaultText !== undefined) {
-    return i18n.global.t(code, defaultText);
+  if (varsOrDefault !== undefined && typeof varsOrDefault === 'object') {
+    return i18n.global.t(code, varsOrDefault, defaultText ?? '');
+  }
+  if (typeof varsOrDefault === 'string') {
+    return i18n.global.t(code, varsOrDefault);
   }
   return i18n.global.t(code);
 }

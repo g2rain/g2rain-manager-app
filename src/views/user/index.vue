@@ -4,11 +4,10 @@
     <el-card class="user-page__search" shadow="never">
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
-        <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')">
+        <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')">
           <OrganSelect
             v-model="queryForm.organId"
-            :api-method="OrganApi.searchOrgans"
-            :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')"
+            :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')"
             width="200px"
           />
         </el-form-item>
@@ -62,7 +61,7 @@
     <!-- 标题和操作按钮 -->
     <div class="user-page__header">
       <div class="user-page__title-group">
-        <h2>{{ $t('MG_USER_TITLE', '管理用户数据') }}</h2>
+        <h2>{{ $t('G2_FIELD_USER', '用户') }}</h2>
       </div>
       <el-button type="primary" v-permission="'user:add'" @click="handleCreate">
         {{ $t('MG_USER_BTN_ADD', '新增用户') }}
@@ -77,13 +76,17 @@
       :enable-multi-sort="true"
       @sort-change="handleSortChange"
     >
-      <el-table-column prop="passportId" :label="$t('MG_USER_COL_PASSPORT', '账号序号')" width="120">
+      <el-table-column prop="passportId" :label="$t('MG_USER_COL_PASSPORT', '账号序号')" width="180">
         <template #default="{ row }">
           <el-button type="primary" link @click="openPassportListDialog(row)">{{ row.passportId }}</el-button>
         </template>
       </el-table-column>
       <el-table-column prop="id" :label="$t('MG_USER_COL_ID', '用户序号')" width="140" />
-      <el-table-column prop="organName" :label="$t('MG_FIELD_ORGAN', '所属机构')" width="140" />
+      <el-table-column :label="$t('G2_FIELD_ORGAN', '所属机构')" width="140">
+        <template #default="{ row }">
+          {{ row.organName || row.organId }}
+        </template>
+      </el-table-column>
       <el-table-column prop="realName" :label="$t('G2_FIELD_REAL_NAME', '姓名')" width="180" />
       <el-table-column prop="admin" :label="$t('G2_FIELD_ADMIN', '管理员')" width="140">
         <template #default="{ row }">
@@ -162,7 +165,7 @@
     <!-- 明细弹窗 -->
       <el-descriptions :column="1" border>
         <el-descriptions-item :label="$t('MG_USER_COL_ID', '用户序号')">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName || currentRow?.organId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_REAL_NAME', '姓名')">{{ currentRow?.realName }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_EMAIL', '邮箱地址')">{{ currentRow?.email }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_MOBILE', '手机号码')">{{ currentRow?.mobile }}</el-descriptions-item>
@@ -195,7 +198,7 @@
         <el-table-column prop="realName" :label="$t('G2_FIELD_REAL_NAME', '姓名')" width="120" />
         <el-table-column prop="status" :label="$t('MG_USER_PASSPORT_STATUS', '账号状态')" width="100">
           <template #default="{ row: p }">
-            <DictText :value="p.status" usage-code="PASSPORT_STATUS" :api-method="DictItemApi.select" />
+            <DictText :value="p.status" usage-code="SUBJECT_STATUS" :api-method="DictItemApi.select" />
           </template>
         </el-table-column>
         <el-table-column prop="mobile" :label="$t('G2_FIELD_MOBILE', '手机号码')" width="140" />
@@ -223,13 +226,14 @@ import { DictItemApi } from '../dict/api';
 import type { User, UserPayload, UserQuery } from './type';
 import type { Passport } from '../passport/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictText } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { OrganSelect, DictText } from '@g2rain/ui/platform';
 
   // 组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
   // 基础查询状态（使用 ref，便于 v-model 替换整个对象时保持响应式）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -260,7 +264,7 @@ const loadData = async () => {
   try {
       // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm }).filter(
+      Object.entries({ ...baseQueryForm.value, ...queryForm }).filter(
         ([_, v]) => (v ?? '') !== '' && [v].flat().length,
       ),
     ) as UserQuery;
@@ -275,9 +279,8 @@ const loadData = async () => {
       // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
   // 表单校验规则
 };
@@ -297,10 +300,9 @@ const handleSearch = () => {
   // 重置查询条件
 const handleReset = () => {
     // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
     // 重置业务特定查询表单
   queryForm.passportId = undefined;
   queryForm.organId = undefined;
@@ -338,23 +340,18 @@ const handleView = (row: User) => {
   // 删除数据记录
 const handleDelete = (row: User) => {
   ElMessageBox.confirm(
-    t('MG_USER_DEL_CONFIRM', `确认删除用户「${row.id}」吗？`),
+    t('MG_USER_DEL_CONFIRM', { id: row.id }, '确认删除用户「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await UserApi.remove(row.id);
-          // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        ElMessage.error(msg);
+      await UserApi.remove(row.id);
+        // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => {});
 };
@@ -418,20 +415,15 @@ const submitEdit = async () => {
     mobile: editForm.mobile,
   };
 
-  try {
-      // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await UserApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    // 查询列表
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    ElMessage.error(msg);
+    // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await UserApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  // 查询列表
+  await loadData();
+  editDialogVisible.value = false;
 };
 
   // 查看账号列表
@@ -441,13 +433,8 @@ const passportListRows = ref<Passport[]>([]);
 const openPassportListDialog = async (row: User) => {
   passportListDialogVisible.value = true;
   passportListRows.value = [];
-  try {
-    if (row.passportId != null) {
-      passportListRows.value = await PassportApi.list({ id: row.passportId });
-    }
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_USER_PASSPORT_LOAD_FAIL', '加载账号列表失败');
-    ElMessage.error(msg);
+  if (row.passportId != null) {
+    passportListRows.value = await PassportApi.list({ id: row.passportId });
   }
 };
 
@@ -460,7 +447,7 @@ onMounted(async () => {
 <style scoped>
 .user-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -473,7 +460,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -498,7 +485,7 @@ onMounted(async () => {
 
 .user-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .user-page__pagination {

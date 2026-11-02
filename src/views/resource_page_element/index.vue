@@ -33,7 +33,7 @@
     <!-- 标题和操作按钮 -->
     <div class="resource-page-element-page__header">
       <div class="resource-page-element-page__title-group">
-        <h2>{{ $t('MG_RES_ELEM_TITLE', '管理页面元素数据') }}</h2>
+        <h2>{{ $t('MG_RES_ELEM_TITLE', '页面元素') }}</h2>
       </div>
       <el-button type="primary" @click="handleCreate">
         {{ $t('MG_RES_ELEM_BTN_ADD', '新增页面元素') }}
@@ -41,7 +41,7 @@
     </div>
 
     <el-table :data="tableData" border stripe style="width: 100%">
-      <el-table-column prop="id" :label="$t('MG_RES_ELEM_COL_ID', '页面元素序号')" width="120" />
+      <el-table-column prop="id" :label="$t('MG_RES_ELEM_COL_ID', '页面元素序号')" width="160" />
       <el-table-column prop="pageElementName" :label="$t('MG_RES_ELEM_FIELD_NAME', '页面元素名称')" width="180" />
       <el-table-column prop="pageElementCode" :label="$t('MG_RES_ELEM_FIELD_CODE', '页面元素编码')" width="180" />
       <el-table-column prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" />
@@ -140,9 +140,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 // 表单校验规则
 };
@@ -182,23 +181,18 @@ const handlePageChange = (page: number) => {
 // 删除数据记录
 const handleDelete = (row: ResourcePageElement) => {
   ElMessageBox.confirm(
-    t('MG_RES_ELEM_DEL_CONFIRM', `确认删除页面元素「${row.id}」吗？`),
+    t('MG_RES_ELEM_DEL_CONFIRM', { id: row.id }, '确认删除页面元素「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await ResourcePageElementApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        ElMessage.error(msg);
+      await ResourcePageElementApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => {});
 };
@@ -277,19 +271,14 @@ const submitEdit = async () => {
     pageElementCode: editForm.pageElementCode,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await ResourcePageElementApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    ElMessage.error(msg);
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await ResourcePageElementApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  await loadData();
+  editDialogVisible.value = false;
 };
 
 // 监听 props 变化，每次传入新的 applicationId/pageCode 都刷新
@@ -303,7 +292,7 @@ watch(
 <style scoped>
 .resource-page-element-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -316,7 +305,7 @@ watch(
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -341,7 +330,7 @@ watch(
 
 .resource-page-element-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .resource-page-element-page__pagination {

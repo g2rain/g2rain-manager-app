@@ -44,7 +44,7 @@
     <!-- 标题和操作按钮 -->
     <div class="resource-menu-page__header">
       <div class="resource-menu-page__title-group">
-        <h2>{{ $t('MG_RES_MENU_TITLE', '管理菜单数据') }}</h2>
+        <h2>{{ $t('MG_RES_MENU_TITLE', '菜单') }}</h2>
       </div>
       <el-button type="primary" v-permission="'resource_menu:add'" @click="handleCreate(undefined)">
         {{ $t('MG_MENU_BTN_ADD_ROOT', '新增顶级菜单') }}
@@ -62,18 +62,18 @@
       <el-table-column prop="menuName" :label="$t('MG_RES_MENU_FIELD_NAME', '菜单名称')" width="150" />
       <el-table-column prop="id" :label="$t('MG_RES_MENU_COL_ID', '菜单序号')" width="100" />
       <!-- 树形列：菜单名称 -->
-      <el-table-column prop="applicationId" :label="$t('MG_FIELD_APPLICATION', '所属应用')" width="120">
+      <el-table-column prop="applicationId" :label="$t('MG_FIELD_APPLICATION', '所属应用')" width="200">
         <template #default="{ row }">
           {{ applicationOptions.find(item => item.value === row?.applicationId)?.label || '' }}
         </template>
       </el-table-column>
       <el-table-column prop="menuCode" :label="$t('MG_RES_MENU_FIELD_CODE', '菜单编码')" width="200" />
       <el-table-column prop="linkPath" :label="$t('MG_RES_MENU_FIELD_LINK', '链接路径')" width="230" />
-      <el-table-column prop="menuSortOrder" :label="$t('G2_LBL_SORT', '排序')" width="70" />
+      <el-table-column prop="menuSortOrder" :label="$t('G2_LBL_SORT', '排序')" width="100" />
       <el-table-column prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" />
       <el-table-column prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" />
       <!-- 操作列 -->
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="220">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="260">
         <template #default="{ row }">
           <el-button link type="primary" v-permission="'resource_menu:edit'" @click="handleEdit(row)">
             {{ $t('G2_BTN_EDIT', '编辑') }}
@@ -90,7 +90,7 @@
 
     <!-- 新增 / 编辑弹窗 -->
     <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="140px">
         <el-form-item
           v-if="showApplicationSelect"
           :label="$t('MG_FIELD_APPLICATION', '所属应用')"
@@ -214,9 +214,8 @@ const loadData = async () => {
     const listData = await ResourceMenuApi.list(query);
     // 设置响应结果
     tableData.value = listData;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -236,19 +235,14 @@ const handleReset = () => {
 // 删除数据记录
 const handleDelete = (row: ResourceMenu) => {
   ElMessageBox.confirm(
-    t('MG_RES_MENU_DEL_CONFIRM', `确认删除菜单「${row.id}」吗？`),
+    t('MG_RES_MENU_DEL_CONFIRM', { id: row.id }, '确认删除菜单「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await ResourceMenuApi.remove(row.id);
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        ElMessage.error(msg);
-      }
+      await ResourceMenuApi.remove(row.id);
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => {});
 };
@@ -283,7 +277,7 @@ const editRules = computed<FormRules>(() => ({
   menuCode: [{ required: true, message: t('MG_RES_MENU_VLD_CODE', '请输入菜单编码'), trigger: 'blur' }],
   linkPath: [{ required: false, message: t('MG_RES_MENU_VLD_LINK', '请输入链接路径'), trigger: 'blur' }],
   icon: [{ required: false, message: t('MG_RES_MENU_VLD_ICON', '请输入菜单图标'), trigger: 'blur' }],
-  menuSortOrder: [{ required: true, message: t('MG_RES_MENU_VLD_SORT', '请输入排序'), trigger: 'blur' }],
+  menuSortOrder: [{ required: true, message: t('G2_PH_SORT', '请输入排序'), trigger: 'blur' }],
 }));
 
 const showApplicationSelect = ref(false);
@@ -340,19 +334,14 @@ const submitEdit = async () => {
     menuSortOrder: editForm.menuSortOrder,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await ResourceMenuApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    ElMessage.error(msg);
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await ResourceMenuApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  await loadData();
+  editDialogVisible.value = false;
 };
 
 // 挂载回调
@@ -367,7 +356,7 @@ onMounted(async () => {
 <style scoped>
 .resource-menu-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -380,7 +369,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -405,7 +394,7 @@ onMounted(async () => {
 
 .resource-menu-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .resource-menu-page__pagination {

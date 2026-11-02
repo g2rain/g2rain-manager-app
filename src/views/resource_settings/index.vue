@@ -6,8 +6,8 @@
     </div>
 
     <!-- 表单内容 -->
-    <div class="resource-settings-page__content" style="background: #fff; padding: 24px; border-radius: 4px;">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px" style="max-width: 500px">
+    <div class="resource-settings-page__content" style="background: var(--g2-bg-container); padding: 24px; border-radius: 4px;">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="140px" style="max-width: 500px">
         <el-form-item :label="$t('MG_RES_SETTINGS_FIELD_APPLICATION', '所属应用')" prop="applicationId">
           <el-select
             v-model="editForm.applicationId"
@@ -66,8 +66,8 @@ const loadDicts = async () => {
       value: u.id,
       label: u.applicationName || `${u.id}`
     }));
-  } catch (e) {
-    ElMessage.error(t('MG_RES_SETTINGS_MSG_LOAD_APP_FAIL', '加载应用列表失败'));
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 // 2. 校验规则
 };
@@ -112,24 +112,20 @@ const submitEdit = async () => {
 
   await editFormRef.value.validate(async (valid) => {
     if (valid) {
-      try {
-        if (!editForm.applicationId) {
-          ElMessage.error(t('MG_RES_SETTINGS_MSG_SELECT_APP', '请选择所属应用'));
-          return;
-        }
-        
-        // 使用 FormData 封装参数
-        const formData = new FormData();
-        if (editForm.file) {
-          formData.append('file', editForm.file);
-        }
-
-        // 调用 API（确保接口支持 FormData）
-        await ResourceSettingsApi.uploadResource(editForm.applicationId, formData);
-        ElMessage.success(t('MG_RES_SETTINGS_MSG_UPLOAD_OK', '上传成功'));
-      } catch (error: any) {
-        ElMessage.error(error.message || t('MG_RES_SETTINGS_MSG_UPLOAD_FAIL', '上传失败'));
+      if (!editForm.applicationId) {
+        ElMessage.error(t('MG_RES_SETTINGS_MSG_SELECT_APP', '请选择所属应用'));
+        return;
       }
+      
+      // 使用 FormData 封装参数
+      const formData = new FormData();
+      if (editForm.file) {
+        formData.append('file', editForm.file);
+      }
+
+      // 调用 API（确保接口支持 FormData）
+      await ResourceSettingsApi.uploadResource(editForm.applicationId, formData);
+      ElMessage.success(t('MG_RES_SETTINGS_MSG_UPLOAD_OK', '上传成功'));
     }
   });
 };
@@ -150,14 +146,14 @@ onMounted(async () => {
 <style scoped>
 .resource-settings-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100vh;
 }
 
 .resource-settings-page__header {
   margin-bottom: 20px;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 

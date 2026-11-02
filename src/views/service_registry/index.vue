@@ -13,7 +13,7 @@
       <!-- 基础查询表单（BaseSelectListDto） -->
         <!-- 业务特定查询字段 -->
         </el-form-item>
-        <el-form-item :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')">
+        <el-form-item :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')">
           <el-input
             v-model="queryForm.name"
             :placeholder="$t('MG_SVC_REG_PH_NAME', '请输入服务名称')"
@@ -51,7 +51,7 @@
     <!-- 标题和操作按钮 -->
     <div class="service_registry-page__header">
       <div class="service_registry-page__title-group">
-        <h2>{{ $t('MG_SVC_REG_TITLE', '管理服务注册数据') }}</h2>
+        <h2>{{ $t('MG_SVC_REG_TITLE', '服务注册') }}</h2>
       </div>
       <el-button type="primary" v-permission="'service_registry:add'" @click="handleCreate">
         {{ $t('MG_SVC_REG_BTN_ADD', '新增服务注册') }}
@@ -66,11 +66,11 @@
       :enable-multi-sort="true"
       @sort-change="handleSortChange"
     >
-      <el-table-column prop="id" :label="$t('MG_SVC_REG_COL_ID', '服务注册序号')" width="120" />
-      <el-table-column prop="serviceCode" :label="$t('MG_SVC_REG_COL_SERVICE_CODE', '服务编号')" width="180" />
-      <el-table-column prop="name" :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')" width="180" />
-      <el-table-column prop="endpoint" :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')" width="180" />
-      <el-table-column prop="routePrefix" :label="$t('MG_SVC_REG_FIELD_ROUTE_PREFIX', '路由前缀')" width="180" />
+      <el-table-column prop="id" :label="$t('MG_SVC_REG_COL_ID', '服务注册序号')" width="140" />
+      <el-table-column prop="serviceCode" :label="$t('MG_SVC_REG_COL_SERVICE_CODE', '服务编号')" width="200" />
+      <el-table-column prop="name" :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')" width="180" />
+      <el-table-column prop="endpoint" :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')" width="240" />
+      <el-table-column prop="routePrefix" :label="$t('MG_SVC_REG_FIELD_ROUTE_PREFIX', '路由前缀')" width="260" />
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
       <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
@@ -108,12 +108,12 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="600px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="280px">
         <el-form-item :label="$t('MG_SVC_REG_FIELD_SERVICE_CODE', '服务编码')" prop="serviceCode">
           <el-input v-model="editForm.serviceCode" :placeholder="$t('MG_SVC_REG_PH_SERVICE_CODE', '请输入服务编码')" />
         </el-form-item>
-        <el-form-item :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')" prop="name">
+        <el-form-item :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')" prop="name">
           <el-input v-model="editForm.name" :placeholder="$t('MG_SVC_REG_PH_NAME', '请输入服务名称')" />
         </el-form-item>
         <el-form-item :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')" prop="endpoint">
@@ -146,7 +146,7 @@
       <el-descriptions :column="1" border>
         <el-descriptions-item :label="$t('MG_SVC_REG_COL_REGISTRY_ID', '服务注册标识')">{{ currentRow?.id }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_SERVICE_CODE', '服务编码')">{{ currentRow?.serviceCode }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_NAME', '服务名称')">{{ currentRow?.name }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')">{{ currentRow?.name }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_ENDPOINT', '目标地址')">{{ currentRow?.endpoint }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_ROUTE_PREFIX', '路由前缀')">{{ currentRow?.routePrefix }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_SVC_REG_FIELD_DESCRIPTION', '服务说明')">{{ currentRow?.description }}</el-descriptions-item>
@@ -171,13 +171,13 @@ import { ServiceRegistryApi } from './api';
 import type { ServiceRegistry, ServiceRegistryPayload, ServiceRegistryQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMessage } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
 
 // 组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
 // 基础查询表单（BaseSelectListDto）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -205,7 +205,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as ServiceRegistryQuery;
 
@@ -219,8 +219,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    showErrorMessage(error || t('G2_MSG_LOAD_FAIL', '加载列表失败'));
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -240,10 +240,9 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.serviceCode = '';
   queryForm.name = '';
@@ -282,22 +281,18 @@ const handleView = (row: ServiceRegistry) => {
 // 删除数据记录
 const handleDelete = (row: ServiceRegistry) => {
   ElMessageBox.confirm(
-    t('MG_SVC_REG_DEL_CONFIRM', `确认删除服务注册「${row.id}」吗？`),
+    t('MG_SVC_REG_DEL_CONFIRM', { id: row.id }, '确认删除服务注册「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await ServiceRegistryApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: any) {
-        showErrorMessage(error || t('G2_MSG_DELETE_FAIL', '删除失败'));
+      await ServiceRegistryApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => {});
 };
@@ -372,18 +367,14 @@ const submitEdit = async () => {
     description: editForm.description,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await ServiceRegistryApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: any) {
-    showErrorMessage(error || t('G2_MSG_SAVE_FAIL', '保存失败'));
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await ServiceRegistryApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  await loadData();
+  editDialogVisible.value = false;
 };
 
 // 挂载回调
@@ -395,7 +386,7 @@ onMounted(() => {
 <style scoped>
 .service_registry-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -408,7 +399,7 @@ onMounted(() => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -433,7 +424,7 @@ onMounted(() => {
 
 .service_registry-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .service_registry-page__pagination {

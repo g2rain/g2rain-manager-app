@@ -4,7 +4,7 @@
     <el-card class="resource_api-page__search" shadow="never">
       <!-- 基础查询表单（BaseSelectListDto） -->
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
-        <el-form-item :label="$t('MG_RES_API_FIELD_SERVICE', '服务名称')">
+        <el-form-item :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')">
           <el-select
             v-model="queryForm.serviceCode"
             :placeholder="$t('MG_RES_API_PH_SERVICE', '请选择服务名称')"
@@ -63,7 +63,7 @@
     <!-- 标题和操作按钮 -->
     <div class="resource_api-page__header">
       <div class="resource_api-page__title-group">
-        <h2>{{ $t('MG_RES_API_TITLE', '管理资源接口数据') }}</h2>
+        <h2>{{ $t('MG_RES_API_TITLE', '资源接口') }}</h2>
       </div>
       <div style="display:flex; gap:8px;">
         <el-button type="primary" v-permission="'resource_api:import'" @click="handleImport">
@@ -83,8 +83,8 @@
       :enable-multi-sort="true"
       @sort-change="handleSortChange"
     >
-      <el-table-column prop="id" :label="$t('MG_RES_API_COL_ID', '资源接口标识')" width="120" />
-      <el-table-column prop="serviceName" :label="$t('MG_RES_API_FIELD_SERVICE', '服务名称')" width="180" />
+      <el-table-column prop="id" :label="$t('MG_RES_API_COL_ID', '资源接口标识')" width="180" />
+      <el-table-column prop="serviceName" :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')" width="180" />
       <el-table-column prop="apiTags" :label="$t('MG_RES_API_FIELD_TAGS', '接口标签')" width="180" />
       <el-table-column prop="name" :label="$t('MG_RES_API_FIELD_NAME', '接口名称')" width="180" />
       <el-table-column prop="method" :label="$t('MG_RES_API_FIELD_METHOD', '请求方法')" width="180" />
@@ -126,9 +126,9 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
-        <el-form-item :label="$t('MG_RES_API_FIELD_SERVICE', '服务名称')" prop="serviceCode">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="600px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="200px">
+        <el-form-item :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')" prop="serviceCode">
           <el-select
             v-model="editForm.serviceCode"
             :disabled="isEdit"
@@ -156,8 +156,8 @@
         <el-form-item :label="$t('MG_RES_API_FIELD_PATH', '请求路径')" prop="path">
           <el-input v-model="editForm.path" :placeholder="$t('MG_RES_API_PH_PATH', '请输入请求路径')" />
         </el-form-item>
-        <el-form-item :label="$t('MG_RES_API_FIELD_DESC', '描述')" prop="description">
-          <el-input v-model="editForm.description" :placeholder="$t('MG_RES_API_PH_DESC', '请输入描述')" />
+        <el-form-item :label="$t('G2_FIELD_DESC', '描述')" prop="description">
+          <el-input v-model="editForm.description" :placeholder="$t('G2_PH_DESC', '请输入描述')" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -170,8 +170,8 @@
 
     <el-dialog v-model="detailDialogVisible" :title="$t('MG_RES_API_DETAIL', '资源接口明细')" width="520px">
     <!-- 明细弹窗 -->
-      <el-descriptions :column="1" border>
-        <el-descriptions-item :label="$t('MG_RES_API_FIELD_SERVICE', '服务名称')">
+      <el-descriptions :column="1" border label-width="160px">
+        <el-descriptions-item :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')">
           <el-tag>
             {{ srvRegistryOptions.find(item => item.value === currentRow?.serviceCode)?.label || '' }}
           </el-tag>
@@ -180,7 +180,7 @@
         <el-descriptions-item :label="$t('MG_RES_API_FIELD_NAME', '接口名称')">{{ currentRow?.name }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_RES_API_FIELD_METHOD', '请求方法')">{{ currentRow?.method }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_RES_API_FIELD_PATH', '请求路径')">{{ currentRow?.path }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_RES_API_FIELD_DESC', '描述')">{{ currentRow?.description }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_DESC', '描述')">{{ currentRow?.description }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
@@ -195,8 +195,8 @@
 
     <el-dialog v-model="importDialogVisible" :title="$t('MG_RES_API_DLG_IMPORT', '导入资源接口')" width="520px">
     <!-- 导入弹窗 -->
-      <el-form ref="importFormRef" :model="importForm" :rules="importRules" label-width="100px">
-        <el-form-item :label="$t('MG_RES_API_FIELD_SERVICE', '服务名称')" prop="serviceCode">
+      <el-form ref="importFormRef" :model="importForm" :rules="importRules" label-width="140px">
+        <el-form-item :label="$t('G2_FIELD_SERVICE_NAME', '服务名称')" prop="serviceCode">
           <el-select
             v-model="importForm.serviceCode"
             :placeholder="$t('MG_RES_API_PH_SERVICE', '请选择服务名称')"
@@ -235,8 +235,9 @@ import { ServiceRegistryApi } from '../service_registry/api';
 import type { ResourceApi, ResourceApiPayload, ResourceApiQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, showErrorMessage } from '@/components';
-import { getHttpClient } from '@/components/http';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { showErrorMessage } from '@/components';
+import { getHttpClient } from '@runtime/http';
 
 // 定义字典引用
 const srvRegistryOptions = ref<Array<{ label: string; value: string }>>([]);
@@ -270,7 +271,7 @@ const loadDicts = async () => {
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
 // 基础查询表单（BaseSelectListDto）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -301,7 +302,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm }).filter(
+      Object.entries({ ...baseQueryForm.value, ...queryForm }).filter(
         ([_, v]) => (v ?? '') !== '' && [v].flat().length,
       ),
     ) as ResourceApiQuery;
@@ -316,9 +317,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    showErrorMessage(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -338,10 +338,9 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.serviceCode = '';
   queryForm.apiTags = '';
@@ -381,23 +380,18 @@ const handleView = (row: ResourceApi) => {
 // 删除数据记录
 const handleDelete = (row: ResourceApi) => {
   ElMessageBox.confirm(
-    t('MG_RES_API_DEL_CONFIRM', `确认删除资源「${row.id}」吗？`),
+    t('MG_RES_API_DEL_CONFIRM', { id: row.id }, '确认删除资源「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await ResourceApiApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        showErrorMessage(msg);
+      await ResourceApiApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => {});
 };
@@ -477,19 +471,14 @@ const submitEdit = async () => {
     description: editForm.description,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await ResourceApiApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    showErrorMessage(msg);
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await ResourceApiApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  await loadData();
+  editDialogVisible.value = false;
 };
 
 // 导入弹窗引用
@@ -601,12 +590,9 @@ const submitImport = async () => {
       document: importDocument.value,
     });
 
-    ElMessage.success(t('MG_RES_API_MSG_IMPORT_OK', `导入成功，共 ${importCount} 条`));
+    ElMessage.success(t('MG_RES_API_MSG_IMPORT_OK', { count: importCount }, '导入成功，共 {count} 条'));
     await loadData();
     importDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_RES_API_MSG_IMPORT_FAIL', '导入失败');
-    showErrorMessage(msg);
   } finally {
     importSaving.value = false;
   }
@@ -624,7 +610,7 @@ onMounted(async () => {
 <style scoped>
 .resource_api-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -637,7 +623,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -662,7 +648,7 @@ onMounted(async () => {
 
 .resource_api-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .resource_api-page__pagination {

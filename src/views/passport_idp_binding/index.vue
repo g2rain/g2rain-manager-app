@@ -24,7 +24,7 @@
         <el-form-item :label="$t('MG_PP_IDP_FIELD_IDP_APP_CODE', 'IDP侧的应用ID')">
           <el-input v-model="queryForm.idpApplicationCode" :placeholder="$t('MG_PP_IDP_PH_IDP_APP_CODE', '请输入IDP侧的应用ID')" clearable style="width: 200px" />
         </el-form-item>
-        <el-form-item :label="$t('MG_PP_IDP_FIELD_BIND_MODE', '接入形态')">
+        <el-form-item :label="$t('G2_FIELD_BIND_MODE', '接入形态')">
           <el-input v-model="queryForm.bindMode" :placeholder="$t('MG_PP_IDP_PH_BIND_MODE', '请输入接入形态')" clearable style="width: 200px" />
         </el-form-item>
 
@@ -41,7 +41,7 @@
     <!-- 标题 -->
     <div class="passport_idp_binding-page__header">
       <div class="passport_idp_binding-page__title-group">
-        <h2>{{ $t('MG_PP_IDP_TITLE', '管理账号与外部身份源绑定表数据') }}</h2>
+        <h2>{{ $t('MG_PP_IDP_TITLE', '账号身份绑定') }}</h2>
       </div>
     </div>
 
@@ -58,7 +58,7 @@
       <el-table-column prop="corpId" :label="$t('MG_PP_IDP_FIELD_CORP_ID', 'IDP侧企业ID')" width="180" />
       <el-table-column prop="idpUserId" :label="$t('MG_PP_IDP_FIELD_IDP_USER_ID', 'IDP侧用户ID')" width="180" />
       <el-table-column prop="idpApplicationCode" :label="$t('MG_PP_IDP_FIELD_IDP_APP_CODE', 'IDP侧的应用ID')" width="180" />
-      <el-table-column prop="bindMode" :label="$t('MG_PP_IDP_FIELD_BIND_MODE', '接入形态')" width="180" />
+      <el-table-column prop="bindMode" :label="$t('G2_FIELD_BIND_MODE', '接入形态')" width="180" />
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
       <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="160">
@@ -102,7 +102,7 @@
         <el-descriptions-item :label="$t('MG_PP_IDP_FIELD_CORP_ID', 'IDP侧企业ID')">{{ currentRow?.corpId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_PP_IDP_FIELD_IDP_USER_ID', 'IDP侧用户ID')">{{ currentRow?.idpUserId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_PP_IDP_FIELD_IDP_APP_CODE', 'IDP侧的应用ID')">{{ currentRow?.idpApplicationCode }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_PP_IDP_FIELD_BIND_MODE', '接入形态')">{{ currentRow?.bindMode }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_BIND_MODE', '接入形态')">{{ currentRow?.bindMode }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_PP_IDP_FIELD_RAW_PROFILE', 'IdP 返回的原始用户信息快照')">
           <span class="passport-idp-binding-detail__content">{{ currentRow?.rawProfile }}</span>
         </el-descriptions-item>
@@ -125,13 +125,14 @@ import { DictItemApi } from '../dict/api';
 import type { PassportIdpBinding, PassportIdpBindingQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, showErrorMessage } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { DictSelect, DictText } from '@g2rain/ui/platform';
 
 // 组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
 // 基础查询表单（BaseSelectListDto）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -165,7 +166,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as PassportIdpBindingQuery;
   
@@ -179,9 +180,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    showErrorMessage(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -201,10 +201,9 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.passportId = undefined;
   queryForm.idpType = '';
@@ -248,23 +247,18 @@ const handleView = (row: PassportIdpBinding) => {
 // 删除数据记录
 const handleDelete = (row: PassportIdpBinding) => {
   ElMessageBox.confirm(
-    t('MG_PP_IDP_DEL_CONFIRM', `确认删除账号与外部身份源绑定表「${row.id}」吗？`),
+    t('MG_PP_IDP_DEL_CONFIRM', { id: row.id }, '确认删除账号与外部身份源绑定表「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await PassportIdpBindingApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        showErrorMessage(msg);
+      await PassportIdpBindingApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => {});
 };
@@ -279,7 +273,7 @@ onMounted(() => {
 <style scoped>
 .passport_idp_binding-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -292,7 +286,7 @@ onMounted(() => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -317,7 +311,7 @@ onMounted(() => {
 
 .passport_idp_binding-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .passport_idp_binding-page__pagination {

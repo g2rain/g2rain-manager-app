@@ -8,7 +8,7 @@
     @closed="handleClosed"
   >
     <el-form ref="formRef" :model="form" :rules="formRules" label-width="100px">
-      <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')" prop="organId">
+      <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')" prop="organId">
         <el-input
           v-if="mode === 'invite'"
           :model-value="organNameDisplay"
@@ -20,9 +20,8 @@
           ref="organSelectRef"
           v-model="form.organId"
           :disabled="isEdit"
-          :use-token-default="false"
-          :api-method="OrganApi.searchOrgans"
-          :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')"
+          :default-value="null"
+          :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')"
           width="100%"
           @change="handleOrganChange"
         />
@@ -79,7 +78,7 @@ import { computed, nextTick, reactive, ref, watch } from 'vue';
 import type { FormInstance, FormRules, InputInstance } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { t } from '@platform/i18n';
-import { OrganSelect } from '@/components';
+import { OrganSelect } from '@g2rain/ui/platform';
 import { OrganApi } from '../organ/api';
 import { RoleApi } from './api';
 import { RoleControlUnitRelationApi } from '../role_control_unit_relation/api';
@@ -141,7 +140,7 @@ const form = reactive({
 const organNameDisplay = computed(() => props.organName || String(form.organId ?? ''));
 
 const formRules = computed<FormRules>(() => ({
-  organId: [{ required: true, message: t('MG_ROLE_VLD_ORGAN', '请选择所属机构'), trigger: 'change' }],
+  organId: [{ required: true, message: t('G2_PH_ORGAN', '请选择所属机构'), trigger: 'change' }],
   roleName: [
     { required: true, message: t('MG_ROLE_VLD_NAME', '请输入角色名称'), trigger: 'blur' },
     {
@@ -167,9 +166,7 @@ const loadAssignable = async (organId: number) => {
     const list = await RoleControlUnitRelationApi.listAssignable(organId);
     // 后端已过滤 USER；前端再兜底，避免非 USER 进入员工角色分配
     assignablePerms.value = list.filter((item) => !item.sessionType || item.sessionType === 'USER');
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_ROLE_MSG_PERM_LOAD_FAIL', '加载功能权限失败');
-    ElMessage.error(msg);
+  } catch {
     assignablePerms.value = [];
   } finally {
     permsLoading.value = false;
@@ -276,12 +273,7 @@ const submit = async () => {
           controlUnitIds,
           deleteControlUnitIds,
         });
-      } catch (error: unknown) {
-        const msg =
-          error instanceof Error
-            ? error.message
-            : t('MG_ROLE_MSG_PERM_SAVE_FAIL', '角色已保存，但功能权限配置失败');
-        ElMessage.error(msg);
+      } catch {
         emit('success', buildRoleResult(roleId));
         visible.value = false;
         return;
@@ -291,9 +283,6 @@ const submit = async () => {
     ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
     emit('success', buildRoleResult(roleId));
     visible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    ElMessage.error(msg);
   } finally {
     saving.value = false;
   }

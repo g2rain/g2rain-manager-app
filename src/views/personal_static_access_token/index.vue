@@ -5,11 +5,11 @@
     <el-card v-if="!embedded" class="personal_static_access_token-page__search" shadow="never">
       <el-form :model="queryForm" :inline="true" class="query-form">
         <!-- 业务特定查询字段 -->
-        <el-form-item :label="$t('MG_PAT_FIELD_NAME', '名称')">
-          <el-input v-model="queryForm.name" :placeholder="$t('MG_PAT_PH_NAME', '请输入名称')" clearable style="width: 200px" />
+        <el-form-item :label="$t('G2_FIELD_NAME', '名称')">
+          <el-input v-model="queryForm.name" :placeholder="$t('G2_PH_NAME', '请输入名称')" clearable style="width: 200px" />
         </el-form-item>
         <el-form-item :label="$t('G2_FIELD_STATUS', '状态')">
-          <DictSelect v-model="queryForm.status" usage-code="STATIC_TOKEN_STATUS" :api-method="DictItemApi.select" :placeholder="$t('MG_PAT_PH_STATUS', '请选择状态')" clearable style="width: 200px" />
+          <DictSelect v-model="queryForm.status" usage-code="STATIC_TOKEN_STATUS" :api-method="DictItemApi.select" :placeholder="$t('G2_PH_STATUS', '请选择状态')" clearable style="width: 200px" />
         </el-form-item>
         <!-- 操作按钮 -->
         <el-form-item>
@@ -22,7 +22,7 @@
     <!-- 标题和操作按钮 -->
     <div class="personal_static_access_token-page__header">
       <div class="personal_static_access_token-page__title-group">
-        <h2>{{ $t('MG_PAT_TITLE', '模型秘钥管理') }}</h2>
+        <h2>{{ $t('MG_PAT_TITLE', '静态令牌') }}</h2>
       </div>
       <el-button type="primary" v-permission="'personal_static_access_token:add'" @click="handleCreate">{{ $t('MG_PAT_BTN_ADD', '新增 Api Key') }}</el-button>
     </div>
@@ -30,7 +30,11 @@
     <el-table :data="tableData" border stripe style="width: 100%">
       <el-table-column prop="id" :label="$t('G2_FIELD_ID', 'ID')" width="120" />
       <el-table-column prop="applicationName" :label="$t('MG_PAT_COL_APP_NAME', '应用名称')" width="140" />
-      <el-table-column prop="organName" :label="$t('MG_PAT_COL_ORGAN_NAME', '机构名称')" width="140" />
+      <el-table-column :label="$t('G2_FIELD_ORGAN_NAME', '机构名称')" width="140">
+        <template #default="{ row }">
+          {{ row.organName || row.organId }}
+        </template>
+      </el-table-column>
       <el-table-column prop="userName" :label="$t('MG_PAT_COL_USER_NAME', '用户名称')" width="140" />
       <el-table-column prop="name" :label="$t('MG_PAT_COL_TOKEN_NAME', '访问令牌名称')" width="180" />
       <el-table-column prop="maskedToken" :label="$t('MG_PAT_COL_MASKED_TOKEN', '脱敏令牌')" width="300" />
@@ -38,11 +42,11 @@
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            v-permission="'personal_static_access_token:status_update'"
+            permission="personal_static_access_token:status_update"
             active-value="ACTIVATED"
             inactive-value="REVOKED"
             usage-code="STATIC_TOKEN_STATUS"
-            :api-method="({ nextValue }) => PersonalStaticAccessTokenApi.updateStatus(row.id, String(nextValue))"
+            :api-method="changeStatus(row)"
             @success="loadData"
           />
         </template>
@@ -74,7 +78,7 @@
     <!-- 新增 / 编辑弹窗 -->
     <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
       <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
-        <el-form-item :label="$t('MG_PAT_FIELD_NAME', '名称')" prop="name">
+        <el-form-item :label="$t('G2_FIELD_NAME', '名称')" prop="name">
           <el-input v-model="editForm.name" :placeholder="$t('MG_PAT_PH_NAME_EDIT', 'test')" />
         </el-form-item>
       </el-form>
@@ -95,7 +99,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="closeApiKeyDialog">{{ $t('G2_BTN_CLOSE', '关闭') }}</el-button>
-          <el-button type="primary" @click="copyApiKey">{{ $t('MG_PAT_BTN_COPY', '复制') }}</el-button>
+          <el-button type="primary" @click="copyApiKey">{{ $t('G2_BTN_COPY', '复制') }}</el-button>
         </span>
       </template>
     </el-dialog>
@@ -105,7 +109,7 @@
       <el-descriptions :column="1" border>
         <el-descriptions-item :label="$t('G2_FIELD_ID', 'ID')">{{ currentRow?.id }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_PAT_COL_APP_NAME', '应用名称')">{{ currentRow?.applicationName }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_PAT_COL_ORGAN_NAME', '机构名称')">{{ currentRow?.organName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_ORGAN_NAME', '机构名称')">{{ currentRow?.organName || currentRow?.organId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_PAT_COL_USER_NAME', '用户名称')">{{ currentRow?.userName }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_PAT_COL_TOKEN_NAME', '访问令牌名称')">{{ currentRow?.name }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_PAT_COL_MASKED_TOKEN', '脱敏令牌')">{{ currentRow?.maskedToken }}</el-descriptions-item>
@@ -138,7 +142,12 @@ import type { ApplicationAuthorization } from '../application_authorization/type
 import type { PageSelectListDto } from '@platform/types/api.type';
 
 import { DictItemApi } from '../dict/api';
-import { DictSelect, DictText, showErrorMessage, StatusSwitch } from '@/components';
+import { DictSelect, DictText, StatusSwitch } from '@g2rain/ui/platform';
+
+// 状态开关回调：放在 script 里，避免模板内直接引用类导致 IDE 类型误报
+const changeStatus = (row: PersonalStaticAccessToken) =>
+  ({ nextValue }: { nextValue: string | number | boolean }) =>
+    PersonalStaticAccessTokenApi.updateStatus(row.id, String(nextValue));
 
 const props = withDefaults(defineProps<{
   embedded?: boolean;
@@ -190,9 +199,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    showErrorMessage(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -239,23 +247,18 @@ const handleView = (row: PersonalStaticAccessToken) => {
 // 删除数据记录
 const handleDelete = (row: PersonalStaticAccessToken) => {
   ElMessageBox.confirm(
-    t('MG_PAT_DEL_CONFIRM', `确认删除个人静态访问令牌「${row.id}」吗？`),
+    t('MG_PAT_DEL_CONFIRM', { id: row.id }, '确认删除个人静态访问令牌「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await PersonalStaticAccessTokenApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        showErrorMessage(msg);
+      await PersonalStaticAccessTokenApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => {});
 };
@@ -279,11 +282,11 @@ const editForm = reactive({
 });
 
 const editDialogTitle = computed(() =>
-  isEdit.value ? t('MG_PAT_DLG_EDIT', '编辑') : t('MG_PAT_DLG_CREATE', '创建 Api Key'),
+  isEdit.value ? t('G2_BTN_EDIT', '编辑') : t('MG_PAT_DLG_CREATE', '创建 Api Key'),
 );
 
 const editRules = computed<FormRules>(() => ({
-  name: [{ required: true, message: t('MG_PAT_VLD_NAME', '请输入名称'), trigger: 'blur' }],
+  name: [{ required: true, message: t('G2_PH_NAME', '请输入名称'), trigger: 'blur' }],
 }));
 
 // 打开创建弹窗
@@ -379,25 +382,20 @@ const submitEdit = async () => {
     maskedToken,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    
-    await PersonalStaticAccessTokenApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('MG_PAT_MSG_CREATE_OK', '创建成功'));
-    await loadData();
-    
-    editDialogVisible.value = false;
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
+  }
+  
+  await PersonalStaticAccessTokenApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('MG_PAT_MSG_CREATE_OK', '创建成功'));
+  await loadData();
+  
+  editDialogVisible.value = false;
 
-    if (!isEdit.value) {
-      createdApiKey.value = apiKey;
-      apiKeyDialogVisible.value = true;
-    }
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    showErrorMessage(msg);
+  if (!isEdit.value) {
+    createdApiKey.value = apiKey;
+    apiKeyDialogVisible.value = true;
   }
 };
 
@@ -420,7 +418,7 @@ watch(
 <style scoped>
 .personal_static_access_token-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -438,7 +436,7 @@ watch(
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -472,7 +470,7 @@ watch(
 
 .personal_static_access_token-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .personal_static_access_token-page__pagination {

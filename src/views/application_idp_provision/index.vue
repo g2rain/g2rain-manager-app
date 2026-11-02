@@ -23,9 +23,6 @@
         <el-form-item :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')">
           <el-input v-model="queryForm.idpApplicationCode" :placeholder="$t('MG_APP_IDP_PH_IDP_APP_CODE', '请输入IDP侧应用ID')" clearable style="width: 200px" />
         </el-form-item>
-        <el-form-item :label="$t('MG_APP_IDP_FIELD_REMARK', '备注')">
-          <el-input v-model="queryForm.remark" :placeholder="$t('MG_APP_IDP_PH_REMARK', '请输入备注')" clearable style="width: 200px" />
-        </el-form-item>
 
         <!-- 操作按钮 -->
         <template #actions>
@@ -40,7 +37,7 @@
     <!-- 标题和操作按钮 -->
     <div class="application_idp_provision-page__header">
       <div class="application_idp_provision-page__title-group">
-        <h2>{{ $t('MG_APP_IDP_TITLE', '管理外部身份源应用与平台应用的绑定数据') }}</h2>
+        <h2>{{ $t('MG_APP_IDP_TITLE', '应用身份源') }}</h2>
       </div>
       <el-button type="primary" v-permission="'application_idp_provision:add'" @click="handleCreate">{{ $t('MG_APP_IDP_BTN_ADD', '配置应用IDP') }}</el-button>
     </div>
@@ -55,8 +52,7 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="idpApplicationCode" :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')" width="180" />
-      <el-table-column prop="remark" :label="$t('MG_APP_IDP_FIELD_REMARK', '备注')" width="180" />
+      <el-table-column prop="idpApplicationCode" :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')" width="240" />
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
       <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
@@ -89,7 +85,7 @@
 
     <!-- 新增 / 编辑弹窗 -->
     <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="560px" append-to-body destroy-on-close>
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="120px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="240px">
         <el-form-item :label="$t('MG_APP_IDP_FIELD_APPLICATION', '应用')" prop="applicationId">
           <el-select
             v-model="editForm.applicationId"
@@ -114,8 +110,8 @@
         <el-form-item :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')" prop="idpApplicationCode">
           <el-input v-model="editForm.idpApplicationCode" :placeholder="$t('MG_APP_IDP_PH_IDP_APP_CODE', '请输入IDP侧应用ID')" />
         </el-form-item>
-        <el-form-item :label="$t('MG_APP_IDP_FIELD_REMARK', '备注')" prop="remark">
-          <el-input v-model="editForm.remark" type="textarea" :rows="3" :placeholder="$t('MG_APP_IDP_PH_REMARK', '请输入备注')" />
+        <el-form-item :label="$t('G2_FIELD_REMARK', '备注')" prop="remark">
+          <el-input v-model="editForm.remark" type="textarea" :rows="3" :placeholder="$t('G2_PH_REMARK', '请输入备注')" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -137,7 +133,7 @@
           </el-tag>
         </el-descriptions-item>
         <el-descriptions-item :label="$t('MG_APP_IDP_FIELD_IDP_APP_CODE', 'IDP侧应用ID')">{{ currentRow?.idpApplicationCode }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_APP_IDP_FIELD_REMARK', '备注')">{{ currentRow?.remark }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_REMARK', '备注')">{{ currentRow?.remark }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
@@ -159,7 +155,8 @@ import { DictItemApi } from '../dict/api';
 import type { ApplicationIdpProvision, ApplicationIdpProvisionPayload, ApplicationIdpProvisionQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, showErrorMessage } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { DictSelect, DictText } from '@g2rain/ui/platform';
 
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
 
@@ -180,7 +177,7 @@ const loadApplicationOptions = async () => {
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
 // 基础查询表单（BaseSelectListDto）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -192,7 +189,6 @@ const queryForm = reactive({
   applicationId: undefined,
   idpType: '',
   idpApplicationCode: '',
-  remark: '',
 });
 
 // 分页相关状态
@@ -210,7 +206,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as ApplicationIdpProvisionQuery;
   
@@ -224,9 +220,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    showErrorMessage(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -246,15 +241,13 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.applicationId = undefined;
   queryForm.idpType = '';
   queryForm.idpApplicationCode = '';
-  queryForm.remark = '';
   
   pagination.pageNum = 1; // 重置到第一页
   pagination.pageNum = 1; // 重置到第一页
@@ -289,23 +282,18 @@ const handleView = (row: ApplicationIdpProvision) => {
 // 删除数据记录
 const handleDelete = (row: ApplicationIdpProvision) => {
   ElMessageBox.confirm(
-    t('MG_APP_IDP_DEL_CONFIRM', `确认删除外部身份源应用与平台应用的绑定「${row.id}」吗？`),
+    t('MG_APP_IDP_DEL_CONFIRM', { id: row.id }, '确认删除外部身份源应用与平台应用的绑定「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await ApplicationIdpProvisionApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        showErrorMessage(msg);
+      await ApplicationIdpProvisionApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => {});
 };
@@ -374,19 +362,14 @@ const submitEdit = async () => {
     remark: editForm.remark,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await ApplicationIdpProvisionApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    showErrorMessage(msg);
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await ApplicationIdpProvisionApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  await loadData();
+  editDialogVisible.value = false;
 };
 
 // 挂载回调
@@ -399,7 +382,7 @@ onMounted(async () => {
 <style scoped>
 .application_idp_provision-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -412,7 +395,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -437,7 +420,7 @@ onMounted(async () => {
 
 .application_idp_provision-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .application_idp_provision-page__pagination {

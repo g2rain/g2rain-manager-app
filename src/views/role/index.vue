@@ -3,8 +3,8 @@
     <!-- 查询表单 -->
     <el-card class="role-page__search" shadow="never">
       <QueryForm ref="queryFormRef" v-model="baseQueryForm" @search="handleSearch">
-        <el-form-item :label="$t('MG_FIELD_ORGAN', '所属机构')">
-          <OrganSelect v-model="queryForm.organId" :api-method="OrganApi.searchOrgans" :placeholder="$t('MG_PH_ORGAN', '请选择所属机构')" width="200px" />
+        <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')">
+          <OrganSelect v-model="queryForm.organId" :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')" width="200px" />
         </el-form-item>
 
         <el-form-item :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')">
@@ -26,7 +26,7 @@
 
     <div class="role-page__header">
       <div class="role-page__title-group">
-        <h2>{{ $t('MG_ROLE_TITLE', '管理角色数据') }}</h2>
+        <h2>{{ $t('MG_ROLE_TITLE', '角色') }}</h2>
       </div>
       <el-button type="primary" v-permission="'role:add'" @click="handleCreate">{{ $t('MG_ROLE_BTN_ADD', '新增角色') }}</el-button>
     </div>
@@ -35,7 +35,11 @@
       @sort-change="handleSortChange">
       <el-table-column prop="id" :label="$t('MG_ROLE_COL_ID', '角色序号')" width="120" />
 
-      <el-table-column prop="organName" :label="$t('MG_FIELD_ORGAN', '所属机构')" width="140" />
+      <el-table-column :label="$t('G2_FIELD_ORGAN', '所属机构')" width="140">
+        <template #default="{ row }">
+          {{ row.organName || row.organId }}
+        </template>
+      </el-table-column>
 
       <el-table-column prop="roleType" :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')" width="140">
         <template #default="{ row }">
@@ -57,7 +61,7 @@
 
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
 
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="300">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="450">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
           <el-button type="primary" v-permission="'role:edit'" link size="small" @click="handleEdit(row)">{{ $t('G2_BTN_EDIT', '编辑') }}</el-button>
@@ -96,7 +100,7 @@
     <el-dialog v-model="detailDialogVisible" :title="$t('MG_ROLE_DETAIL', '角色明细')" width="520px">
       <el-descriptions :column="1" border>
         <el-descriptions-item :label="$t('MG_ROLE_COL_ID', '角色序号')">{{ currentRow?.id }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName || currentRow?.organId }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_ROLE_FIELD_TYPE', '角色类型')">
           <el-tag>
             <DictText :value="currentRow?.roleType" usage-code="ROLE_TYPE" :api-method="DictItemApi.select" />
@@ -169,14 +173,15 @@ import { RoleControlUnitRelationApi } from '../role_control_unit_relation/api';
 import type { RoleControlUnitRelation } from '../role_control_unit_relation/type';
 import type { Role, RoleQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, OrganSelect, DictSelect, DictText } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { OrganSelect, DictSelect, DictText } from '@g2rain/ui/platform';
 import RoleEditDialog from './RoleEditDialog.vue';
 import RolePermissionTags from './RolePermissionTags.vue';
 import PermissionTooltip from './PermissionTooltip.vue';
 
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -235,7 +240,7 @@ const loadRolePermissions = async (roles: Role[]) => {
 const loadData = async () => {
   try {
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as RoleQuery;
 
@@ -248,9 +253,8 @@ const loadData = async () => {
     tableData.value = pageData.records;
     pagination.total = pageData.total;
     await loadRolePermissions(pageData.records);
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -264,10 +268,9 @@ const handleSearch = () => {
 };
 
 const handleReset = () => {
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   queryForm.organId = undefined;
   queryForm.roleType = '';
   queryForm.roleName = '';
@@ -296,22 +299,17 @@ const handleView = (row: Role) => {
 
 const handleDelete = (row: Role) => {
   ElMessageBox.confirm(
-    t('MG_ROLE_DEL_CONFIRM', `确认删除角色「${row.id}」吗？`),
+    t('MG_ROLE_DEL_CONFIRM', { id: row.id }, '确认删除角色「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await RoleApi.remove(row.id);
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        ElMessage.error(msg);
+      await RoleApi.remove(row.id);
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => { });
 };
@@ -468,7 +466,7 @@ onMounted(async () => {
 <style scoped>
 .role-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -481,7 +479,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -506,7 +504,7 @@ onMounted(async () => {
 
 .role-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .role-page__pagination {
