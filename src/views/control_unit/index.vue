@@ -36,22 +36,22 @@
     <!-- 标题和操作按钮 -->
     <div class="control-unit-page__header">
       <div class="control-unit-page__title-group">
-        <h2>{{ $t('MG_CTRL_UNIT_TITLE', '管理功能权限数据') }}</h2>
+        <h2>{{ $t('MG_CTRL_UNIT_TITLE', '功能权限') }}</h2>
       </div>
       <el-button type="primary" v-permission="'control_unit:add'" @click="handleCreate">{{ $t('MG_CTRL_UNIT_BTN_ADD', '新增功能权限') }}</el-button>
     </div>
 
     <SortableTable :data="tableData" border stripe style="width: 100%" :enable-multi-sort="true"
       @sort-change="handleSortChange">
-      <el-table-column prop="id" :label="$t('MG_CTRL_UNIT_COL_ID', '功能权限ID')" width="120" />
+      <el-table-column prop="id" :label="$t('MG_CTRL_UNIT_COL_ID', '功能权限ID')" width="180" />
       <el-table-column prop="applicationId" :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')" width="150">
         <template #default="{ row }">
           {{applicationOptions.find(item => item.value === row?.applicationId)?.label || ''}}
         </template>
       </el-table-column>
-      <el-table-column prop="controlUnitName" :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')" width="180" />
-      <el-table-column prop="description" :label="$t('MG_FIELD_DESC', '描述')" min-width="200" show-overflow-tooltip />
-      <el-table-column prop="controlUnitScope" :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')" width="180">
+      <el-table-column prop="controlUnitName" :label="$t('MG_CTRL_UNIT_FIELD_NAME', '功能权限名称')" width="230" />
+      <el-table-column prop="description" :label="$t('G2_FIELD_DESC', '描述')" min-width="200" show-overflow-tooltip />
+      <el-table-column prop="controlUnitScope" :label="$t('MG_CTRL_UNIT_FIELD_SCOPE', '功能权限范围')" width="200">
         <template #default="{ row }">
           <el-tag effect="light">
             <DictText :value="row?.controlUnitScope" usage-code="CONTROL_UNIT_SCOPE" :api-method="DictItemApi.select" />
@@ -65,22 +65,22 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="status" :label="$t('MG_CTRL_UNIT_FIELD_STATUS', '功能权限状态')" width="180">
+      <el-table-column prop="status" :label="$t('MG_CTRL_UNIT_FIELD_STATUS', '功能权限状态')" width="220">
         <template #default="{ row }">
           <StatusSwitch
             v-model="row.status"
-            v-permission="'control_unit:status_update'"
+            permission="control_unit:status_update"
             active-value="PUBLISHED"
             inactive-value="UNPUBLISHED"
-            usage-code="CONTROL_UNIT_STATUS"
-            :api-method="({ nextValue }) => ControlUnitApi.updateStatus(row.id, String(nextValue))"
+            usage-code="PUBLISH_STATUS"
+            :api-method="changeStatus(row)"
             @success="loadData"
           />
         </template>
       </el-table-column>
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
-      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="280">
+      <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="320">
         <template #default="{ row }">
           <el-button type="primary" link size="small" @click="handleView(row)">{{ $t('G2_BTN_DETAIL', '明细') }}</el-button>
           <el-button type="primary" v-permission="'control_unit:edit'" link size="small"
@@ -107,8 +107,8 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px">
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="120px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="600px">
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="200px">
         <!-- 所属应用 -->
         <el-form-item :label="$t('MG_CTRL_DOM_FIELD_APP', '所属应用')" prop="applicationId" v-if="!isEdit">
           <el-select v-model="editForm.applicationId" :placeholder="$t('MG_CTRL_DOM_PH_APP', '请选择所属应用')" style="width: 200px">
@@ -128,8 +128,8 @@
           <DictSelect v-model="editForm.sessionType" usage-code="SESSION_TYPE" :disabled="isEdit" :clearable="false" :api-method="DictItemApi.select" :placeholder="$t('MG_CTRL_UNIT_PH_SESSION_TYPE', '请选择会话类型')" />
         </el-form-item>
 
-        <el-form-item :label="$t('MG_FIELD_DESC', '描述')" prop="description">
-          <el-input v-model="editForm.description" type="textarea" :rows="4" :placeholder="$t('MG_PH_DESC', '请输入描述')" show-word-limit
+        <el-form-item :label="$t('G2_FIELD_DESC', '描述')" prop="description">
+          <el-input v-model="editForm.description" type="textarea" :rows="4" :placeholder="$t('G2_PH_DESC', '请输入描述')" show-word-limit
             maxlength="200" />
         </el-form-item>
 
@@ -162,10 +162,10 @@
         </el-descriptions-item>
         <el-descriptions-item :label="$t('MG_CTRL_UNIT_FIELD_STATUS', '功能权限状态')">
           <el-tag>
-            <DictText :value="currentRow?.status" usage-code="CONTROL_UNIT_STATUS" :api-method="DictItemApi.select" />
+            <DictText :value="currentRow?.status" usage-code="PUBLISH_STATUS" :api-method="DictItemApi.select" />
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_FIELD_DESC', '描述')">{{ currentRow?.description }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_DESC', '描述')">{{ currentRow?.description }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
@@ -198,16 +198,21 @@
               default-expand-all
               :props="{ label: 'name', children: 'children' }"
             />
+            <el-empty
+              v-else
+              :description="$t('G2_EMPTY_DATA', '暂无数据')"
+              :image-size="80"
+            />
           </el-scrollbar>
         </el-tab-pane>
 
         <!-- 界面 -->
         <el-tab-pane :label="$t('MG_CTRL_UNIT_TAB_VIEW', '界面资源')" name="view">
           <el-scrollbar max-height="58vh">
-            <div class="table-wrapper">
+            <div v-if="pages.length > 0" class="table-wrapper">
               <el-table :data="pages" style="width: 100%">
                 <!-- 页面 -->
-                <el-table-column :label="$t('MG_CTRL_UNIT_COL_PAGE', '页面')" width="200" header-align="center">
+                <el-table-column :label="$t('G2_FIELD_PAGE', '页面')" width="200" header-align="center">
                   <template #default="{ row }">
                     <el-checkbox v-model="row.checked" @change="togglePage(row)">
                       <el-badge class="custom-badge" type="primary"
@@ -234,6 +239,11 @@
                 </el-table-column>
               </el-table>
             </div>
+            <el-empty
+              v-else
+              :description="$t('G2_EMPTY_DATA', '暂无数据')"
+              :image-size="80"
+            />
           </el-scrollbar>
         </el-tab-pane>
 
@@ -275,8 +285,7 @@
             </div>
           </div>
           <el-scrollbar max-height="58vh">
-            <!-- 根据接口数据渲染复选框即可 -->
-            <div class="api-groups-container">
+            <div v-if="apiServiceCode && apiGroups.length > 0" class="api-groups-container">
               <fieldset class="api-fieldset" v-for="group in apiGroups" :key="group.tag">
                 <legend class="api-legend">{{ group.tag }}</legend>
                 <div class="api-items">
@@ -300,6 +309,15 @@
                 </div>
               </fieldset>
             </div>
+            <el-empty
+              v-else
+              :description="
+                apiServiceCode
+                  ? $t('G2_EMPTY_DATA', '暂无数据')
+                  : $t('MG_CTRL_UNIT_PH_API_SERVICE', '请选择服务后加载接口')
+              "
+              :image-size="80"
+            />
           </el-scrollbar>
         </el-tab-pane>
       </el-tabs>
@@ -331,7 +349,13 @@ import type { ControlUnitResourceRelationPayload } from '../control_unit_resourc
 import type { ResourcePage } from '../resource_page/type';
 import type { ResourcePageElement } from '../resource_page_element/type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, StatusSwitch } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { DictSelect, DictText, StatusSwitch } from '@g2rain/ui/platform';
+
+// 状态开关回调：放在 script 里，避免模板内直接引用类导致 IDE 类型误报
+const changeStatus = (row: ControlUnit) =>
+  ({ nextValue }: { nextValue: string | number | boolean }) =>
+    ControlUnitApi.updateStatus(row.id, String(nextValue));
 
 // 定义字典引用
 const applicationOptions = ref<Array<{ label: string; value: number }>>([]);
@@ -350,7 +374,7 @@ const loadDicts = async () => {
 };
 
 // 基础查询状态（使用 reactive v-model 替换整个对象时保持响应式）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -383,7 +407,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as ControlUnitQuery;
 
@@ -397,9 +421,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_LOAD_FAIL', '加载列表失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -418,10 +441,9 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.applicationId = undefined;
   queryForm.controlUnitName = '';
@@ -458,23 +480,18 @@ const handleView = (row: ControlUnit) => {
 // 删除数据记录
 const handleDelete = (row: ControlUnit) => {
   ElMessageBox.confirm(
-    t('MG_CTRL_UNIT_DEL_CONFIRM', `确认删除功能权限「${row.id}」吗？`),
+    t('MG_CTRL_UNIT_DEL_CONFIRM', { id: row.id }, '确认删除功能权限「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await ControlUnitApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: unknown) {
-        const msg = error instanceof Error ? error.message : t('G2_MSG_DELETE_FAIL', '删除失败');
-        ElMessage.error(msg);
+      await ControlUnitApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => { });
 };
@@ -508,7 +525,7 @@ const editRules = computed<FormRules>(() => ({
   controlUnitName: [{ required: true, message: t('MG_CTRL_UNIT_VLD_NAME', '请输入功能权限名称'), trigger: 'blur' }],
   controlUnitScope: [{ required: true, message: t('MG_CTRL_UNIT_VLD_SCOPE', '请选择功能权限范围'), trigger: 'blur' }],
   sessionType: [{ required: true, message: t('MG_CTRL_UNIT_VLD_SESSION_TYPE', '请选择会话类型'), trigger: 'change' }],
-  description: [{ required: false, message: t('MG_PH_DESC', '请输入描述'), trigger: 'blur' }],
+  description: [{ required: false, message: t('G2_PH_DESC', '请输入描述'), trigger: 'blur' }],
 }));
 
 // 打开创建弹窗
@@ -553,19 +570,14 @@ const submitEdit = async () => {
     description: editForm.description,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await ControlUnitApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('G2_MSG_SAVE_FAIL', '保存失败');
-    ElMessage.error(msg);
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await ControlUnitApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  await loadData();
+  editDialogVisible.value = false;
 };
 // --------------------关联资源-----------------------------------
 
@@ -690,9 +702,8 @@ const loadMenuTree = async (row: ControlUnit) => {
 
     sortTree(tree);
     menuTreeData.value = tree;
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_CTRL_UNIT_MSG_MENU_LOAD_FAIL', '加载菜单树失败');
-    ElMessage.error(msg);
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 
   // 再加载已选菜单并回显
@@ -934,110 +945,105 @@ const configureResources = async () => {
   if (!configureResourcesDialog.controlUnitId) return
   const controlUnitId = configureResourcesDialog.controlUnitId;
 
-  try {
-    // 1. 定义关联资源行为的数据结构
+  // 1. 定义关联资源行为的数据结构
 
-    // ------------------ 菜单 ------------------
-    const menuToCreate: { resourceId: number; resourceType: string }[] = []
-    const menuToDelete: { resourceId: number; resourceType: string }[] = []
+  // ------------------ 菜单 ------------------
+  const menuToCreate: { resourceId: number; resourceType: string }[] = []
+  const menuToDelete: { resourceId: number; resourceType: string }[] = []
 
-    // ------------------ 页面 ------------------
-    const pageToCreate: { resourceId: number; resourceType: string }[] = []
-    const pageToDelete: { resourceId: number; resourceType: string }[] = []
+  // ------------------ 页面 ------------------
+  const pageToCreate: { resourceId: number; resourceType: string }[] = []
+  const pageToDelete: { resourceId: number; resourceType: string }[] = []
 
-    // ------------------ 元素 ------------------
-    const elemToCreate: { resourceId: number; resourceType: string; status: string }[] = []
-    const elemToUpdate: { resourceId: number; resourceType: string; status: string }[] = []
-    const elemToDelete: { resourceId: number; resourceType: string }[] = []
+  // ------------------ 元素 ------------------
+  const elemToCreate: { resourceId: number; resourceType: string; status: string }[] = []
+  const elemToUpdate: { resourceId: number; resourceType: string; status: string }[] = []
+  const elemToDelete: { resourceId: number; resourceType: string }[] = []
 
-    // ------------------ 接口 ------------------
-    const apisToCreate: { resourceId: number; resourceType: string }[] = []
-    const apisToDelete: { resourceId: number; resourceType: string }[] = []
+  // ------------------ 接口 ------------------
+  const apisToCreate: { resourceId: number; resourceType: string }[] = []
+  const apisToDelete: { resourceId: number; resourceType: string }[] = []
 
-    // 1. 赋值关联资源行为的数据结构
+  // 1. 赋值关联资源行为的数据结构
 
-    // ------------------ 菜单 ------------------
-    const checkedMenuIds = [
-      ...(menuTreeRef.value?.getCheckedKeys(false) || []),
-      ...(menuTreeRef.value?.getHalfCheckedKeys() || []),
-    ] as number[];
-    // 计算新增和删除菜单
-    checkedMenuIds.filter(id => !originalMenuIds.includes(id)).forEach(m => {
-      menuToCreate.push({ resourceId: m, resourceType: 'MENU' })
-    });
+  // ------------------ 菜单 ------------------
+  const checkedMenuIds = [
+    ...(menuTreeRef.value?.getCheckedKeys(false) || []),
+    ...(menuTreeRef.value?.getHalfCheckedKeys() || []),
+  ] as number[];
+  // 计算新增和删除菜单
+  checkedMenuIds.filter(id => !originalMenuIds.includes(id)).forEach(m => {
+    menuToCreate.push({ resourceId: m, resourceType: 'MENU' })
+  });
 
-    originalMenuIds.filter(id => !checkedMenuIds.includes(id)).forEach(m => {
-      menuToDelete.push({ resourceId: m, resourceType: 'MENU' })
-    });
+  originalMenuIds.filter(id => !checkedMenuIds.includes(id)).forEach(m => {
+    menuToDelete.push({ resourceId: m, resourceType: 'MENU' })
+  });
 
-    // ------------------ 页面 & 元素 ------------------
-    pages.forEach(p => {
-      // 页面
-      if (p.checked && !originalPageIds.includes(p.id)) {
-        pageToCreate.push({ resourceId: p.id, resourceType: 'PAGE' })
-      }
-
-      if (!p.checked && originalPageIds.includes(p.id)) {
-        pageToDelete.push({ resourceId: p.id, resourceType: 'PAGE' })
-      }
-
-      // 元素
-      p.elements.forEach(e => {
-        // 原始状态
-        const oriStatus = originalElementMap.get(e.id)
-
-        // 新增
-        if (e.checked && !oriStatus) {
-          elemToCreate.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT', status: e.status })
-          return
-        }
-
-        // 更新
-        if (e.checked && oriStatus !== e.status) {
-          elemToUpdate.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT', status: e.status })
-          return
-        }
-
-        // 删除
-        if (!e.checked && oriStatus) {
-          elemToDelete.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT' })
-        }
-      })
-    })
-
-    // ------------------ 接口 ------------------
-    const checkedApiIds = Array.from(selectedApiIds.value)
-    // 计算新增和删除接口
-    checkedApiIds.filter(id => !originalApiIds.includes(id)).forEach(m => {
-      apisToCreate.push({ resourceId: m, resourceType: 'API_ENDPOINT' })
-    });
-
-    originalApiIds.filter(id => !checkedApiIds.includes(id)).forEach(m => {
-      apisToDelete.push({ resourceId: m, resourceType: 'API_ENDPOINT' })
-    });
-
-    // 定义三个关联关系的变量, 需要统一做验证
-    const createRelations = [...menuToCreate, ...pageToCreate, ...elemToCreate, ...apisToCreate];
-    const updateRelations = [...elemToUpdate];
-    const deleteRelations = [...menuToDelete, ...pageToDelete, ...elemToDelete, ...apisToDelete];
-    if (createRelations.length === 0 && updateRelations.length === 0 && deleteRelations.length === 0) {
-      ElMessage.success(t('MG_CTRL_UNIT_MSG_RESOURCE_OK', '资源更新成功'));
-      return;
+  // ------------------ 页面 & 元素 ------------------
+  pages.forEach(p => {
+    // 页面
+    if (p.checked && !originalPageIds.includes(p.id)) {
+      pageToCreate.push({ resourceId: p.id, resourceType: 'PAGE' })
     }
 
-    const payload: ControlUnitResourceRelationPayload = {
-      controlUnitId,
-      createRelations,
-      updateRelations,
-      deleteRelations
-    };
-    await ControlUnitResourceRelationApi.save(payload);
+    if (!p.checked && originalPageIds.includes(p.id)) {
+      pageToDelete.push({ resourceId: p.id, resourceType: 'PAGE' })
+    }
+
+    // 元素
+    p.elements.forEach(e => {
+      // 原始状态
+      const oriStatus = originalElementMap.get(e.id)
+
+      // 新增
+      if (e.checked && !oriStatus) {
+        elemToCreate.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT', status: e.status })
+        return
+      }
+
+      // 更新
+      if (e.checked && oriStatus !== e.status) {
+        elemToUpdate.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT', status: e.status })
+        return
+      }
+
+      // 删除
+      if (!e.checked && oriStatus) {
+        elemToDelete.push({ resourceId: e.id, resourceType: 'PAGE_ELEMENT' })
+      }
+    })
+  })
+
+  // ------------------ 接口 ------------------
+  const checkedApiIds = Array.from(selectedApiIds.value)
+  // 计算新增和删除接口
+  checkedApiIds.filter(id => !originalApiIds.includes(id)).forEach(m => {
+    apisToCreate.push({ resourceId: m, resourceType: 'API_ENDPOINT' })
+  });
+
+  originalApiIds.filter(id => !checkedApiIds.includes(id)).forEach(m => {
+    apisToDelete.push({ resourceId: m, resourceType: 'API_ENDPOINT' })
+  });
+
+  // 定义三个关联关系的变量, 需要统一做验证
+  const createRelations = [...menuToCreate, ...pageToCreate, ...elemToCreate, ...apisToCreate];
+  const updateRelations = [...elemToUpdate];
+  const deleteRelations = [...menuToDelete, ...pageToDelete, ...elemToDelete, ...apisToDelete];
+  if (createRelations.length === 0 && updateRelations.length === 0 && deleteRelations.length === 0) {
     ElMessage.success(t('MG_CTRL_UNIT_MSG_RESOURCE_OK', '资源更新成功'));
-    resetConfigureResourcesDialog();
-  } catch (error: unknown) {
-    const msg = error instanceof Error ? error.message : t('MG_CTRL_UNIT_MSG_RESOURCE_FAIL', '菜单资源更新失败');
-    ElMessage.error(msg);
+    return;
   }
+
+  const payload: ControlUnitResourceRelationPayload = {
+    controlUnitId,
+    createRelations,
+    updateRelations,
+    deleteRelations
+  };
+  await ControlUnitResourceRelationApi.save(payload);
+  ElMessage.success(t('MG_CTRL_UNIT_MSG_RESOURCE_OK', '资源更新成功'));
+  resetConfigureResourcesDialog();
 };
 
 // 挂载回调
@@ -1058,7 +1064,7 @@ onMounted(async () => {
 }
 
 .table-wrapper {
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--g2-border-color);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -1073,7 +1079,7 @@ onMounted(async () => {
 
 .table-wrapper :deep(.el-table th.el-table__cell) {
   font-weight: 600;
-  color: #2c2c2c;
+  color: var(--g2-text-primary);
 }
 
 /* 允许单元格内容向上溢出 */
@@ -1117,9 +1123,10 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   padding: 7px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--g2-border-color);
   border-radius: 4px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
+  color: var(--g2-text-primary);
   font-size: 13px;
   position: relative;
   overflow: visible;
@@ -1145,7 +1152,7 @@ onMounted(async () => {
 }
 
 .api-fieldset {
-  border: 1px solid #e0e3eb;
+  border: 1px solid var(--g2-border-color);
   border-radius: 12px;
   padding: 16px;
   position: relative;
@@ -1155,7 +1162,7 @@ onMounted(async () => {
   padding: 0 12px;
   font-weight: 600;
   font-size: 14px;
-  color: #2c2c2c;
+  color: var(--g2-text-primary);
   margin-left: 40px;
 }
 
@@ -1220,7 +1227,7 @@ onMounted(async () => {
 
 .api-name {
   font-weight: 500;
-  color: #2c2c2c;
+  color: var(--g2-text-primary);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1239,7 +1246,7 @@ onMounted(async () => {
 
 .api-meta {
   font-size: 12px;
-  color: #6e6e6e;
+  color: var(--g2-text-secondary);
   margin-left: 0;
   max-width: 100%;
   overflow: hidden;
@@ -1249,7 +1256,7 @@ onMounted(async () => {
 
 .control-unit-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -1262,7 +1269,7 @@ onMounted(async () => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -1287,7 +1294,7 @@ onMounted(async () => {
 
 .control-unit-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .control-unit-page__pagination {

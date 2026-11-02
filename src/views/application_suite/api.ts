@@ -2,7 +2,7 @@
  * application_suite相关 API 服务
  * 提供application_suite数据的 CRUD 操作接口
  */
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 import type { ApplicationSuite, ApplicationSuitePayload, ApplicationSuiteQuery } from './type';
 
 /**

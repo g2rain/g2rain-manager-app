@@ -3,7 +3,7 @@
  * 提供个人静态访问令牌数据的 CRUD 操作接口
  */
 
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 import type { PersonalStaticAccessToken, PersonalStaticAccessTokenPayload, PersonalStaticAccessTokenQuery } from './type';
 import type { PageData, PageSelectListDto } from '@platform/types/api.type';
 

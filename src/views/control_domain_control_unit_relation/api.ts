@@ -2,7 +2,7 @@
  * control_domain_control_unit_relation相关 API 服务
  * 提供control_domain_control_unit_relation数据的 CRUD 操作接口
  */
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 import type { ControlDomainControlUnitRelation, ControlDomainControlUnitRelationPayload, ControlDomainControlUnitRelationQuery } from './type';
 
 /**

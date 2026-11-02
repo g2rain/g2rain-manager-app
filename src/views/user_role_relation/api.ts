@@ -2,7 +2,7 @@
  * user_role_relation相关 API 服务
  * 提供user_role_relation数据的 CRUD 操作接口
  */
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 import type { UserRoleRelation, UserRoleRelationPayload, UserRoleRelationQuery } from './type';
 
 /**

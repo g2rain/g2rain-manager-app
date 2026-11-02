@@ -22,28 +22,15 @@
             style="width: 200px"
           />
         </el-form-item>
-        <el-form-item :label="$t('MG_IDP_ENT_FIELD_ORGAN_ID', '机构标识')">
-          <el-input
-            v-model="queryForm.organId"
-            :placeholder="$t('MG_IDP_ENT_PH_ORGAN_ID', '请输入机构标识')"
-            clearable
-            style="width: 200px"
-          />
+        <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')">
+          <OrganSelect v-model="queryForm.organId" :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')" width="200px" />
         </el-form-item>
         <el-form-item :label="$t('G2_FIELD_STATUS', '状态')">
           <DictSelect
             v-model="queryForm.status"
-            usage-code="STATUS"
+            usage-code="ENABLE_STATUS"
             :api-method="DictItemApi.select"
-            :placeholder="$t('MG_IDP_ENT_PH_STATUS', '请选择状态')"
-            clearable
-            style="width: 200px"
-          />
-        </el-form-item>
-        <el-form-item :label="$t('MG_IDP_ENT_FIELD_REMARK', '备注')">
-          <el-input
-            v-model="queryForm.remark"
-            :placeholder="$t('MG_IDP_ENT_PH_REMARK', '请输入备注')"
+            :placeholder="$t('G2_PH_STATUS', '请选择状态')"
             clearable
             style="width: 200px"
           />
@@ -62,7 +49,7 @@
     <!-- 标题和操作按钮 -->
     <div class="idp_enterprise_organ-page__header">
       <div class="idp_enterprise_organ-page__title-group">
-        <h2>{{ $t('MG_IDP_ENT_TITLE', '管理外部企业数据') }}</h2>
+        <h2>{{ $t('MG_IDP_ENT_TITLE', '外部企业') }}</h2>
       </div>
       <el-button type="primary" v-permission="'idp_enterprise_organ:add'" @click="handleCreate">
         {{ $t('MG_IDP_ENT_BTN_ADD', '新增外部企业') }}
@@ -79,15 +66,22 @@
     >
       <el-table-column prop="id" :label="$t('G2_FIELD_ID', 'ID')" width="120" />
       <el-table-column prop="idpType" :label="$t('MG_IDP_ENT_FIELD_IDP_TYPE', '身份源类型')" width="180" />
-      <el-table-column prop="enterpriseId" :label="$t('MG_IDP_ENT_COL_ENTERPRISE_ID', '外部企业/租户ID')" width="180" />
-      <el-table-column prop="bindMode" :label="$t('MG_IDP_ENT_FIELD_BIND_MODE', '接入形态')" width="140" />
-      <el-table-column prop="organId" :label="$t('MG_IDP_ENT_COL_ORGAN_ID', '机构标识，关联 organ.id')" width="140" />
-      <el-table-column prop="status" :label="$t('G2_FIELD_STATUS', '状态')" width="180">
+      <el-table-column prop="enterpriseId" :label="$t('MG_IDP_ENT_COL_ENTERPRISE_ID', '外部企业/租户ID')" width="260" />
+      <el-table-column prop="bindMode" :label="$t('G2_FIELD_BIND_MODE', '接入形态')" width="140">
         <template #default="{ row: item }">
-          <DictText :value="item?.status" usage-code="STATUS" :api-method="DictItemApi.select" />
+          <DictText :value="item?.bindMode" usage-code="IDP_BIND_MODE" :api-method="DictItemApi.select" />
         </template>
       </el-table-column>
-      <el-table-column prop="remark" :label="$t('MG_IDP_ENT_FIELD_REMARK', '备注')" width="180" />
+      <el-table-column :label="$t('G2_FIELD_ORGAN', '所属机构')" width="140">
+        <template #default="{ row: item }">
+          {{ item.organName || item.organId }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="status" :label="$t('G2_FIELD_STATUS', '状态')" width="180">
+        <template #default="{ row: item }">
+          <DictText :value="item?.status" usage-code="ENABLE_STATUS" :api-method="DictItemApi.select" />
+        </template>
+      </el-table-column>
       <TableColumn prop="createTime" :label="$t('G2_FIELD_CREATE_TIME', '创建时间')" width="180" :sortable="true" />
       <TableColumn prop="updateTime" :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')" width="180" :sortable="true" />
       <el-table-column :label="$t('G2_FIELD_ACTION', '操作')" fixed="right" width="400">
@@ -110,7 +104,7 @@
                   size="small"
                   :loading="syncLoadingId === row.id"
                 >
-                  {{ $t('MG_IDP_ENT_BTN_SYNC', '同步') }}
+                  {{ $t('G2_BTN_SYNC', '同步') }}
                   <el-icon class="el-icon--right"><ArrowDown /></el-icon>
                 </el-button>
                 <template #dropdown>
@@ -166,34 +160,37 @@
     </div>
 
     <!-- 新增 / 编辑弹窗 -->
-    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="520px" append-to-body destroy-on-close>
-      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="100px">
+    <el-dialog v-model="editDialogVisible" :title="editDialogTitle" width="600px" append-to-body destroy-on-close>
+      <el-form ref="editFormRef" :model="editForm" :rules="editRules" label-width="260px">
         <el-form-item :label="$t('MG_IDP_ENT_FIELD_IDP_TYPE', '身份源类型')" prop="idpType">
           <el-input v-model="editForm.idpType" :placeholder="$t('MG_IDP_ENT_PH_IDP_TYPE', '请输入身份源类型')" />
         </el-form-item>
         <el-form-item :label="$t('MG_IDP_ENT_COL_ENTERPRISE_ID', '外部企业/租户ID')" prop="enterpriseId">
           <el-input v-model="editForm.enterpriseId" :placeholder="$t('MG_IDP_ENT_PH_ENTERPRISE_ID', '请输入外部企业/租户ID')" />
         </el-form-item>
-        <el-form-item :label="$t('MG_IDP_ENT_FIELD_BIND_MODE', '接入形态')" prop="bindMode">
-          <el-select v-model="editForm.bindMode" :placeholder="$t('MG_IDP_ENT_PH_BIND_MODE', '请选择接入形态')" style="width: 100%">
-            <el-option label="INTERNAL" value="INTERNAL" />
-            <el-option label="THIRD_PARTY" value="THIRD_PARTY" />
-          </el-select>
+        <el-form-item :label="$t('G2_FIELD_BIND_MODE', '接入形态')" prop="bindMode">
+          <DictSelect
+            v-model="editForm.bindMode"
+            usage-code="IDP_BIND_MODE"
+            :api-method="DictItemApi.select"
+            :clearable="false"
+            :placeholder="$t('MG_IDP_ENT_PH_BIND_MODE', '请选择接入形态')"
+          />
         </el-form-item>
-        <el-form-item :label="$t('MG_IDP_ENT_COL_ORGAN_ID', '机构标识，关联 organ.id')" prop="organId">
-          <el-input v-model="editForm.organId" :placeholder="$t('MG_IDP_ENT_PH_ORGAN_ID_FULL', '请输入机构标识，关联 organ.id')" />
+        <el-form-item :label="$t('G2_FIELD_ORGAN', '所属机构')" prop="organId">
+          <OrganSelect v-model="editForm.organId" :disabled="isEdit" :placeholder="$t('G2_PH_ORGAN', '请选择所属机构')" width="200px" />
         </el-form-item>
         <el-form-item :label="$t('G2_FIELD_STATUS', '状态')" prop="status">
           <DictSelect
             v-model="editForm.status"
-            usage-code="STATUS"
+            usage-code="ENABLE_STATUS"
             :api-method="DictItemApi.select"
             :clearable="false"
-            :placeholder="$t('MG_IDP_ENT_PH_STATUS', '请选择状态')"
+            :placeholder="$t('G2_PH_STATUS', '请选择状态')"
           />
         </el-form-item>
-        <el-form-item :label="$t('MG_IDP_ENT_FIELD_REMARK', '备注')" prop="remark">
-          <el-input v-model="editForm.remark" :placeholder="$t('MG_IDP_ENT_PH_REMARK', '请输入备注')" />
+        <el-form-item :label="$t('G2_FIELD_REMARK', '备注')" prop="remark">
+          <el-input v-model="editForm.remark" :placeholder="$t('G2_PH_REMARK', '请输入备注')" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -204,18 +201,20 @@
       </template>
     </el-dialog>
 
-    <el-drawer v-model="detailDialogVisible" :title="$t('MG_IDP_ENT_DETAIL', '外部企业明细')" direction="rtl" size="520px" destroy-on-close>
+    <el-drawer v-model="detailDialogVisible" :title="$t('MG_IDP_ENT_DETAIL', '外部企业明细')" direction="rtl" size="600px" destroy-on-close>
     <!-- 明细抽屉 -->
-      <el-descriptions :column="1" border>
+      <el-descriptions :column="1" border label-width="260px">
         <el-descriptions-item :label="$t('G2_FIELD_ID', 'ID')">{{ currentRow?.id }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_IDP_ENT_FIELD_IDP_TYPE', '身份源类型')">{{ currentRow?.idpType }}</el-descriptions-item>
         <el-descriptions-item :label="$t('MG_IDP_ENT_COL_ENTERPRISE_ID', '外部企业/租户ID')">{{ currentRow?.enterpriseId }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_IDP_ENT_FIELD_BIND_MODE', '接入形态')">{{ currentRow?.bindMode }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_IDP_ENT_COL_ORGAN_ID', '机构标识，关联 organ.id')">{{ currentRow?.organId }}</el-descriptions-item>
-        <el-descriptions-item :label="$t('G2_FIELD_STATUS', '状态')">
-          <DictText :value="currentRow?.status" usage-code="STATUS" :api-method="DictItemApi.select" />
+        <el-descriptions-item :label="$t('G2_FIELD_BIND_MODE', '接入形态')">
+          <DictText :value="currentRow?.bindMode" usage-code="IDP_BIND_MODE" :api-method="DictItemApi.select" />
         </el-descriptions-item>
-        <el-descriptions-item :label="$t('MG_IDP_ENT_FIELD_REMARK', '备注')">{{ currentRow?.remark }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_ORGAN', '所属机构')">{{ currentRow?.organName || currentRow?.organId }}</el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_STATUS', '状态')">
+          <DictText :value="currentRow?.status" usage-code="ENABLE_STATUS" :api-method="DictItemApi.select" />
+        </el-descriptions-item>
+        <el-descriptions-item :label="$t('G2_FIELD_REMARK', '备注')">{{ currentRow?.remark }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_CREATE_TIME', '创建时间')">{{ currentRow?.createTime }}</el-descriptions-item>
         <el-descriptions-item :label="$t('G2_FIELD_UPDATE_TIME', '更新时间')">{{ currentRow?.updateTime }}</el-descriptions-item>
       </el-descriptions>
@@ -238,13 +237,14 @@ import { DictItemApi } from '../dict/api';
 import type { IdpEnterpriseOrgan, IdpEnterpriseOrganPayload, IdpEnterpriseOrganQuery } from './type';
 import type { BaseSelectListDto, PageSelectListDto } from '@platform/types/api.type';
 
-import { SortableTable, TableColumn, SortManagerButton, QueryForm, DictSelect, DictText, showErrorMessage } from '@/components';
+import { SortableTable, TableColumn, SortManagerButton, QueryForm } from '@g2rain/ui';
+import { OrganSelect, DictSelect, DictText } from '@g2rain/ui/platform';
 
 // 组件引用
 const queryFormRef = ref<InstanceType<typeof QueryForm> | null>(null);
 
 // 基础查询表单（BaseSelectListDto）
-let baseQueryForm = reactive<BaseSelectListDto>({
+const baseQueryForm = ref<BaseSelectListDto>({
   id: undefined,
   createTime: undefined,
   updateTime: undefined,
@@ -255,9 +255,8 @@ let baseQueryForm = reactive<BaseSelectListDto>({
 const queryForm = reactive({
   idpType: '',
   enterpriseId: '',
-  organId: undefined,
+  organId: undefined as number | undefined,
   status: '',
-  remark: '',
 });
 
 // 分页相关状态
@@ -275,7 +274,7 @@ const loadData = async () => {
   try {
     // 合并基础查询 + 业务查询，并过滤空值
     const query = Object.fromEntries(
-      Object.entries({ ...baseQueryForm, ...queryForm })
+      Object.entries({ ...baseQueryForm.value, ...queryForm })
         .filter(([_, v]) => (v ?? '') !== '' && [v].flat().length)
     ) as IdpEnterpriseOrganQuery;
   
@@ -289,8 +288,8 @@ const loadData = async () => {
     // 设置响应结果
     tableData.value = pageData.records;
     pagination.total = pageData.total;
-  } catch (error: any) {
-    showErrorMessage(error || t('G2_MSG_LOAD_FAIL', '加载列表失败'));
+  } catch {
+    // 请求失败已由 http 层统一提示
   }
 };
 
@@ -310,16 +309,14 @@ const handleSearch = () => {
 // 重置查询条件
 const handleReset = () => {
   // 重置基础查询表单
-  baseQueryForm.id = undefined;
-  baseQueryForm.createTime = undefined;
-  baseQueryForm.updateTime = undefined;
-  baseQueryForm.sorts = undefined;
+  baseQueryForm.value.id = undefined;
+  baseQueryForm.value.createTime = undefined;
+  baseQueryForm.value.updateTime = undefined;
   // 重置业务特定查询表单
   queryForm.idpType = '';
   queryForm.enterpriseId = '';
   queryForm.organId = undefined;
   queryForm.status = '';
-  queryForm.remark = '';
   
   pagination.pageNum = 1; // 重置到第一页
   pagination.pageNum = 1; // 重置到第一页
@@ -364,22 +361,18 @@ const handleView = (row: IdpEnterpriseOrgan) => {
 // 删除数据记录
 const handleDelete = (row: IdpEnterpriseOrgan) => {
   ElMessageBox.confirm(
-    t('MG_IDP_ENT_DEL_CONFIRM', `确认删除外部企业「${row.id}」吗？`),
+    t('MG_IDP_ENT_DEL_CONFIRM', { id: row.id }, '确认删除外部企业「{id}」吗？'),
     t('G2_LBL_TIP', '提示'),
     { type: 'warning' },
   )
     .then(async () => {
-      try {
-        await IdpEnterpriseOrganApi.remove(row.id);
-        // 如果当前页只有一条数据，删除后应该跳转到上一页
-        if (tableData.value.length === 1 && pagination.pageNum > 1) {
-          pagination.pageNum--;
-        }
-        await loadData();
-        ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
-      } catch (error: any) {
-        showErrorMessage(error || t('G2_MSG_DELETE_FAIL', '删除失败'));
+      await IdpEnterpriseOrganApi.remove(row.id);
+      // 如果当前页只有一条数据，删除后应该跳转到上一页
+      if (tableData.value.length === 1 && pagination.pageNum > 1) {
+        pagination.pageNum--;
       }
+      await loadData();
+      ElMessage.success(t('G2_MSG_DELETE_OK', '删除成功'));
     })
     .catch(() => {});
 };
@@ -411,8 +404,8 @@ const editRules = computed<FormRules>(() => ({
   idpType: [{ required: true, message: t('MG_IDP_ENT_PH_IDP_TYPE', '请输入身份源类型'), trigger: 'blur' }],
   enterpriseId: [{ required: true, message: t('MG_IDP_ENT_VLD_ENTERPRISE_ID', '请输入外部企业/租户标识'), trigger: 'blur' }],
   bindMode: [{ required: true, message: t('MG_IDP_ENT_PH_BIND_MODE', '请选择接入形态'), trigger: 'change' }],
-  organId: [{ required: true, message: t('MG_IDP_ENT_PH_ORGAN_ID_FULL', '请输入机构标识，关联 organ.id'), trigger: 'blur' }],
-  status: [{ required: true, message: t('MG_IDP_ENT_PH_STATUS', '请选择状态'), trigger: 'change' }],
+  organId: [{ required: true, message: t('G2_PH_ORGAN', '请选择所属机构'), trigger: 'change' }],
+  status: [{ required: true, message: t('G2_PH_STATUS', '请选择状态'), trigger: 'change' }],
 }));
 
 // 打开创建弹窗
@@ -459,18 +452,14 @@ const submitEdit = async () => {
     remark: editForm.remark,
   };
 
-  try {
-    // 编辑模式下，将 id 添加到 payload 中
-    if (isEdit.value) {
-      payload.id = editForm.id;
-    }
-    await IdpEnterpriseOrganApi.save(payload);
-    ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
-    await loadData();
-    editDialogVisible.value = false;
-  } catch (error: any) {
-    showErrorMessage(error || t('G2_MSG_SAVE_FAIL', '保存失败'));
+  // 编辑模式下，将 id 添加到 payload 中
+  if (isEdit.value) {
+    payload.id = editForm.id;
   }
+  await IdpEnterpriseOrganApi.save(payload);
+  ElMessage.success(isEdit.value ? t('G2_MSG_UPDATE_OK', '更新成功') : t('G2_MSG_ADD_OK', '新增成功'));
+  await loadData();
+  editDialogVisible.value = false;
 };
 
 // 挂载回调
@@ -483,7 +472,7 @@ onMounted(() => {
 <style scoped>
 .idp_enterprise_organ-page {
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--g2-bg-page);
   min-height: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -496,7 +485,7 @@ onMounted(() => {
   margin-bottom: 12px;
   margin-top: 0;
   padding: 16px 20px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
   border-radius: 4px;
 }
 
@@ -521,7 +510,7 @@ onMounted(() => {
 
 .idp_enterprise_organ-page__search {
   margin-bottom: 12px;
-  background-color: #fff;
+  background-color: var(--g2-bg-container);
 }
 
 .idp_enterprise_organ-page__pagination {

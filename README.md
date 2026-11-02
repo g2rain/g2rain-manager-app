@@ -10,9 +10,7 @@
 [![Vite](https://img.shields.io/badge/Vite-7.3.0-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
 [![Qiankun](https://img.shields.io/badge/micro--frontend-Qiankun-1677FF)](https://qiankun.umijs.org/)
 
-下一代AI软件开发范式，AI原生Agent平台，开源的企业级SaaS底座。
-
-平台管理控制台微前端子应用，提供账号、用户、机构、资源、角色、应用、授权与审计管理界面；承载 SaaS 平台管理侧的身份、权限与应用治理操作
+g2rain-manager-app 是 G2rain（谷雨）开源智能体平台中的平台管理控制台微前端子应用。它提供账号、用户、机构、资源、角色、应用、授权、身份提供方、服务注册和审计等管理界面；它只负责前端交互与页面权限呈现，不拥有后端领域数据，也不替代 IAM、Gateway 或领域服务的鉴权和业务规则。平台整体能力与当前状态以 [g2rain 中央仓库](https://github.com/g2rain/g2rain) 为准。
 
 [官网](https://www.g2rain.com) · [完整文档](docs/index.md) · [Frontend App Profile 1.0.0](https://github.com/g2rain/g2rain/tree/architecture-v1.1.0/docs/architecture/profiles/frontend-app) · [架构偏差](docs/architecture/deviations.md) · [Issues](https://github.com/g2rain/g2rain/issues) · [Discussions](https://github.com/g2rain/g2rain/discussions)
 
@@ -29,6 +27,7 @@
 - 快速开始
 - 配置说明
 - 构建与镜像
+- GHCR 镜像发布
 - 代码质量与测试
 - 运行示例
 - 与关联仓库的关系
@@ -113,9 +112,9 @@
 | 生成业务代码 | `npm run build:generate -- --tables=<table_name>` | 从 database.sql 中选择表，生成页面、API、类型、Mock 与路由骨架；同名文件可能被覆盖。 |
 | 生成资源配置 | `npm run build:config` | 开发完成后扫描路由和静态权限指令，生成平台页面与页面元素资源配置 JSON。 |
 | 预览产物 | `npm run preview` | 在本地预览构建后的前端产物。 |
-| 容器化 | `docker build .` | 仓库提供 Dockerfile，可按组织镜像规范封装前端运行镜像。 |
+| 容器化 | `./build.sh --tag 1.0.0` | 使用与 CI 相同的 Dockerfile 和 OCI 构建参数封装前端运行镜像。 |
 
-版本号以项目构建配置为准，当前识别为 `0.1.0`。
+版本事实源为 `package.json`，当前版本为 `1.0.0`（锁文件与 `docs/project.yaml` 已同步）。
 
 ## 配置说明
 
@@ -158,14 +157,22 @@
 | 业务代码骨架 | `npm run build:generate -- --tables=<table_name>` | `src/views/<table_name> 与 src/views/route-map.ts` | 按数据库表生成页面、API、类型和 Mock，可用 --no-view、--no-api、--no-mock、--no-route 关闭部分生成项。 |
 | 平台资源配置 | `npm run build:config` | `src/shared/config-util/config/*.json` | 生成 resources.json、pages.json 和 page-elements.json，供平台资源登记或导入使用。 |
 | 产物预览 | `npm run preview` | 本地预览服务 | 在本地预览构建后的前端静态产物。 |
-| 容器镜像 | `docker build .` | 前端运行镜像 | 基于 Dockerfile 封装静态前端运行镜像。 |
-| 构建脚本 | `./build.sh` | 脚本定义的构建结果 | 执行仓库提供的构建脚本，承载组织内镜像或发布流程。 |
+| 容器镜像 | `./build.sh --tag 1.0.0` | OpenResty 运行镜像 | 与 CI 复用根目录 Dockerfile，传入构建模式、版本和提交 SHA OCI 元数据。 |
+| GHCR 推送 | 标签推送触发 Actions | `ghcr.io/g2rain/g2rain-manager-app` | 仅稳定版 tag 且验证通过后推送；详见[部署文档](docs/operations/deployment.md)。 |
 
 ## 代码质量与测试
 
 | 检查项 | 命令 | 说明 |
 | --- | --- | --- |
 | Vue 类型检查 | `npm run build` | 构建流程中使用 vue-tsc 检查 Vue 与 TypeScript 类型。 |
+
+## GHCR 镜像发布
+
+镜像地址：`ghcr.io/g2rain/g2rain-manager-app`。稳定版 `v1.0.0` 发布为 `:1.0.0` 与 `:sha-<完整提交 SHA>`；不发布 `latest`。只有推送严格格式的 `v<major>.<minor>.<patch>` 标签、且标签提交已进入 `main` 并包含同名发布说明时，GitHub Actions 才会构建和推送。完整权限、首次公开和部署操作见[构建与部署](docs/operations/deployment.md)。
+
+```bash
+docker pull ghcr.io/g2rain/g2rain-manager-app:1.0.0
+```
 
 ## 运行示例
 
@@ -233,7 +240,7 @@
 | 架构与依赖 | [架构概览](docs/architecture/overview.md) · [层次职责](docs/architecture/layers.md) · [依赖规则](docs/architecture/dependencies.md) |
 | 运行时与偏差 | [运行时流程](docs/architecture/runtime-flows.md) · [架构偏差](docs/architecture/deviations.md) |
 | 页面与生成器 | [Views 规范](docs/development/views-conventions.md) · [代码生成](docs/development/code-generation.md) · [资源生成](docs/development/resource-generation.md) |
-| 配置、部署与安全 | [配置](docs/operations/configuration.md) · [部署](docs/operations/deployment.md) · [安全边界](docs/security/security-boundaries.md) |
+| 配置、部署与安全 | [配置](docs/operations/configuration.md) · [部署](docs/operations/deployment.md) · [安全边界](docs/security/security-boundaries.md) · [发布记录](docs/releases/README.md) |
 | 测试与完成定义 | [测试策略](docs/development/testing.md) · [完成定义](docs/development/definition-of-done.md) |
 
 ## 参与贡献
@@ -252,7 +259,7 @@
 
 ## 许可证
 
-本项目基于 [Apache 2.0许可证](https://github.com/g2rain/g2rain-manager-app/blob/main/LICENSE) 开源。
+本项目采用标准 [Apache License 2.0](LICENSE) 开源；`package.json` 与 OCI 镜像许可证元数据均使用 SPDX 标识 `Apache-2.0`。
 
 ## 联系我们
 

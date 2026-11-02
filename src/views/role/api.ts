@@ -2,7 +2,7 @@
  * role相关 API 服务
  * 提供role数据的 CRUD 操作接口
  */
-import { getHttpClient } from '@/components/http';
+import { getHttpClient } from '@runtime/http';
 import type { Role, RolePayload, RoleQuery } from './type';
 import type { PageData, PageSelectListDto } from '@platform/types/api.type';
 

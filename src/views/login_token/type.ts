@@ -10,6 +10,8 @@ import type { BaseSelectListDto, BaseVo } from '@platform/types/api.type';
 export interface LoginToken extends BaseVo {
   sessionType: string;
   organId: number;
+  /** 网关根据 organId 补全 */
+  organName?: string;
   organType: string;
   adminCompany: number;
   passportId: number;

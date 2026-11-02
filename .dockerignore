@@ -23,10 +23,13 @@ README.md
 coverage
 .nyc_output
 
-# 环境变量文件
+# 环境变量文件：保留已跟踪的生产构建配置；运行时 Secret 必须通过容器环境或挂载注入
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.production
+
+# 运行时 Lua/IAM 密钥目录（README 不需要进入镜像）
+lua/keys/
 
 # 日志文件
 logs
